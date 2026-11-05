@@ -1,13 +1,13 @@
 {
-  "version": "1.2.7",
+  "version": "1.2.8",
   "minimum_version": "1.1.6",
-  "notes": "Logros: 27 con aviso en partida y pantalla nueva;sin ventana CMD al abrir el juego;aliados con un solo dueno y maximo 3;los bots hostiles ya no escriben a toda la sala;version web para iPhone",
+  "notes": "Sin tirones al entrar a partida: carga en hilo con pantalla propia;escenas de enemigos precargadas;calidad automatica segun tu equipo (GPU, nucleos y RAM) con aviso la primera vez",
   "windows_url": "https://boomershooter.vercel.app/api/download/windows",
   "linux_url": "https://boomershooter.vercel.app/api/download/linux",
-  "windows_size": 149191960,
-  "windows_sha256": "c325015c57f61331a48173624a7286d8f5609b90c1b3dd40c19b35de46617f48",
-  "linux_size": 113425480,
-  "linux_sha256": "4238bdb32d6c21cd0a0a11985bced6cec962c78666971a905ce2b812d64216e4",
+  "windows_size": 151758464,
+  "windows_sha256": "844c0bbc641f3e1b2258d382a69a3f4774ebe8fb0dd793e02a41b2df8ca639c0",
+  "linux_size": 115992000,
+  "linux_sha256": "8e020e8fc226421dd45fb2ff37a4b2121699e615befb7b1886181f9c602cba33",
   "history": [
     {
       "version": "1.2.7",
@@ -16,6 +16,14 @@
       "windows_sha256": "c325015c57f61331a48173624a7286d8f5609b90c1b3dd40c19b35de46617f48",
       "linux_size": 113425480,
       "linux_sha256": "4238bdb32d6c21cd0a0a11985bced6cec962c78666971a905ce2b812d64216e4"
+    },
+    {
+      "version": "1.2.8",
+      "released_at": "2026-11-05",
+      "windows_size": 151758464,
+      "windows_sha256": "844c0bbc641f3e1b2258d382a69a3f4774ebe8fb0dd793e02a41b2df8ca639c0",
+      "linux_size": 115992000,
+      "linux_sha256": "8e020e8fc226421dd45fb2ff37a4b2121699e615befb7b1886181f9c602cba33"
     }
   ],
   "released_at": "2026-11-05",
