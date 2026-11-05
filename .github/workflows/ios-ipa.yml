@@ -1,0 +1,47 @@
+# Construye la IPA de iPhone en GitHub (runner macOS con Xcode ya instalado).
+# La IPA sale SIN FIRMAR: se instala con Sideloadly/AltStore usando la cuenta Apple
+# del jugador (gratis), o se firma con un certificado de pago para App Store/TestFlight.
+name: IPA de Boomer Shooter
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  ipa:
+    runs-on: macos-14
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Godot 4.7 y plantillas de exportacion
+        run: |
+          set -e
+          curl -fL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/4.7-stable/Godot_v4.7-stable_macos.universal.zip"
+          unzip -q godot.zip
+          sudo mv Godot.app /Applications/
+          GODOT="/Applications/Godot.app/Contents/MacOS/Godot"
+          "$GODOT" --version
+          PLANTILLAS="$HOME/Library/Application Support/Godot/export_templates/4.7.stable"
+          mkdir -p "$PLANTILLAS"
+          curl -fL -o plantillas.tpz "https://github.com/godotengine/godot-builds/releases/download/4.7-stable/Godot_v4.7-stable_export_templates.tpz"
+          unzip -q plantillas.tpz
+          cp templates/ios.zip "$PLANTILLAS/"
+          cp templates/version.txt "$PLANTILLAS/" 2>/dev/null || true
+          ls -la "$PLANTILLAS"
+
+      - name: Exportar y empaquetar la IPA sin firmar
+        env:
+          GODOT: /Applications/Godot.app/Contents/MacOS/Godot
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || 'ABCDE12345' }}
+        run: sh tools/build_ios_unsigned.sh
+
+      - name: Guardar la IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: BoomerShooter-ipa-sin-firmar
+          path: Build/iOS/*.ipa
+          if-no-files-found: error
+          retention-days: 90
