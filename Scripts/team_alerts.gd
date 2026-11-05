@@ -190,6 +190,7 @@ func _on_player_down_changed(user_id: String, is_down: bool, info: Dictionary) -
 
 func _on_revive_result(ok: bool, info: Dictionary) -> void:
 	if ok:
+		Achievements.suma("revives")
 		return
 	var reasons := {
 		"too_far": "Acercate mas para levantarlo.",

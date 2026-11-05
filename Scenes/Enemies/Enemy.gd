@@ -116,6 +116,11 @@ func walk_towards(target: Vector3, delta: float) -> void:
 
 
 func headshot() -> void:
+	# Un tiro en la cabeza tambien es una baja: antes se saltaba el contador de
+	# kills porque ponia la vida a 0 y llamaba directo a handle_damage().
+	if health > 0 and not dead:
+		Achievements.suma("kills")
+		Achievements.suma("headshots")
 	health = 0
 	handle_damage()
 
@@ -131,6 +136,9 @@ func take_damage() -> void:
 func handle_damage() -> void:
 	if health <= 0 and !dead:
 		dead = true
+		# Los de elite (oleadas de jefe) llevan la marca puesta por el SpawnManager.
+		if has_meta("elite"):
+			Achievements.suma("elites")
 		# Sin esto el cadaver seguia corriendo y atacando durante el segundo
 		# que tarda en desaparecer.
 		if state_machine != null:

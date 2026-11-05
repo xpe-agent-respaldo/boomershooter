@@ -94,10 +94,13 @@ huecos = [min(b - a for a, b in zip(v, v[1:])) for v in ult.values() if len(v) >
 check("ningun bot habla mas de 1 vez cada ~6 s", all(g >= 6.0 for g in huecos), min(huecos) if huecos else None)
 
 print("\n[4] variedad: un bot no repite su ultima frase")
-sys.path.insert(0, "../modules")
+MODULES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "modules")
+sys.path.insert(0, MODULES)
 from lupa import LuaRuntime
 L = LuaRuntime(unpack_returned_tuples=True)
-M = L.execute("local f=function() " + open("../modules/charla_bots.lua", encoding="utf-8").read().replace("return M\n", "return M") + " end return f()")
+with open(os.path.join(MODULES, "charla_bots.lua"), encoding="utf-8") as _f:
+    _src = _f.read().replace("return M\n", "return M")
+M = L.execute("local f=function() " + _src + " end return f()")
 for rol in ("pandilla", "solo", "amigo", "entrenado"):
     mem = L.table(); ctx = L.table(nombre="Ana", gang="Los Oxido", mapa="Planta", vida=0.8, dist=15, oleada=2)
     seq = [str(M.decir(rol, "aviso", ctx, mem, None)) for _ in range(400)]

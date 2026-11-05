@@ -17,7 +17,7 @@ def alturas(mapa):
     return {(int(a), int(b)): float(y) for a, b, y in re.findall(r"\{(-?\d+),(-?\d+),(-?[\d.]+)\}", bloque)}
 
 ESPERADO = {  # companeros, pandilleros, solitarios, amigos
-    "coop_waves":  (3, 3, 1, 1),
+    "coop_waves":  (3, 3, 1, 3),   # 3 buenos: cada jugador puede llevar hasta 3 aliados
     "survival":    (0, 0, 1, 0),
     "horde":       (4, 0, 0, 0),
     "boss_rush":   (2, 0, 0, 0),

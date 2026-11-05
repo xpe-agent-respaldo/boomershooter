@@ -541,7 +541,7 @@ func _apply_and_restart() -> void:
 			return
 		file.store_string(build_windows_script(current, _target_path))
 		file.close()
-		OS.create_process("cmd.exe", ["/c", "start", "\"\"", "/min", script_path])
+		_lanzar_oculto_windows(script_path)
 	else:
 		var script_path := ProjectSettings.globalize_path(UPDATE_DIR).path_join("apply_update.sh")
 		var file := FileAccess.open(script_path, FileAccess.WRITE)
@@ -552,6 +552,35 @@ func _apply_and_restart() -> void:
 		file.close()
 		OS.create_process("/bin/sh", [script_path])
 	get_tree().quit()
+
+
+## Lanza el .cmd SIN ventana. Un `start /min` seguia mostrando la consola y el juego,
+## al reabrirse desde ella, heredaba ese CMD (los jugadores veian una ventana negra con
+## los mensajes del motor). WScript.Shell.Run con estilo 0 la crea oculta de verdad.
+func _lanzar_oculto_windows(script_path: String) -> void:
+	var vbs_path := script_path.get_basename() + ".vbs"
+	var file := FileAccess.open(vbs_path, FileAccess.WRITE)
+	if file != null:
+		file.store_string(build_windows_launcher(vbs_path.get_file(), script_path))
+		file.close()
+		if OS.create_process("wscript.exe", [vbs_path]) > 0:
+			return
+	# Respaldo: si wscript no esta disponible, se usa cmd oculto por consola propia.
+	OS.create_process("cmd.exe", ["/c", "start", "\"\"", "/min", script_path])
+
+
+## VBS de una linea: ejecuta el .cmd con la ventana oculta (0) y sin esperar.
+static func build_windows_launcher(vbs_name: String, cmd_path: String) -> String:
+	var base := cmd_path.get_base_dir().replace("/", "\\")
+	return "\r\n".join([
+		"' Lanzador silencioso del actualizador de Boomer Shooter.",
+		"DIM q, shell, cmd" ,
+		"q = Chr(34)",
+		"Set shell = CreateObject(\"WScript.Shell\")",
+		"shell.CurrentDirectory = \"%s\"" % base,
+		"shell.Run \"cmd /c \" & q & q & \"%s\" & q & q, 0, False" % cmd_path.replace("/", "\\"),
+		"",
+	])
 
 
 ## Script .cmd: espera a que el juego cierre, copia el nuevo encima (con reintentos), abre y se borra.
@@ -623,7 +652,8 @@ func _leer_resultado_anterior() -> void:
 	if lineas.is_empty():
 		return
 	ultimo_resultado = str(lineas[lineas.size() - 1]).strip_edges()
-	print("[actualizacion] ultimo intento: ", ultimo_resultado)
+	if OS.is_debug_build():
+		print("[actualizacion] ultimo intento: ", ultimo_resultado)
 	if ultimo_resultado.begins_with("OK"):
 		# instalado bien: se limpia para no arrastrar el aviso
 		DirAccess.remove_absolute(ruta)

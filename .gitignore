@@ -39,3 +39,10 @@ BUILD_TEST.md
 
 # Generado en cada compilacion con el servidor Nakama (ver tools/write_online_defaults.sh)
 online_defaults.cfg
+
+# Python: cache de las pruebas Lua
+__pycache__/
+*.pyc
+
+# Capturas locales de revision (no forman parte del juego)
+capturas/

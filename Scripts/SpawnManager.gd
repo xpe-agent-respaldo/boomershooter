@@ -116,6 +116,9 @@ func _spawn_enemy(scene: PackedScene, at_position: Vector3) -> void:
 	if scene == null:
 		return
 	var enemy: Enemy = scene.instantiate()
+	# Marca de elite para el logro de jefes: la escena de elite es la misma referencia.
+	if elite_scene != null and scene == elite_scene:
+		enemy.set_meta("elite", true)
 	enemy.spawn_ammo.connect(_on_ammo_spawned)
 	enemy.spawn_health.connect(_on_health_spawned)
 	enemy.add_to_group("enemy")

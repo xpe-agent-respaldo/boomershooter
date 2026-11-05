@@ -80,6 +80,8 @@ local GANG_DAMAGE = 4
 local GANG_SPEED = 0.52            -- metros por tick de 100 ms = 5,2 m/s, a la velocidad de un jugador corriendo (antes 2,6 = 26 m/s: teletransporte)
 local AMIGO_TALK_DIST = 9.0        -- a esta distancia puedes hacerte su amigo
 local AMIGO_FOLLOW_DIST = 3.0
+local MAX_ALIADOS = 3              -- aliados maximos por jugador
+local AMIGOS_CANDIDATOS = 3        -- buena gente disponible en la partida para repartir
 -- Chat de voz: el servidor decide quien oye a quien.
 local VOICE_MAX_BYTES = 1400     -- 160 muestras mu-law = 216 caracteres en base64; 1400 deja aire
 local VOICE_PROX_M = 24.0        -- alcance de la voz de proximidad, en metros
@@ -804,11 +806,32 @@ local function bot_dice(state, dispatcher, p, situacion, t, objetivo)
   local texto = CHARLA.decir(rol, sit, ctx, p.charla, math.random)
   p.next_say = t + BOT_SAY_GAP_S * (0.7 + math.random() * 0.8)   -- no hablan a intervalos exactos
   state.say_win.n = state.say_win.n + 1
-  for uid, pres in pairs(state.presences) do
-    local h = state.players[uid]
-    if h ~= nil and h.bot ~= true and vec_dist(p.pos, h.pos) <= BOT_SAY_RANGE then
-      send_one(dispatcher, OP_BOT_SAY, { user_id = p.user_id, name = p.username, text = texto, rol = rol }, pres)
+  -- A quien va dirigido: un aliado SOLO le habla a su dueno. Los demas bots se lo
+  -- dicen unicamente al jugador con el que estan tratando, nunca a la sala entera
+  -- (antes cualquiera que pasara cerca recibia charla de bots que no eran su equipo).
+  local destinos = {}
+  if p.owner ~= nil and state.presences[p.owner] ~= nil then
+    destinos[1] = state.presences[p.owner]
+  else
+    local oyente = objetivo
+    if oyente == nil or oyente.bot == true then
+      -- mas_cerca_a se declara mas abajo en el archivo: aqui se busca en linea
+      local dist = math.huge
+      oyente = nil
+      for _, h in pairs(state.players) do
+        if h.bot ~= true and not h.dead then
+          local d = vec_dist(p.pos, h.pos)
+          if d < dist then oyente, dist = h, d end
+        end
+      end
     end
+    if oyente ~= nil and oyente.bot ~= true and vec_dist(p.pos, oyente.pos) <= BOT_SAY_RANGE
+       and state.presences[oyente.user_id] ~= nil then
+      destinos[1] = state.presences[oyente.user_id]
+    end
+  end
+  for _, pres in pairs(destinos) do
+    send_one(dispatcher, OP_BOT_SAY, { user_id = p.user_id, name = p.username, text = texto, rol = rol }, pres)
   end
 end
 
@@ -838,7 +861,11 @@ local function handle_hit_bot(state, dispatcher, presence, payload, t)
     objetivo.dead = true
     objetivo.hp = 0
     objetivo.respawn_at = (state.tick or 0) + (es_pvp(state) and FREESTYLE_RESPAWN_TICKS or CALLE_RESPAWN_TICKS)
-    if objetivo.side == "amigo" then objetivo.friend = false end
+    if objetivo.side == "amigo" then
+      -- al caer queda libre: su dueno puede reclutar a otro
+      objetivo.friend = false
+      objetivo.owner = nil
+    end
     objetivo.next_fire = t + 4.0
     if tirador ~= nil then
       tirador.kills = (tirador.kills or 0) + 1
@@ -886,7 +913,7 @@ local function crear_gente(state, id, alias, side, gang, pos)
   state.players[id] = {
     user_id = id, session_id = id, username = alias,
     bot = true, alive = true, dead = false, side = side, gang = gang or "", skin = skin_para(side, id),
-    hp = 100, max_hp = 100, next_fire = 0, respawn_at = 0, friend = false,
+    hp = 100, max_hp = 100, next_fire = 0, respawn_at = 0, friend = false, owner = nil,
     pos = pos, yaw = 0, target = nil,
     kills = 0, elite_kills = 0, boss_kills = 0, revives = 0, times_downed = 0,
     help_calls = 0, damage_dealt = 0, rewards = 0, last_revive_at = 0,
@@ -925,8 +952,14 @@ local function sembrar_calle(state)
     local nombre = SOLO_NAMES[math.random(1, #SOLO_NAMES)]
     crear_gente(state, "solo-" .. i, nombre, "solo", "", celda_real(state, { x = 0, z = 0 }, 18))
   end
-  for i = 1, (plan.amigo or 0) do
-    local nombre = AMIGO_NAMES[math.random(1, #AMIGO_NAMES)]
+  -- Varios buenos para repartir: cada jugador puede llevar hasta MAX_ALIADOS, y cada
+  -- aliado tiene un unico dueno, asi que hacen falta candidatos suficientes.
+  local cuantos_amigos = 0
+  if (plan.amigo or 0) > 0 then cuantos_amigos = math.max(plan.amigo, AMIGOS_CANDIDATOS) end
+  local inicio = math.random(1, #AMIGO_NAMES)
+  for i = 1, cuantos_amigos do
+    -- nombres distintos, sin repetir, para que nadie confunda a dos aliados
+    local nombre = AMIGO_NAMES[(inicio + i - 2) % #AMIGO_NAMES + 1]
     crear_gente(state, "ami-" .. i, nombre, "amigo", "", celda_real(state, { x = 0, z = 0 }, 10))
   end
 end
@@ -1018,27 +1051,45 @@ local function calle_tick(state, dispatcher, t)
     end
   end
 
-  -- el amigo: si ya es tu amigo te sigue; si no, se acerca y te ofrece hablar
-  local amigo = state.players["ami-1"]
-  if amigo ~= nil and not amigo.dead then
-    local objetivo, d = mas_cerca_a(state, amigo.pos)
-    if objetivo ~= nil then
-      if amigo.friend then
-        mover_hacia(amigo, objetivo, GANG_SPEED, AMIGO_FOLLOW_DIST, state)
-        if math.random() < 0.01 then bot_dice(state, dispatcher, amigo, "aviso", t, objetivo) end
+  -- La buena gente: cada aliado pertenece a UN jugador y solo sigue y le habla a el.
+  -- Los que estan libres se acercan al jugador mas cercano a ofrecerse.
+  for _, amigo in pairs(state.players) do
+    if amigo.bot == true and amigo.side == "amigo" and not amigo.dead then
+      local dueno = nil
+      if amigo.owner ~= nil then dueno = state.players[amigo.owner] end
+      if amigo.friend and dueno ~= nil and not dueno.dead and state.presences[dueno.user_id] ~= nil then
+        mover_hacia(amigo, dueno, GANG_SPEED, AMIGO_FOLLOW_DIST, state)
+        if math.random() < 0.01 then bot_dice(state, dispatcher, amigo, "aviso", t, dueno) end
       else
-        mover_hacia(amigo, objetivo, GANG_SPEED * 0.7, AMIGO_TALK_DIST - 1.0, state)
-        if d <= AMIGO_TALK_DIST and not amigo.avisado then
-          amigo.avisado = true
-          send_one(dispatcher, OP_GANG_ALERT, {
-            kind = "amigo", gang = "", count = 1, dist = math.floor(d),
-            nombre = amigo.username, user_id = amigo.user_id, tecla = "F",
-          }, state.presences[objetivo.user_id])
-          bot_dice(state, dispatcher, amigo, "aviso", t, objetivo)
+        if amigo.friend then
+          -- el dueno se cayo o se fue: el aliado queda libre otra vez
+          amigo.friend = false
+          amigo.owner = nil
+        end
+        local objetivo, d = mas_cerca_a(state, amigo.pos)
+        if objetivo ~= nil then
+          mover_hacia(amigo, objetivo, GANG_SPEED * 0.7, AMIGO_TALK_DIST - 1.0, state)
+          if d <= AMIGO_TALK_DIST and not amigo.avisado then
+            amigo.avisado = true
+            send_one(dispatcher, OP_GANG_ALERT, {
+              kind = "amigo", gang = "", count = 1, dist = math.floor(d),
+              nombre = amigo.username, user_id = amigo.user_id, tecla = "F",
+            }, state.presences[objetivo.user_id])
+            bot_dice(state, dispatcher, amigo, "aviso", t, objetivo)
+          end
         end
       end
     end
   end
+end
+
+-- Cuantos buenos lleva ahora mismo este jugador (fuente de verdad: los bots).
+local function contar_aliados(state, user_id)
+  local n = 0
+  for _, p in pairs(state.players) do
+    if p.bot == true and p.side == "amigo" and p.friend == true and p.owner == user_id then n = n + 1 end
+  end
+  return n
 end
 
 -- Hacerse amigo: solo cuenta si es de los buenos y lo tienes cerca.
@@ -1048,8 +1099,24 @@ local function handle_befriend(state, dispatcher, presence, payload, t)
   local yo = state.players[presence.user_id]
   if yo == nil or yo.dead then return state end
   if vec_dist(yo.pos, amigo.pos) > AMIGO_TALK_DIST + 2.0 then return state end
+  -- Nadie puede robar el aliado de otro, y cada jugador lleva como mucho MAX_ALIADOS.
+  if amigo.owner ~= nil and amigo.owner ~= yo.user_id and amigo.friend then
+    send_one(dispatcher, OP_TEAM_ALERT, {
+      kind = "aviso", severity = 0,
+      text = amigo.username .. " ya acompana a otro jugador.",
+    }, presence)
+    return state
+  end
+  if contar_aliados(state, yo.user_id) >= MAX_ALIADOS and amigo.owner ~= yo.user_id then
+    send_one(dispatcher, OP_TEAM_ALERT, {
+      kind = "aviso", severity = 0,
+      text = "Solo puedes llevar " .. MAX_ALIADOS .. " aliados. Libres uno para hablar con otro.",
+    }, presence)
+    return state
+  end
   amigo.friend = true
-  yo.friends = (yo.friends or 0) + 1
+  amigo.owner = yo.user_id
+  yo.friends = contar_aliados(state, yo.user_id)
   amigo.next_say = 0
   bot_dice(state, dispatcher, amigo, "victoria", os.time() + 0.0, yo)
   send_one(dispatcher, OP_BEFRIEND_OK, {

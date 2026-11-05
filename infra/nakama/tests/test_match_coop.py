@@ -177,7 +177,8 @@ def scenario_calle():
             lados.setdefault(p.get("side"), []).append(uid)
     check("hay pandilla en cualquier sala", len(lados.get("pandilla", [])) >= 2, str(lados))
     check("hay uno que va por libre", len(lados.get("solo", [])) == 1, str(lados.get("solo")))
-    check("hay buena gente reclutable", len(lados.get("amigo", [])) == 1, str(lados.get("amigo")))
+    check("hay buena gente reclutable para repartir", len(lados.get("amigo", [])) == 3,
+          str(lados.get("amigo")))
     check("la pandilla tiene nombre propio", bool(estado.get("gang_name")), str(estado.get("gang_name")))
     check("salta el aviso de que se acercan", len(h.ops(87)) >= 1, str(len(h.ops(87))))
     # se les puede disparar
@@ -195,6 +196,138 @@ def scenario_calle():
     check("hacerte amigo funciona", estado["players"][amigo].get("friend") is True,
           str(estado["players"][amigo].get("friend")))
     check("se confirma la amistad", len(h.ops(89)) >= 1, str(len(h.ops(89))))
+
+
+def destino(pres):
+    """user_id del jugador que recibe el mensaje (send_one envia una lista de un elemento)."""
+    try:
+        if pres is None:
+            return None
+        if hasattr(pres, "keys") and 1 in list(pres.keys()):
+            dentro = pres[1]
+            if dentro is not None:
+                return str(dentro["user_id"])
+        if hasattr(pres, "keys"):
+            return str(pres["user_id"])
+    except Exception:
+        return None
+    return None
+
+
+def pegar(h, uid, objetivo_uid):
+    """Pone al jugador uid justo encima de otro jugador/bot (para poder hablarle)."""
+    p = h.py(h.state["players"][objetivo_uid]["pos"])
+    h.state["players"][uid]["pos"] = h.lua.table(x=p["x"], y=p.get("y", 0.0), z=p["z"])
+
+
+def scenario_aliados():
+    print("\n[aliados: un dueno por bot, maximo 3, y solo hablan a su dueno]")
+    h = Harness()
+    u1 = h.presence("u1", "Uno"); u2 = h.presence("u2", "Dos")
+    h.init(); h.join(u1, u2)
+    h.tick(2)
+    estado = h.py(h.state)
+    amigos = sorted(uid for uid, p in estado["players"].items() if p.get("side") == "amigo")
+    check("hay 3 candidatos", len(amigos) == 3, str(amigos))
+    nombres = {estado["players"][a]["username"] for a in amigos}
+    check("los candidatos tienen nombres distintos", len(nombres) == 3, str(nombres))
+    check("ninguno empieza con dueno",
+          all(not estado["players"][a].get("owner") for a in amigos), str(amigos))
+
+    # U1 recluta al primero
+    primero = amigos[0]
+    pegar(h, "u1", primero)
+    h.sent.clear()
+    h.tick(3, msgs=[(88, u1, {"user_id": primero})])
+    estado = h.py(h.state)
+    check("reclutar funciona", estado["players"][primero].get("friend") is True)
+    check("el aliado sabe quien es su dueno", estado["players"][primero].get("owner") == "u1",
+          str(estado["players"][primero].get("owner")))
+    check("se confirma con el total de aliados", any(p.get("total") == 1 for p in h.ops(89)),
+          str(h.ops(89)))
+
+    # U2 no puede robarlo
+    pegar(h, "u2", primero)
+    h.sent.clear()
+    h.tick(4, msgs=[(88, u2, {"user_id": primero})])
+    estado = h.py(h.state)
+    check("nadie roba el aliado de otro", estado["players"][primero].get("owner") == "u1",
+          str(estado["players"][primero].get("owner")))
+    check("al que intenta robarlo se le avisa", any("otro jugador" in str(p.get("text", ""))
+          for p in h.ops(OP["TEAM_ALERT"])), str(h.ops(OP["TEAM_ALERT"])))
+
+    # El aliado solo le habla a su dueno. La sala tiene un presupuesto de charla por
+    # segundo (3 frases); en el test se limpia para no depender de quien hablo antes.
+    charla = []
+    for t in (5, 6, 7):
+        h.state["say_win"] = h.lua.table(t0=0, n=0)
+        h.sent.clear()
+        h.tick(t, msgs=[(88, u1, {"user_id": primero})])
+        charla = [(p, pres) for o, p, pres in h.sent if o == 93 and p.get("user_id") == primero]
+        if charla:
+            break
+    check("el aliado habla al reclutarlo", len(charla) >= 1, str(len(charla)))
+    destinos = [destino(pres) for _, pres in charla]
+    check("solo se lo dice a su dueno", len(destinos) >= 1 and all(d == "u1" for d in destinos),
+          str(destinos))
+    check("el otro jugador no recibe el mensaje", all(d != "u2" for d in destinos), str(destinos))
+
+    # U1 llega a 3 aliados
+    for extra in amigos[1:]:
+        pegar(h, "u1", extra)
+        h.tick(9, msgs=[(88, u1, {"user_id": extra})])
+    estado = h.py(h.state)
+    de_u1 = [a for a in amigos if estado["players"][a].get("owner") == "u1"]
+    check("un jugador puede llevar 3 aliados", len(de_u1) == 3, str(de_u1))
+
+    # Un cuarto candidato (se convierte un pandillero en buena gente) es rechazado
+    otros = [uid for uid, p in estado["players"].items()
+             if p.get("bot") and p.get("side") == "pandilla"]
+    if otros:
+        cuarto = otros[0]
+        h.state["players"][cuarto]["side"] = "amigo"
+        h.state["players"][cuarto]["friend"] = False
+        h.state["players"][cuarto]["owner"] = None
+        pegar(h, "u1", cuarto)
+        h.sent.clear()
+        h.tick(10, msgs=[(88, u1, {"user_id": cuarto})])
+        estado = h.py(h.state)
+        check("el cuarto aliado se rechaza", estado["players"][cuarto].get("friend") is not True,
+              str(estado["players"][cuarto].get("friend")))
+        check("se explica el tope de 3", any("3 aliados" in str(p.get("text", ""))
+              for p in h.ops(OP["TEAM_ALERT"])), str(h.ops(OP["TEAM_ALERT"])))
+
+    # Si el aliado cae, queda libre para volver a reclutarlo
+    h.sent.clear()
+    h.tick(11, msgs=[(85, u1, {"user_id": primero, "damage": 999})])
+    estado = h.py(h.state)
+    check("el aliado derribado queda libre",
+          estado["players"][primero].get("dead") is True
+          and not estado["players"][primero].get("friend")
+          and not estado["players"][primero].get("owner"),
+          str(estado["players"][primero]))
+
+    pandilleros = [uid for uid, p in h.py(h.state)["players"].items()
+                   if p.get("side") == "pandilla" and not p.get("dead")]
+
+    # Ninguna frase de un bot se reparte a dos jugadores distintos. Antes la charla
+    # salia a todos los que pasaban cerca (te llegaba charla de bots que no eran tu equipo).
+    if pandilleros:
+        pegar(h, "u2", pandilleros[0])   # a distancia de charla, no al otro lado del mapa
+    dichos = {}
+    for t in range(12, 60):
+        h.clock += 2          # el reloj del servidor avanza: los bots vuelven a hablar
+        h.sent.clear()
+        h.tick(t, msgs=[(85, u2, {"user_id": pandilleros[0] if pandilleros else primero, "damage": 1})])
+        for o, p, pres in h.sent:
+            if o == 93:
+                clave = (str(p.get("user_id", "")), str(p.get("text", "")))
+                dichos.setdefault(clave, set()).add(destino(pres))
+        if len(dichos) >= 3:
+            break
+    repetidos = {k: v for k, v in dichos.items() if len(v) > 1}
+    check("ninguna frase de bot se manda a dos jugadores", not repetidos, str(list(repetidos.items())[:2]))
+    check("los bots siguen hablando", len(dichos) > 0, str(len(dichos)))
 
 
 def scenario_basic_flow():
@@ -570,7 +703,7 @@ def scenario_wipe():
 
 if __name__ == "__main__":
     for fn in (scenario_basic_flow, scenario_opcode_collision, scenario_down_and_revive, scenario_bleedout,
-               scenario_help, scenario_strong_waves, scenario_modes, scenario_final_stats, scenario_capacity, scenario_matchmaker, scenario_join_or_create, scenario_position_relay, scenario_handshake_multiplayer, scenario_wipe, scenario_freestylers, scenario_calle):
+               scenario_help, scenario_strong_waves, scenario_modes, scenario_final_stats, scenario_capacity, scenario_matchmaker, scenario_join_or_create, scenario_position_relay, scenario_handshake_multiplayer, scenario_wipe, scenario_freestylers, scenario_calle, scenario_aliados):
         try:
             fn()
         except Exception as exc:  # una excepcion en un escenario cuenta como fallo

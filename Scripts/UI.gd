@@ -26,6 +26,17 @@ func _on_player_died() -> void:
 	player_save.add_run(run_time, owner.kills)
 	player_save.save_player_data(player_save)
 
+	# Logros: partida terminada, mapa jugado y el secreto de la madrugada.
+	# Sin este punto "BIENVENIDO" y "ADICTO" eran imposibles de conseguir.
+	Achievements.suma("partidas")
+	Achievements.suma("muertes")
+	var escena := get_tree().current_scene
+	if escena != null:
+		Achievements.mapa_jugado(str(escena.name))
+	var hora := int(Time.get_time_dict_from_system().get("hour", 12))
+	if hora >= 3 and hora < 5:
+		Achievements.soltar("madrugador")
+
 	%GameOverLayer.visible = true
 	get_tree().paused = true
 

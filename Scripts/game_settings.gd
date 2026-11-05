@@ -131,7 +131,10 @@ func _diagnostico_gpu() -> void:
 		float(OS.get_memory_info().get("physical", 0)) / 1073741824.0,
 		"SI (la tarjeta grafica NO se esta usando)" if software else "no",
 		str(ProjectSettings.get_setting("application/config/version", "?"))]
-	print(texto)
+	# En release no se imprime nada: si alguien abre el juego desde una terminal,
+	# no debe salir un chorro de diagnostico por consola.
+	if OS.is_debug_build():
+		print(texto)
 	var f := FileAccess.open("user://gpu.txt", FileAccess.WRITE)
 	if f:
 		f.store_string(texto)
