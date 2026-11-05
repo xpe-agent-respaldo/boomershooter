@@ -4,6 +4,7 @@ image: barichello/godot-ci:4.7
 
 stages:
   - build
+  - publish
 
 variables:
   EXPORT_NAME: "BoomerShooter"
@@ -33,7 +34,7 @@ build_windows:
       - Build/Windows/BoomerShooter.exe
       - Build/Windows/BoomerShooter.pck
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG'
 
 # Linux: se construye con las mismas plantillas y no bloquea el pipeline si
 # el runner falla en esta plataforma (Windows es la descarga principal).
@@ -60,4 +61,133 @@ build_linux:
     paths:
       - Build/Linux/
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG'
+
+
+# Version jugable en el navegador: es la via para iPhone/iPad sin Mac.
+# WordPress... (no) - Godot exporta HTML5 sin hilos, asi que corre en Safari sin
+# cabeceras especiales. Se publica en /play y se instala como app desde Safari.
+build_web:
+  stage: build
+  image: barichello/godot-ci:4.7
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl unzip libfontconfig1
+    - mkdir -p "$GODOT_TEMPLATES"
+    - |
+      if [ ! -f "$GODOT_TEMPLATES/web_nothreads_release.zip" ]; then
+        curl --fail --location --retry 3 \
+          "https://github.com/godotengine/godot-builds/releases/download/4.7-stable/Godot_v4.7-stable_export_templates.tpz" \
+          --output /tmp/godot-export-templates.tpz
+        unzip -q -j /tmp/godot-export-templates.tpz 'templates/*' -d "$GODOT_TEMPLATES"
+      fi
+  script:
+    - godot --headless --path "$CI_PROJECT_DIR" --editor --quit
+    - mkdir -p Build/Web
+    - godot --headless --path "$CI_PROJECT_DIR" --export-release "Web" "Build/Web/index.html"
+    - ls -la Build/Web
+  artifacts:
+    name: "BoomerShooter-Web-${CI_COMMIT_SHORT_SHA}"
+    expire_in: 30 days
+    paths:
+      - Build/Web/
+  allow_failure: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG'
+
+# ---------------------------------------------------------------------------
+# Flujo de actualizaciones automatico
+# ---------------------------------------------------------------------------
+# Empujar un tag vX.Y.Z hace TODO esto sin tocar nada a mano:
+#   1. compila Windows y Linux,
+#   2. sube los binarios al proyecto publico de descargas (paquete boomershooter/X.Y.Z),
+#   3. recalcula tamanos y SHA-256 reales y escribe site/update.json (historial de 100),
+#   4. apunta site/api/download/*.js a la version nueva,
+#   5. crea la release con sus enlaces,
+#   6. empuja el manifiesto a main para que Vercel lo publique.
+#
+#   git tag -a v1.3.0 -m "Notas de esta version;separadas por punto y coma"
+#   git push origin v1.3.0
+#
+# No hay ninguna version escrita a mano: sirve igual para la proxima y para las 100 siguientes.
+publish_release:
+  stage: publish
+  image: alpine:3.20
+  needs:
+    - job: build_windows
+      artifacts: true
+    - job: build_linux
+      artifacts: true
+      optional: true
+    - job: build_web
+      artifacts: true
+      optional: true
+  variables:
+    DESCARGAS_PROYECTO: "88475071"
+    GIT_STRATEGY: clone
+  before_script:
+    - apk add --no-cache git curl python3
+  script:
+    - set -e
+    - VERSION="${CI_COMMIT_TAG#v}"
+    - echo "Publicando $VERSION"
+    - test -f Build/Windows/BoomerShooter.exe || (echo "Falta el binario de Windows" && exit 1)
+    - |
+      subir() {
+        archivo="$1"; nombre="$2"
+        echo "Subiendo $nombre ($(stat -c%s "$archivo") bytes)"
+        curl --fail --silent --show-error \
+          --header "JOB-TOKEN: $CI_JOB_TOKEN" \
+          --upload-file "$archivo" \
+          "${CI_API_V4_URL}/projects/${DESCARGAS_PROYECTO}/packages/generic/boomershooter/${VERSION}/${nombre}"
+      }
+    - subir Build/Windows/BoomerShooter.exe BoomerShooter.exe
+    - if [ -f Build/Linux/boomershooter.x86_64 ]; then subir Build/Linux/boomershooter.x86_64 boomershooter.x86_64; fi
+    # Manifiesto + rutas de descarga, con los hashes reales de estos binarios
+    - NOTAS="${CI_COMMIT_TAG_MESSAGE:-Version ${VERSION}}"
+    - ARGS="--version ${VERSION}"
+    - ARGS="$ARGS --windows Build/Windows/BoomerShooter.exe"
+    - if [ -f Build/Linux/boomershooter.x86_64 ]; then ARGS="$ARGS --linux Build/Linux/boomershooter.x86_64"; fi
+    - python3 tools/publish_update.py $ARGS
+    - cat site/update.json
+    # Release con enlaces a los binarios
+    - python3 tools/crear_release.py --version "${VERSION}" --plataformas "windows,linux"
+    # El manifiesto publicado tiene que llegar a main para que Vercel lo sirva
+    - git config user.name "Boomer Shooter CI"
+    - git config user.email "ci@xpe.nettt"
+    - git fetch origin main
+    - git checkout -B main origin/main
+    # Version web (iPhone/iPad): si se compilo, se publica en /play
+    - if [ -d Build/Web ]; then rm -rf site/play && mkdir -p site/play && cp -r Build/Web/. site/play/ && echo "web copiada a site/play"; fi
+    - git add site/update.json site/api/download/windows.js site/api/download/linux.js
+    - if [ -d site/play ]; then git add -f site/play; fi
+    - git diff --cached --quiet || git commit -m "Publicada la ${VERSION} (manifiesto y descargas)"
+    - git push "https://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git" HEAD:main
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
+
+# ---------------------------------------------------------------------------
+# iOS (iPhone/iPad): la IPA solo se puede compilar y firmar en un Mac
+# ---------------------------------------------------------------------------
+# Godot necesita un Mac con Xcode, los export templates de iOS, una cuenta Apple
+# Developer y el certificado + profile de distribucion. Este trabajo es MANUAL y
+# no bloquea nada. Si existe un runner macOS con las variables APPLE_TEAM_ID y
+# IOS_EXPORT_METHOD configuradas, `tools/build_ios.sh` genera la IPA y la deja como
+# artefacto; si no hay entorno Apple, el script explica lo que falta y termina.
+build_ios:
+  stage: publish
+  when: manual
+  allow_failure: true
+  tags:
+    - saas-macos-medium-m1
+  needs: []
+  script:
+    - sh tools/build_ios.sh
+  artifacts:
+    name: "BoomerShooter-iOS-${CI_PIPELINE_ID}"
+    expire_in: 30 days
+    paths:
+      - Build/iOS/
+  rules:
+    - if: '$CI_COMMIT_TAG'
+      when: manual
+      allow_failure: true
