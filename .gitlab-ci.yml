@@ -187,7 +187,9 @@ build_ios:
     expire_in: 30 days
     paths:
       - Build/iOS/
+  # Solo aparece si existe un runner macOS y se activa IOS_MAC_RUNNER=1 en CI/CD.
+  # Asi el pipeline normal no ensena un trabajo rojo por algo que necesita un Mac.
   rules:
-    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_TAG && $IOS_MAC_RUNNER'
       when: manual
       allow_failure: true
