@@ -1,0 +1,41 @@
+# Godot 4+ specific ignores
+.godot/
+/.github/
+*.tmp
+Builds/*
+Build/*
+*.exe
+*.pck
+*.zip
+*.log
+publish_repo.bat
+Godot_v*.exe
+Godot_v4.7-stable_win64.exe
+Godot_v4.7-stable_win64_console.exe
+.godot_appdata/
+sync_project.cmd
+nuevos mounstros.zip
+godot*.zip
+SOLICITUDES COMPLETAS.txt
+.env
+.env.*
+promt acgtual.txt
+site/assets/*.import
+galaxy/*.import
+# Fuente local de WebRTC: nunca se publica. Solo se versionan binarios ya
+# probados dentro de addons/webrtc/ cuando existan.
+webrtc-native-1.2.1-stable/
+
+# Referencias de diseno locales (no versionar)
+referencia lobby.png
+para la pagina*.png
+_tmp_*
+seguridad.txt
+
+# Notas de trabajo: no son parte del juego
+ONLINE_TEST.md
+BUILD_TEST.md
+*.md.bak
+
+# Generado en cada compilacion con el servidor Nakama (ver tools/write_online_defaults.sh)
+online_defaults.cfg

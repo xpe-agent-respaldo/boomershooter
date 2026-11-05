@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/Reptile/ReptileElite.tscn" id="1_base"]
+
+[node name="ScrapBrute" instance=ExtResource("1_base")]
+health = 16
+speed = 105
+damage = 28
+proximity_sound_cooldown = 10.0
+proximity_sound_path = "res://Assets/Sounds/SFX/Enemies/bruto_chatarra.wav"
+tint = Color(0.42, 0.46, 0.55, 1)

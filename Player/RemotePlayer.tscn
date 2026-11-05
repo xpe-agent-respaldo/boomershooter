@@ -1,0 +1,133 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://Scripts/remote_player.gd" id="1_script"]
+
+[sub_resource type="CapsuleMesh" id="TorsoMesh"]
+radius = 0.34
+height = 1.05
+radial_segments = 16
+rings = 6
+
+[sub_resource type="CapsuleMesh" id="LegMesh"]
+radius = 0.13
+height = 0.9
+radial_segments = 12
+rings = 4
+
+[sub_resource type="SphereMesh" id="HeadMesh"]
+radius = 0.25
+height = 0.5
+radial_segments = 16
+rings = 8
+
+[sub_resource type="BoxMesh" id="PlateMesh"]
+size = Vector3(0.66, 0.5, 0.22)
+
+[sub_resource type="BoxMesh" id="VisorMesh"]
+size = Vector3(0.36, 0.14, 0.1)
+
+[sub_resource type="BoxMesh" id="PackMesh"]
+size = Vector3(0.52, 0.6, 0.26)
+
+[sub_resource type="CylinderMesh" id="AntennaMesh"]
+top_radius = 0.02
+bottom_radius = 0.035
+height = 0.5
+radial_segments = 8
+
+[sub_resource type="BoxMesh" id="RifleMesh"]
+size = Vector3(0.1, 0.14, 0.72)
+
+[sub_resource type="TorusMesh" id="RingMesh"]
+inner_radius = 0.42
+outer_radius = 0.54
+rings = 12
+ring_segments = 8
+
+[node name="RemotePlayer" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Body" type="Node3D" parent="."]
+unique_name_in_owner = true
+
+[node name="LegL" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(-0.16, 0.45, 0)
+mesh = SubResource("LegMesh")
+
+[node name="LegR" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(0.16, 0.45, 0)
+mesh = SubResource("LegMesh")
+
+[node name="Torso" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(0, 1.12, 0)
+mesh = SubResource("TorsoMesh")
+
+[node name="ChestPlate" type="MeshInstance3D" parent="Body"]
+position = Vector3(0, 1.2, -0.16)
+mesh = SubResource("PlateMesh")
+
+[node name="HazardStripe" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(0, 1.12, -0.29)
+scale = Vector3(0.9, 0.12, 0.06)
+mesh = SubResource("PlateMesh")
+
+[node name="ShoulderL" type="MeshInstance3D" parent="Body"]
+position = Vector3(-0.42, 1.46, 0)
+scale = Vector3(0.42, 0.34, 0.72)
+mesh = SubResource("TorsoMesh")
+
+[node name="ShoulderR" type="MeshInstance3D" parent="Body"]
+position = Vector3(0.42, 1.46, 0)
+scale = Vector3(0.42, 0.34, 0.72)
+mesh = SubResource("TorsoMesh")
+
+[node name="Backpack" type="MeshInstance3D" parent="Body"]
+position = Vector3(0, 1.24, 0.29)
+mesh = SubResource("PackMesh")
+
+[node name="Antenna" type="MeshInstance3D" parent="Body"]
+position = Vector3(-0.2, 1.75, 0.32)
+mesh = SubResource("AntennaMesh")
+
+[node name="AntennaTip" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(-0.2, 2.02, 0.32)
+mesh = SubResource("HeadMesh")
+scale = Vector3(0.16, 0.16, 0.16)
+
+[node name="Head" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(0, 1.84, 0)
+mesh = SubResource("HeadMesh")
+
+[node name="Visor" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(0, 1.88, -0.19)
+mesh = SubResource("VisorMesh")
+
+[node name="Rifle" type="MeshInstance3D" parent="Body"]
+unique_name_in_owner = true
+position = Vector3(0.3, 1.12, -0.22)
+rotation = Vector3(0, -0.18, 0.08)
+mesh = SubResource("RifleMesh")
+
+[node name="GroundRing" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.04, 0)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("RingMesh")
+
+[node name="NameTag" type="Label3D" parent="."]
+unique_name_in_owner = true
+position = Vector3(0, 2.2, 0)
+billboard = 1
+no_depth_test = true
+fixed_size = false
+pixel_size = 0.0045
+font_size = 26
+outline_size = 8
+modulate = Color(1, 1, 1, 1)
+text = "Jugador"

@@ -1,0 +1,72 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://Scenes/Weapons/weapon.gd" id="1_weapon"]
+[ext_resource type="Script" path="res://Resources/weapon_data.gd" id="2_data"]
+[ext_resource type="PackedScene" path="res://Scenes/Bullet.tscn" id="3_bullet"]
+[ext_resource type="PackedScene" path="res://Assets/Models/Weapons/SMG/SMG.glb" id="4_model"]
+[ext_resource type="AudioStream" path="res://Assets/Sounds/SFX/Weapons/sonido de franco.ogg" id="5_shot"]
+[ext_resource type="AudioStream" path="res://Assets/Sounds/SFX/621155__ktfreesound__reload-escopeta-m7.wav" id="6_reload"]
+
+[sub_resource type="Resource" id="SniperData"]
+resource_local_to_scene = true
+script = ExtResource("2_data")
+weapon_name = "Francotirador"
+max_ammo = 5
+max_mag = 3
+fire_rate = 1050
+recoil = Vector3(0.18, 0.006, 0)
+pellet_count = 1
+spread_degrees = 0.12
+ads_fov_multiplier = 0.32
+
+[sub_resource type="StandardMaterial3D" id="ScopeMaterial"]
+albedo_color = Color(0.025, 0.03, 0.05, 1)
+metallic = 0.75
+roughness = 0.28
+
+[sub_resource type="CylinderMesh" id="ScopeMesh"]
+material = SubResource("ScopeMaterial")
+top_radius = 0.026
+bottom_radius = 0.026
+height = 0.28
+
+[sub_resource type="CylinderMesh" id="LensMesh"]
+material = SubResource("ScopeMaterial")
+top_radius = 0.034
+bottom_radius = 0.034
+height = 0.025
+
+[node name="Sniper" type="Node3D" groups=["weapon"]]
+transform = Transform3D(-0.986771, 0.144558, 0.0733869, 0.0945756, 0.145634, 0.984808, 0.131674, 0.97872, -0.157379, 0.0248404, 0.00755084, 0.040623)
+script = ExtResource("1_weapon")
+weapon_data = SubResource("SniperData")
+bullet_scene = ExtResource("3_bullet")
+shot_pitch_scale = 0.9
+shot_pitch_variation = 0.02
+
+[node name="RifleBody" parent="." instance=ExtResource("4_model")]
+transform = Transform3D(0.18, 0, 0, 0, 0.18, 0, 0, 0, 0.18, 0, 0, 0)
+
+[node name="Scope" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.078, -0.22)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("ScopeMesh")
+
+[node name="ScopeLens" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.078, -0.365)
+rotation_degrees = Vector3(90, 0, 0)
+mesh = SubResource("LensMesh")
+
+[node name="GunEnd" type="Marker3D" parent="."]
+unique_name_in_owner = true
+position = Vector3(0, 0.07, 0.46)
+
+[node name="ShotSound" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"
+unique_name_in_owner = true
+stream = ExtResource("5_shot")
+
+[node name="ReloadSound" type="AudioStreamPlayer" parent="."]
+bus = &"SFX"
+unique_name_in_owner = true
+stream = ExtResource("6_reload")

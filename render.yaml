@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: nakama-boomer-shooter
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./infra/nakama/Dockerfile
+    dockerContext: .
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NAKAMA_SERVER_KEY
+        sync: false
+      - key: NAKAMA_CONSOLE_USERNAME
+        sync: false
+      - key: NAKAMA_CONSOLE_PASSWORD
+        sync: false

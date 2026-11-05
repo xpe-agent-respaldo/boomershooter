@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/Beetle/Beetle.tscn" id="1_base"]
+
+[node name="Wormbeak" instance=ExtResource("1_base")]
+health = 3
+damage = 14
+speed = 470
+scale = Vector3(0.82, 0.82, 0.82)

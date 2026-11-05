@@ -1,0 +1,19 @@
+[remap]
+
+importer="oggvorbisstr"
+type="AudioStreamOggVorbis"
+uid="uid://b1ar5qaltpcot"
+path="res://.godot/imported/sonido de franco.ogg-0b89bfe3c7678b2ea62ac4d41dc9ffad.oggvorbisstr"
+
+[deps]
+
+source_file="res://Assets/Sounds/SFX/Weapons/sonido de franco.ogg"
+dest_files=["res://.godot/imported/sonido de franco.ogg-0b89bfe3c7678b2ea62ac4d41dc9ffad.oggvorbisstr"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

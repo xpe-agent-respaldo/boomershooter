@@ -1,0 +1,9 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#160d20"/><stop offset="1" stop-color="#42131a"/></linearGradient></defs>
+  <rect x="16" y="16" width="480" height="480" rx="96" fill="url(#bg)" stroke="#ff5b24" stroke-width="20"/>
+  <path d="M102 313h92l31-51h114l31 51h56c20 0 36 16 36 36v25H90v-25c0-20 16-36 36-36Z" fill="#ff5825"/>
+  <path d="M225 262 276 159h47l-30 103h-68Z" fill="#ffd166"/>
+  <circle cx="165" cy="346" r="25" fill="#160d20"/><circle cx="385" cy="346" r="25" fill="#160d20"/>
+  <path d="M147 189 173 99l27 58 56-38-47 85-62-15Zm240 0-62 15-47-85 56 38 27-58 26 90Z" fill="#ffd166"/>
+  <text x="256" y="443" text-anchor="middle" fill="#fff5e8" font-family="Impact, sans-serif" font-size="48" letter-spacing="3">BOOMER</text>
+</svg>

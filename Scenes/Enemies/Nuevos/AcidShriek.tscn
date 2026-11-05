@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/Wormbeak/Wormbeak.tscn" id="1_base"]
+
+[node name="AcidShriek" instance=ExtResource("1_base")]
+health = 6
+speed = 175
+damage = 15
+proximity_sound_cooldown = 6.0
+proximity_sound_path = "res://Assets/Sounds/SFX/Enemies/graznido_acido.wav"
+tint = Color(0.55, 1.0, 0.32, 1)

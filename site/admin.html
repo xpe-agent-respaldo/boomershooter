@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Panel · Boomer Shooter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#f7efe7;--muted:#b5a8a0;--bg:#120f13;--panel:#1b151b;--orange:#ff5b26;--yellow:#ffd166;--ok:#68db79;--bad:#ff4b4b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:'Barlow Condensed',sans-serif;letter-spacing:.04em}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 5vw;border-bottom:1px solid #33272a}
+h1{margin:0;font-size:28px;font-weight:900;letter-spacing:.08em}h1 em{color:var(--orange);font-style:normal}
+main{padding:30px 5vw 60px;max-width:1200px;margin:0 auto}
+.eyebrow{font:11px 'Space Mono',monospace;color:var(--yellow);letter-spacing:.18em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin:18px 0 28px}
+.card{border:1px solid #473337;background:#171218;padding:20px}
+.card b{display:block;font-size:54px;line-height:.9;color:var(--yellow);font-weight:900}
+.card span{font:10px 'Space Mono',monospace;color:var(--muted);letter-spacing:.12em}
+.card.ok b{color:var(--ok)}.card.bad b{color:var(--bad)}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:800px){.cols{grid-template-columns:1fr}}
+.bar{display:grid;grid-template-columns:150px 1fr 40px;gap:10px;align-items:center;margin:8px 0;font:11px 'Space Mono',monospace}
+.bar div{height:14px;background:var(--orange)}.bar i{font-style:normal;color:var(--muted);text-align:right}
+li{font:12px 'Space Mono',monospace;color:var(--muted);margin:6px 0;list-style:none}
+input,button{font:700 12px 'Space Mono',monospace;padding:14px 16px;border:1px solid var(--orange);background:#171218;color:var(--ink)}
+button{background:var(--orange);color:#1b1010;cursor:pointer}
+#login{max-width:420px;margin:12vh auto;padding:0 5vw}#login input{width:100%;margin:14px 0}
+#err{color:var(--bad);font:11px 'Space Mono',monospace;min-height:16px}
+footer{padding:20px 5vw;color:#807476;font:10px 'Space Mono',monospace;border-top:1px solid #33272a}
+</style></head><body>
+<header><h1>BOOMER <em>SHOOTER</em> · PANEL</h1><div><button id="salir" hidden>SALIR</button></div></header>
+<section id="login"><p class="eyebrow">ACCESO PRIVADO</p><h1>CLAVE DE <em>ADMIN</em></h1>
+<input id="clave" type="password" placeholder="clave del panel" autocomplete="current-password"><button id="entrar">ENTRAR</button><p id="err"></p></section>
+<main id="panel" hidden>
+<p class="eyebrow" id="gen">CARGANDO</p>
+<div class="grid" id="tarjetas"></div>
+<div class="cols">
+<div class="card"><p class="eyebrow">PARTIDAS POR MAPA (ULTIMAS 200)</p><div id="mapas"></div></div>
+<div class="card"><p class="eyebrow">PARTIDAS POR DIA</p><div id="dias"></div></div>
+<div class="card"><p class="eyebrow">ULTIMOS JUGADORES</p><ul id="recientes"></ul></div>
+<div class="card"><p class="eyebrow">ENLACES DE ADMINISTRACION</p><ul id="enlaces"></ul></div>
+</div></main>
+<footer>© 2026 xpe.nettt · Stealth Proyects</footer>
+<script>
+const $=(i)=>document.getElementById(i);
+const esc=(s)=>String(s).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function tarjeta(n,t,c){return `<div class="card ${c||''}"><b>${n===null||n===undefined?'?':esc(n)}</b><span>${esc(t)}</span></div>`}
+function barras(obj){const e=Object.entries(obj).sort((a,b)=>b[1]-a[1]).slice(0,10);const m=Math.max(1,...e.map((x)=>x[1]));
+ return e.length?e.map(([k,v])=>`<div class="bar"><span>${esc(k)}</span><div style="width:${v/m*100}%"></div><i>${v}</i></div>`).join(''):'<li>Sin datos</li>'}
+async function cargar(clave){
+  const r=await fetch('/api/admin-stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key:clave})});
+  if(r.status===401){sessionStorage.removeItem('bs_admin');throw new Error('Clave incorrecta');}
+  if(!r.ok)throw new Error('El panel no esta configurado (falta ADMIN_PANEL_KEY en Vercel)');
+  const d=await r.json();
+  $('gen').textContent='ACTUALIZADO '+new Date(d.generado).toLocaleString('es');
+  $('tarjetas').innerHTML=tarjeta(d.jugadores,'JUGADORES REGISTRADOS')+tarjeta(d.partidas.total,'PARTIDAS TOTALES')+tarjeta(d.partidas.hoy,'PARTIDAS HOY')+tarjeta(d.partidas.ultimos7dias,'ULTIMOS 7 DIAS')+tarjeta(d.comentarios,'COMENTARIOS')+
+   tarjeta(d.servidor.ok?d.servidor.ms+' ms':'CAIDO','SERVIDOR ONLINE',d.servidor.ok?'ok':'bad')+tarjeta(d.version?d.version.actual:null,'VERSION PUBLICADA');
+  $('mapas').innerHTML=barras(d.porMapa);$('dias').innerHTML=barras(d.porDia);
+  $('recientes').innerHTML=d.perfilesRecientes.map((p)=>`<li>${esc(p.nombre||'jugador')} · ${esc((p.alta||'').slice(0,10))}</li>`).join('')||'<li>Sin datos</li>';
+  $('enlaces').innerHTML=['https://gitlab.com/rewardnexus000/boomershooter|Codigo y releases (GitLab)','https://dashboard.render.com|Servidor online (Render)','https://vercel.com/dashboard|Web (Vercel)','https://supabase.com/dashboard/project/dctgtdapiyrylrzxbeib|Base de datos (Supabase)','https://discord.com/developers/applications|Aplicacion de Discord'].map((x)=>{const [u,t]=x.split('|');return `<li><a href="${u}" target="_blank" rel="noopener" style="color:var(--yellow)">${esc(t)}</a></li>`}).join('');
+  $('login').hidden=true;$('panel').hidden=false;$('salir').hidden=false;
+}
+async function entrar(){const c=$('clave').value||sessionStorage.getItem('bs_admin')||'';$('err').textContent='';
+ try{await cargar(c);sessionStorage.setItem('bs_admin',c);}catch(e){$('err').textContent=e.message}}
+$('entrar').onclick=entrar;$('clave').onkeydown=(e)=>{if(e.key==='Enter')entrar()};
+$('salir').onclick=()=>{sessionStorage.removeItem('bs_admin');location.reload()};
+if(sessionStorage.getItem('bs_admin'))entrar();
+</script></body></html>

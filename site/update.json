@@ -1,0 +1,11 @@
+{
+  "version": "1.2.6",
+  "minimum_version": "1.1.6",
+  "notes": "Los bots ahora visten las skins de la tienda segun su papel (pandilla, solitarios, buena gente y jugadores entrenados) y hablan: mas de 38.000 frases distintas que reaccionan a la vida, la distancia y la oleada. Cada modo tiene su propia poblacion y los bots solo pisan suelo real. Servidor probado con 200 jugadores a la vez. Los jugadores online se ven como Neko con su skin, cada arma suena distinto y hay Discord Rich Presence.",
+  "windows_url": "https://boomershooter.vercel.app/api/download/windows",
+  "linux_url": "https://boomershooter.vercel.app/api/download/linux",
+  "windows_size": 149120272,
+  "windows_sha256": "262b6cc43ad5e2badf308c49f91ea8642dc53eab02c24163ec31e265374a1396",
+  "linux_size": 113353808,
+  "linux_sha256": "91b2c8a37b163fd79df4560f2d6207cb28f1af92d5f56bdcd011dbd272793e43"
+}

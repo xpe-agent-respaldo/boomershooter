@@ -1,0 +1,2091 @@
+[gd_scene load_steps=18 format=3]
+
+[ext_resource type="PackedScene" path="res://Levels/ArenaBase.tscn" id="1_base"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_1"]
+albedo_color = Color(0.200, 0.340, 0.120, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_2"]
+albedo_color = Color(0.420, 0.380, 0.330, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_3"]
+albedo_color = Color(0.860, 0.840, 0.880, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_4"]
+albedo_color = Color(0.550, 0.160, 0.100, 1)
+roughness = 0.85
+
+[sub_resource type="StandardMaterial3D" id="Mat_5"]
+albedo_color = Color(0.520, 0.500, 0.550, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_6"]
+albedo_color = Color(0.300, 0.160, 0.080, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_7"]
+albedo_color = Color(0.120, 0.380, 0.120, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_8"]
+albedo_color = Color(0.250, 0.150, 0.090, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_9"]
+albedo_color = Color(0.780, 0.600, 0.120, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_10"]
+albedo_color = Color(0.100, 0.180, 0.400, 1)
+roughness = 0.3
+emission_enabled = true
+emission = Color(0.200, 0.350, 0.800, 1)
+emission_energy_multiplier = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_11"]
+albedo_color = Color(0.300, 0.300, 0.320, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_12"]
+albedo_color = Color(0.340, 0.220, 0.130, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_13"]
+albedo_color = Color(0.040, 0.030, 0.030, 1)
+roughness = 1.0
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_Village"]
+sky_top_color = Color(0.340, 0.420, 0.620, 1)
+sky_horizon_color = Color(0.620, 0.580, 0.660, 1)
+ground_bottom_color = Color(0.100, 0.120, 0.080, 1)
+ground_horizon_color = Color(0.620, 0.580, 0.660, 1)
+
+[sub_resource type="Sky" id="Sky_Village"]
+sky_material = SubResource("SkyMat_Village")
+
+[sub_resource type="Environment" id="Env_Village"]
+background_mode = 2
+sky = SubResource("Sky_Village")
+ambient_light_source = 2
+ambient_light_color = Color(0.550, 0.580, 0.680, 1)
+ambient_light_energy = 0.9
+tonemap_mode = 2
+glow_enabled = false
+fog_enabled = true
+fog_light_color = Color(0.500, 0.520, 0.600, 1)
+fog_density = 0.01
+
+[node name="StormVillage" instance=ExtResource("1_base")]
+
+[node name="WorldEnvironment" parent="Environment" index="0"]
+environment = SubResource("Env_Village")
+
+[node name="DirectionalLight3D" parent="Environment" index="1"]
+transform = Transform3D(0.81915, 0.42625, -0.38380, 0.00000, 0.66913, 0.74314, 0.57358, -0.60875, 0.54812, 0, 0, 0)
+light_color = Color(1.000, 0.880, 0.720, 1)
+light_energy = 1.1
+shadow_enabled = false
+
+[node name="Ground" type="CSGBox3D" parent="Map"]
+position = Vector3(0, -0.5, 0)
+size = Vector3(72, 1, 72)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_1")
+
+[node name="WallN" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.5, -34)
+size = Vector3(70.0, 5, 2.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="WallS" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.5, 34)
+size = Vector3(70.0, 5, 2.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="WallE" type="CSGBox3D" parent="Map"]
+position = Vector3(34, 2.5, 0)
+size = Vector3(2.0, 5, 70.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="WallW" type="CSGBox3D" parent="Map"]
+position = Vector3(-34, 2.5, 0)
+size = Vector3(2.0, 5, 70.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="PathNS" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 0.03, 0)
+size = Vector3(5, 0.06, 68)
+material = SubResource("Mat_2")
+
+[node name="PathEW" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 0.04, 2)
+size = Vector3(68, 0.06, 5)
+material = SubResource("Mat_2")
+
+[node name="Plaza" type="CSGCylinder3D" parent="Map"]
+position = Vector3(0, 0.05, 2)
+radius = 7
+height = 0.1
+sides = 24
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="HouseAFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 0.05, -14)
+size = Vector3(10, 0.1, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseAWall+zA" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.1, 2.3, -10.0)
+size = Vector3(3.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseAWall+zB" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.9, 2.3, -10.0)
+size = Vector3(3.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseALintel+z" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 3.5999999999999996, -10.0)
+size = Vector3(2.4, 1.9999999999999996, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseAWall-z" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 2.3, -18.0)
+size = Vector3(10, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseAWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(-13.0, 2.3, -14)
+size = Vector3(0.5, 4.6, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseAWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.0, 2.3, -14)
+size = Vector3(0.5, 4.6, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseARoof" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 4.75, -14)
+size = Vector3(10.6, 0.3, 8.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseAParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 5.35, -18.0)
+size = Vector3(10.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseAParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 5.35, -10.0)
+size = Vector3(10.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseAParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(-13.0, 5.35, -14)
+size = Vector3(0.3, 0.9, 8.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseAParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.0, 5.35, -14)
+size = Vector3(0.3, 0.9, 8.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseALoft" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 2.7, -17.0)
+size = Vector3(9.0, 0.3, 1.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseAStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.2, 0.225, -10.85)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.2, 0.45, -11.75)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.2, 0.675, -12.65)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.2, 0.9, -13.55)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.2, 1.125, -14.45)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.2, 1.35, -15.35)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseARoofRidge" type="CSGBox3D" parent="Map"]
+position = Vector3(-18, 5.6, -14)
+size = Vector3(8.8, 0.6, 6.8)
+material = SubResource("Mat_4")
+
+[node name="HouseAWinL" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.333333333333332, 2.53, -18.0)
+size = Vector3(1.2, 1.1, 0.12)
+material = SubResource("Mat_10")
+
+[node name="HouseAOut0" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 0.2227272727272727, -17.4)
+size = Vector3(1.8, 0.4454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut1" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 0.4454545454545454, -16.5)
+size = Vector3(1.8, 0.8909090909090908, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut2" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 0.6681818181818181, -15.599999999999998)
+size = Vector3(1.8, 1.3363636363636362, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut3" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 0.8909090909090908, -14.7)
+size = Vector3(1.8, 1.7818181818181815, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut4" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 1.1136363636363635, -13.799999999999999)
+size = Vector3(1.8, 2.227272727272727, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut5" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 1.3363636363636362, -12.899999999999999)
+size = Vector3(1.8, 2.6727272727272724, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut6" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 1.5590909090909089, -11.999999999999998)
+size = Vector3(1.8, 3.1181818181818177, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut7" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 1.7818181818181815, -11.099999999999998)
+size = Vector3(1.8, 3.563636363636363, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut8" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 2.0045454545454544, -10.2)
+size = Vector3(1.8, 4.009090909090909, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut9" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 2.227272727272727, -9.299999999999999)
+size = Vector3(1.8, 4.454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseAOut10" type="CSGBox3D" parent="Map"]
+position = Vector3(-11.6, 2.4499999999999997, -8.399999999999999)
+size = Vector3(1.8, 4.8999999999999995, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 0.05, -16)
+size = Vector3(9, 0.1, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseBWall+zA" type="CSGBox3D" parent="Map"]
+position = Vector3(15.15, 2.3, -11.5)
+size = Vector3(3.3, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseBWall+zB" type="CSGBox3D" parent="Map"]
+position = Vector3(20.85, 2.3, -11.5)
+size = Vector3(3.3, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseBLintel+z" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 3.5999999999999996, -11.5)
+size = Vector3(2.4, 1.9999999999999996, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseBWall-z" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 2.3, -20.5)
+size = Vector3(9, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseBWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(22.5, 2.3, -16)
+size = Vector3(0.5, 4.6, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseBWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(13.5, 2.3, -16)
+size = Vector3(0.5, 4.6, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseBRoof" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 4.75, -16)
+size = Vector3(9.6, 0.3, 9.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseBParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 5.35, -20.5)
+size = Vector3(9.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseBParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 5.35, -11.5)
+size = Vector3(9.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseBParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(22.5, 5.35, -16)
+size = Vector3(0.3, 0.9, 9.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseBParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(13.5, 5.35, -16)
+size = Vector3(0.3, 0.9, 9.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseBLoft" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 2.7, -19.0)
+size = Vector3(8.0, 0.3, 2.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseBStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(15.3, 0.225, -12.35)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(15.3, 0.45, -13.25)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(15.3, 0.675, -14.15)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(15.3, 0.9, -15.05)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(15.3, 1.125, -15.95)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(15.3, 1.35, -16.85)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBRoofRidge" type="CSGBox3D" parent="Map"]
+position = Vector3(18, 5.6, -16)
+size = Vector3(7.8, 0.6, 7.8)
+material = SubResource("Mat_4")
+
+[node name="HouseBWinL" type="CSGBox3D" parent="Map"]
+position = Vector3(15.0, 2.53, -20.5)
+size = Vector3(1.2, 1.1, 0.12)
+material = SubResource("Mat_10")
+
+[node name="HouseBOut0" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 0.2227272727272727, -19.9)
+size = Vector3(1.8, 0.4454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut1" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 0.4454545454545454, -19.0)
+size = Vector3(1.8, 0.8909090909090908, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut2" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 0.6681818181818181, -18.099999999999998)
+size = Vector3(1.8, 1.3363636363636362, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut3" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 0.8909090909090908, -17.2)
+size = Vector3(1.8, 1.7818181818181815, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut4" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 1.1136363636363635, -16.299999999999997)
+size = Vector3(1.8, 2.227272727272727, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut5" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 1.3363636363636362, -15.399999999999999)
+size = Vector3(1.8, 2.6727272727272724, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut6" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 1.5590909090909089, -14.499999999999998)
+size = Vector3(1.8, 3.1181818181818177, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut7" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 1.7818181818181815, -13.599999999999998)
+size = Vector3(1.8, 3.563636363636363, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut8" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 2.0045454545454544, -12.7)
+size = Vector3(1.8, 4.009090909090909, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut9" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 2.227272727272727, -11.799999999999999)
+size = Vector3(1.8, 4.454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseBOut10" type="CSGBox3D" parent="Map"]
+position = Vector3(23.9, 2.4499999999999997, -10.899999999999999)
+size = Vector3(1.8, 4.8999999999999995, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 0.05, 14)
+size = Vector3(9, 0.1, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseCWall+z" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 2.3, 18.0)
+size = Vector3(9, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseCWall-zA" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.85, 2.3, 10.0)
+size = Vector3(3.3, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseCWall-zB" type="CSGBox3D" parent="Map"]
+position = Vector3(-17.15, 2.3, 10.0)
+size = Vector3(3.3, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseCLintel-z" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 3.5999999999999996, 10.0)
+size = Vector3(2.4, 1.9999999999999996, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseCWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(-15.5, 2.3, 14)
+size = Vector3(0.5, 4.6, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseCWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(-24.5, 2.3, 14)
+size = Vector3(0.5, 4.6, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseCRoof" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 4.75, 14)
+size = Vector3(9.6, 0.3, 8.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseCParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 5.35, 10.0)
+size = Vector3(9.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseCParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 5.35, 18.0)
+size = Vector3(9.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseCParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(-15.5, 5.35, 14)
+size = Vector3(0.3, 0.9, 8.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseCParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(-24.5, 5.35, 14)
+size = Vector3(0.3, 0.9, 8.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseCLoft" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 2.7, 17.0)
+size = Vector3(8.0, 0.3, 1.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseCStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.7, 0.225, 10.85)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.7, 0.45, 11.75)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.7, 0.675, 12.65)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.7, 0.9, 13.55)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.7, 1.125, 14.45)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.7, 1.35, 15.35)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCRoofRidge" type="CSGBox3D" parent="Map"]
+position = Vector3(-20, 5.6, 14)
+size = Vector3(7.8, 0.6, 6.8)
+material = SubResource("Mat_4")
+
+[node name="HouseCWinL" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.0, 2.53, 18.0)
+size = Vector3(1.2, 1.1, 0.12)
+material = SubResource("Mat_10")
+
+[node name="HouseCOut0" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 0.2227272727272727, 10.6)
+size = Vector3(1.8, 0.4454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut1" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 0.4454545454545454, 11.5)
+size = Vector3(1.8, 0.8909090909090908, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut2" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 0.6681818181818181, 12.4)
+size = Vector3(1.8, 1.3363636363636362, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut3" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 0.8909090909090908, 13.3)
+size = Vector3(1.8, 1.7818181818181815, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut4" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 1.1136363636363635, 14.2)
+size = Vector3(1.8, 2.227272727272727, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut5" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 1.3363636363636362, 15.1)
+size = Vector3(1.8, 2.6727272727272724, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut6" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 1.5590909090909089, 16.0)
+size = Vector3(1.8, 3.1181818181818177, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut7" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 1.7818181818181815, 16.9)
+size = Vector3(1.8, 3.563636363636363, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut8" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 2.0045454545454544, 17.8)
+size = Vector3(1.8, 4.009090909090909, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut9" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 2.227272727272727, 18.7)
+size = Vector3(1.8, 4.454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseCOut10" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.1, 2.4499999999999997, 19.6)
+size = Vector3(1.8, 4.8999999999999995, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 0.05, 12)
+size = Vector3(10, 0.1, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseDWall+z" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 2.3, 16.5)
+size = Vector3(10, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseDWall-zA" type="CSGBox3D" parent="Map"]
+position = Vector3(16.9, 2.3, 7.5)
+size = Vector3(3.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseDWall-zB" type="CSGBox3D" parent="Map"]
+position = Vector3(23.1, 2.3, 7.5)
+size = Vector3(3.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseDLintel-z" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 3.5999999999999996, 7.5)
+size = Vector3(2.4, 1.9999999999999996, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseDWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(25.0, 2.3, 12)
+size = Vector3(0.5, 4.6, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseDWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(15.0, 2.3, 12)
+size = Vector3(0.5, 4.6, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseDRoof" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 4.75, 12)
+size = Vector3(10.6, 0.3, 9.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseDParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 5.35, 7.5)
+size = Vector3(10.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseDParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 5.35, 16.5)
+size = Vector3(10.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseDParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(25.0, 5.35, 12)
+size = Vector3(0.3, 0.9, 9.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseDParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(15.0, 5.35, 12)
+size = Vector3(0.3, 0.9, 9.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseDLoft" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 2.7, 15.0)
+size = Vector3(9.0, 0.3, 2.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseDStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(16.8, 0.225, 8.35)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(16.8, 0.45, 9.25)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(16.8, 0.675, 10.15)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(16.8, 0.9, 11.05)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(16.8, 1.125, 11.95)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(16.8, 1.35, 12.85)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDRoofRidge" type="CSGBox3D" parent="Map"]
+position = Vector3(20, 5.6, 12)
+size = Vector3(8.8, 0.6, 7.8)
+material = SubResource("Mat_4")
+
+[node name="HouseDWinL" type="CSGBox3D" parent="Map"]
+position = Vector3(16.666666666666668, 2.53, 16.5)
+size = Vector3(1.2, 1.1, 0.12)
+material = SubResource("Mat_10")
+
+[node name="HouseDOut0" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 0.2227272727272727, 8.1)
+size = Vector3(1.8, 0.4454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut1" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 0.4454545454545454, 9.0)
+size = Vector3(1.8, 0.8909090909090908, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut2" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 0.6681818181818181, 9.9)
+size = Vector3(1.8, 1.3363636363636362, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut3" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 0.8909090909090908, 10.8)
+size = Vector3(1.8, 1.7818181818181815, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut4" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 1.1136363636363635, 11.7)
+size = Vector3(1.8, 2.227272727272727, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut5" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 1.3363636363636362, 12.6)
+size = Vector3(1.8, 2.6727272727272724, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut6" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 1.5590909090909089, 13.5)
+size = Vector3(1.8, 3.1181818181818177, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut7" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 1.7818181818181815, 14.399999999999999)
+size = Vector3(1.8, 3.563636363636363, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut8" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 2.0045454545454544, 15.3)
+size = Vector3(1.8, 4.009090909090909, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut9" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 2.227272727272727, 16.2)
+size = Vector3(1.8, 4.454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseDOut10" type="CSGBox3D" parent="Map"]
+position = Vector3(26.4, 2.4499999999999997, 17.1)
+size = Vector3(1.8, 4.8999999999999995, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 0.05, -26)
+size = Vector3(8, 0.1, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseEWall+zA" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.6, 2.3, -22.5)
+size = Vector3(2.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseEWall+zB" type="CSGBox3D" parent="Map"]
+position = Vector3(-3.4000000000000004, 2.3, -22.5)
+size = Vector3(2.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseELintel+z" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 3.5999999999999996, -22.5)
+size = Vector3(2.4, 1.9999999999999996, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseEWall-z" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 2.3, -29.5)
+size = Vector3(8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseEWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(-2.0, 2.3, -26)
+size = Vector3(0.5, 4.6, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseEWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(-10.0, 2.3, -26)
+size = Vector3(0.5, 4.6, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseERoof" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 4.75, -26)
+size = Vector3(8.6, 0.3, 7.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseEParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 5.35, -29.5)
+size = Vector3(8.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseEParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 5.35, -22.5)
+size = Vector3(8.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseEParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(-2.0, 5.35, -26)
+size = Vector3(0.3, 0.9, 7.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseEParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(-10.0, 5.35, -26)
+size = Vector3(0.3, 0.9, 7.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseELoft" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 2.7, -29.0)
+size = Vector3(7.0, 0.3, 1.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseEStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.2, 0.225, -23.35)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.2, 0.45, -24.25)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.2, 0.675, -25.150000000000002)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.2, 0.9, -26.05)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.2, 1.125, -26.950000000000003)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.2, 1.35, -27.85)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseERoofRidge" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 5.6, -26)
+size = Vector3(6.8, 0.6, 5.8)
+material = SubResource("Mat_4")
+
+[node name="HouseEWinL" type="CSGBox3D" parent="Map"]
+position = Vector3(-8.666666666666666, 2.53, -29.5)
+size = Vector3(1.2, 1.1, 0.12)
+material = SubResource("Mat_10")
+
+[node name="HouseEOut0" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 0.2227272727272727, -28.9)
+size = Vector3(1.8, 0.4454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut1" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 0.4454545454545454, -28.0)
+size = Vector3(1.8, 0.8909090909090908, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut2" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 0.6681818181818181, -27.099999999999998)
+size = Vector3(1.8, 1.3363636363636362, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut3" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 0.8909090909090908, -26.2)
+size = Vector3(1.8, 1.7818181818181815, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut4" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 1.1136363636363635, -25.299999999999997)
+size = Vector3(1.8, 2.227272727272727, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut5" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 1.3363636363636362, -24.4)
+size = Vector3(1.8, 2.6727272727272724, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut6" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 1.5590909090909089, -23.5)
+size = Vector3(1.8, 3.1181818181818177, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut7" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 1.7818181818181815, -22.599999999999998)
+size = Vector3(1.8, 3.563636363636363, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut8" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 2.0045454545454544, -21.7)
+size = Vector3(1.8, 4.009090909090909, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut9" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 2.227272727272727, -20.799999999999997)
+size = Vector3(1.8, 4.454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseEOut10" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.6000000000000001, 2.4499999999999997, -19.9)
+size = Vector3(1.8, 4.8999999999999995, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 0.05, 25)
+size = Vector3(8, 0.1, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseFWall+z" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 2.3, 28.5)
+size = Vector3(8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseFWall-zA" type="CSGBox3D" parent="Map"]
+position = Vector3(5.4, 2.3, 21.5)
+size = Vector3(2.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseFWall-zB" type="CSGBox3D" parent="Map"]
+position = Vector3(10.6, 2.3, 21.5)
+size = Vector3(2.8, 4.6, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseFLintel-z" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 3.5999999999999996, 21.5)
+size = Vector3(2.4, 1.9999999999999996, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseFWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(12.0, 2.3, 25)
+size = Vector3(0.5, 4.6, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseFWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(4.0, 2.3, 25)
+size = Vector3(0.5, 4.6, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="HouseFRoof" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 4.75, 25)
+size = Vector3(8.6, 0.3, 7.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseFParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 5.35, 21.5)
+size = Vector3(8.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseFParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 5.35, 28.5)
+size = Vector3(8.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseFParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(12.0, 5.35, 25)
+size = Vector3(0.3, 0.9, 7.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseFParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(4.0, 5.35, 25)
+size = Vector3(0.3, 0.9, 7.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="HouseFLoft" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 2.7, 28.0)
+size = Vector3(7.0, 0.3, 1.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_12")
+
+[node name="HouseFStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(5.8, 0.225, 22.35)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(5.8, 0.45, 23.25)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(5.8, 0.675, 24.150000000000002)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(5.8, 0.9, 25.05)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(5.8, 1.125, 25.950000000000003)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(5.8, 1.35, 26.85)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFRoofRidge" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 5.6, 25)
+size = Vector3(6.8, 0.6, 5.8)
+material = SubResource("Mat_4")
+
+[node name="HouseFWinL" type="CSGBox3D" parent="Map"]
+position = Vector3(5.333333333333334, 2.53, 28.5)
+size = Vector3(1.2, 1.1, 0.12)
+material = SubResource("Mat_10")
+
+[node name="HouseFOut0" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 0.2227272727272727, 22.1)
+size = Vector3(1.8, 0.4454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut1" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 0.4454545454545454, 23.0)
+size = Vector3(1.8, 0.8909090909090908, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut2" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 0.6681818181818181, 23.900000000000002)
+size = Vector3(1.8, 1.3363636363636362, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut3" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 0.8909090909090908, 24.8)
+size = Vector3(1.8, 1.7818181818181815, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut4" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 1.1136363636363635, 25.700000000000003)
+size = Vector3(1.8, 2.227272727272727, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut5" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 1.3363636363636362, 26.6)
+size = Vector3(1.8, 2.6727272727272724, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut6" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 1.5590909090909089, 27.5)
+size = Vector3(1.8, 3.1181818181818177, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut7" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 1.7818181818181815, 28.400000000000002)
+size = Vector3(1.8, 3.563636363636363, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut8" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 2.0045454545454544, 29.3)
+size = Vector3(1.8, 4.009090909090909, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut9" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 2.227272727272727, 30.200000000000003)
+size = Vector3(1.8, 4.454545454545454, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="HouseFOut10" type="CSGBox3D" parent="Map"]
+position = Vector3(13.4, 2.4499999999999997, 31.1)
+size = Vector3(1.8, 4.8999999999999995, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="TowerBase" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 4.0, -16)
+size = Vector3(6, 8.0, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TowerDeck" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 8.15, -16)
+size = Vector3(9, 0.3, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="TowerRailN" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 8.85, -20.5)
+size = Vector3(9, 1.1, 0.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TowerRailE" type="CSGBox3D" parent="Map"]
+position = Vector3(4.5, 8.85, -16)
+size = Vector3(0.4, 1.1, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TowerRailW" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.5, 8.85, -16)
+size = Vector3(0.4, 1.1, 9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TowerRailS1" type="CSGBox3D" parent="Map"]
+position = Vector3(-1.65, 8.85, -11.5)
+size = Vector3(5.7, 1.1, 0.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TowerRailS2" type="CSGBox3D" parent="Map"]
+position = Vector3(4.65, 8.85, -11.5)
+size = Vector3(0.3, 1.1, 0.4)
+material = SubResource("Mat_5")
+
+[node name="TowerRamp" type="CSGBox3D" parent="Map"]
+transform = Transform3D(-1.00000, -0.00000, 0.00000, 0.00000, 0.85187, 0.52375, -0.00000, 0.52375, -0.85187, 3.0, 3.8565296803214406, -4.75)
+size = Vector3(2.6, 0.5, 15.847)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="BarnWalls" type="CSGBox3D" parent="Map"]
+position = Vector3(26, 3, -2)
+size = Vector3(6, 6, 10)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="BarnRoof" type="CSGBox3D" parent="Map"]
+position = Vector3(26, 6.8, -2)
+size = Vector3(7.6, 0.7, 11.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="BarnOpening" type="CSGBox3D" parent="Map"]
+position = Vector3(22.95, 2, -2)
+size = Vector3(0.1, 3.4, 4)
+material = SubResource("Mat_13")
+
+[node name="Sack0" type="CSGBox3D" parent="Map"]
+position = Vector3(23.4, 0.5, 1)
+size = Vector3(0.9, 1.0, 0.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Sack1" type="CSGBox3D" parent="Map"]
+position = Vector3(23.4, 0.5, -5)
+size = Vector3(0.9, 1.0, 0.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Sack2" type="CSGBox3D" parent="Map"]
+position = Vector3(24.2, 0.5, 3)
+size = Vector3(0.9, 1.0, 0.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Wheat0" type="CSGBox3D" parent="Map"]
+position = Vector3(-28, 0.7, -4)
+size = Vector3(4, 1.4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Wheat1" type="CSGBox3D" parent="Map"]
+position = Vector3(-28, 0.7, 4)
+size = Vector3(4, 1.4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Wheat2" type="CSGBox3D" parent="Map"]
+position = Vector3(-24, 0.7, 0)
+size = Vector3(4, 1.4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Wheat3" type="CSGBox3D" parent="Map"]
+position = Vector3(28, 0.7, 18)
+size = Vector3(4, 1.4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Wheat4" type="CSGBox3D" parent="Map"]
+position = Vector3(28, 0.7, 24)
+size = Vector3(4, 1.4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_9")
+
+[node name="Trunk0" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-9, 2.2, 8)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf0" type="CSGSphere3D" parent="Map"]
+position = Vector3(-9, 5.6, 8)
+scale = Vector3(1, 0.85, 1)
+radius = 3.4229016948897018
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk1" type="CSGCylinder3D" parent="Map"]
+position = Vector3(10, 2.2, -6)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf1" type="CSGSphere3D" parent="Map"]
+position = Vector3(10, 5.6, -6)
+scale = Vector3(1, 0.85, 1)
+radius = 3.5417869892607294
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk2" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-12, 2.2, -4)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf2" type="CSGSphere3D" parent="Map"]
+position = Vector3(-12, 5.6, -4)
+scale = Vector3(1, 0.85, 1)
+radius = 3.5951935655656966
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk3" type="CSGCylinder3D" parent="Map"]
+position = Vector3(13, 2.2, 18)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf3" type="CSGSphere3D" parent="Map"]
+position = Vector3(13, 5.6, 18)
+scale = Vector3(1, 0.85, 1)
+radius = 3.74245028377705
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk4" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-3, 2.2, 22)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf4" type="CSGSphere3D" parent="Map"]
+position = Vector3(-3, 5.6, 22)
+scale = Vector3(1, 0.85, 1)
+radius = 3.5398985747399303
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk5" type="CSGCylinder3D" parent="Map"]
+position = Vector3(6, 2.2, -28)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf5" type="CSGSphere3D" parent="Map"]
+position = Vector3(6, 5.6, -28)
+scale = Vector3(1, 0.85, 1)
+radius = 3.722324996665417
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk6" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-30, 2.2, 22)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf6" type="CSGSphere3D" parent="Map"]
+position = Vector3(-30, 5.6, 22)
+scale = Vector3(1, 0.85, 1)
+radius = 2.8290052282836147
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Trunk7" type="CSGCylinder3D" parent="Map"]
+position = Vector3(30, 2.2, -22)
+radius = 0.55
+height = 4.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_8")
+
+[node name="Leaf7" type="CSGSphere3D" parent="Map"]
+position = Vector3(30, 5.6, -22)
+scale = Vector3(1, 0.85, 1)
+radius = 3.265622654378105
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Wall0" type="CSGBox3D" parent="Map"]
+position = Vector3(-8, 0.8, 4)
+rotation = Vector3(0, 0.26180, 0)
+size = Vector3(3.6, 1.6, 0.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="Wall1" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 0.8, 6)
+rotation = Vector3(0, -0.34907, 0)
+size = Vector3(3.6, 1.6, 0.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="Wall2" type="CSGBox3D" parent="Map"]
+position = Vector3(-3, 0.8, 12)
+size = Vector3(3.6, 1.6, 0.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="Wall3" type="CSGBox3D" parent="Map"]
+position = Vector3(4, 0.8, -6)
+rotation = Vector3(0, 0.69813, 0)
+size = Vector3(3.6, 1.6, 0.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="Wall4" type="CSGBox3D" parent="Map"]
+position = Vector3(-14, 0.8, -2)
+rotation = Vector3(0, 1.22173, 0)
+size = Vector3(3.6, 1.6, 0.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="Wall5" type="CSGBox3D" parent="Map"]
+position = Vector3(14, 0.8, 2)
+rotation = Vector3(0, -0.61087, 0)
+size = Vector3(3.6, 1.6, 0.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_11")
+
+[node name="Barrel0" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-9, 0.7, -10)
+radius = 0.6
+height = 1.4
+sides = 14
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Barrel1" type="CSGCylinder3D" parent="Map"]
+position = Vector3(10, 0.7, 0)
+radius = 0.6
+height = 1.4
+sides = 14
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Barrel2" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-1, 0.7, 18)
+radius = 0.6
+height = 1.4
+sides = 14
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Barrel3" type="CSGCylinder3D" parent="Map"]
+position = Vector3(16, 0.7, -8)
+radius = 0.6
+height = 1.4
+sides = 14
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Flash0" type="OmniLight3D" parent="Map"]
+position = Vector3(0, 12, 0)
+light_color = Color(0.550, 0.650, 1.000, 1)
+light_energy = 1.6
+omni_range = 40
+shadow_enabled = false
+
+[node name="VillageSign" type="Label3D" parent="Map"]
+position = Vector3(0, 9, -2)
+text = "STORM VILLAGE"
+font_size = 64
+outline_size = 14
+modulate = Color(1.000, 0.550, 0.200, 1)
+billboard = 1
+
+[node name="SpawnPoint1" parent="SpawnPoints" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1, -26)
+
+[node name="SpawnPoint2" parent="SpawnPoints" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 1, -26)
+
+[node name="SpawnPoint3" parent="SpawnPoints" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1, 26)
+
+[node name="SpawnPoint4" parent="SpawnPoints" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 1, 26)
+
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 30)
+
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 1, 0)
+

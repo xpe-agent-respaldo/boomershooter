@@ -1,0 +1,8 @@
+# Cambios sensibles: requieren revision de la cuenta propietaria.
+/.gitlab-ci.yml @rewardnexus000
+/infra/ @rewardnexus000
+/render.yaml @rewardnexus000
+/supabase/ @rewardnexus000
+/Scripts/online_manager.gd @rewardnexus000
+/Scripts/voice_manager.gd @rewardnexus000
+/project.godot @rewardnexus000

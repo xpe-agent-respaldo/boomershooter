@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/Beetle/Beetle.tscn" id="1_base"]
+
+[node name="AshCrawler" instance=ExtResource("1_base")]
+health = 2
+speed = 235
+damage = 7
+proximity_sound_cooldown = 4.5
+proximity_sound_path = "res://Assets/Sounds/SFX/Enemies/crawler_ceniza.wav"
+tint = Color(0.9, 0.45, 0.16, 1)

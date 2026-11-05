@@ -1,0 +1,63 @@
+# GitLab descarga esta imagen de Godot 4.7 en su runner; no necesita MinGW ni
+# una instalacion local para construir el ejecutable de Windows.
+image: barichello/godot-ci:4.7
+
+stages:
+  - build
+
+variables:
+  EXPORT_NAME: "BoomerShooter"
+  GODOT_TEMPLATES: "$HOME/.local/share/godot/export_templates/4.7.stable"
+
+build_windows:
+  stage: build
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl unzip libfontconfig1 osslsigncode
+    - mkdir -p "$GODOT_TEMPLATES" Build/Windows
+    - |
+      if [ ! -f "$GODOT_TEMPLATES/windows_release_x86_64.exe" ]; then
+        curl --fail --location --retry 3 \
+          "https://github.com/godotengine/godot-builds/releases/download/4.7-stable/Godot_v4.7-stable_export_templates.tpz" \
+          --output /tmp/godot-export-templates.tpz
+        unzip -q -j /tmp/godot-export-templates.tpz 'templates/*' -d "$GODOT_TEMPLATES"
+      fi
+  script:
+    - sh tools/write_online_defaults.sh "$CI_PROJECT_DIR/online_defaults.cfg"
+    - godot --headless --path "$CI_PROJECT_DIR" --editor --quit
+    - godot --headless --path "$CI_PROJECT_DIR" --export-release "Windows Desktop" "Build/Windows/${EXPORT_NAME}.exe"
+    - sh tools/sign_windows.sh "Build/Windows/${EXPORT_NAME}.exe"
+  artifacts:
+    name: "BoomerShooter-Windows-${CI_COMMIT_SHORT_SHA}"
+    expire_in: 30 days
+    paths:
+      - Build/Windows/BoomerShooter.exe
+      - Build/Windows/BoomerShooter.pck
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+
+# Linux: se construye con las mismas plantillas y no bloquea el pipeline si
+# el runner falla en esta plataforma (Windows es la descarga principal).
+build_linux:
+  stage: build
+  allow_failure: true
+  before_script:
+    - apt-get update && apt-get install -y --no-install-recommends curl unzip libfontconfig1
+    - mkdir -p "$GODOT_TEMPLATES" Build/Linux
+    - |
+      if [ ! -f "$GODOT_TEMPLATES/linux_release.x86_64" ]; then
+        curl --fail --location --retry 3 \
+          "https://github.com/godotengine/godot-builds/releases/download/4.7-stable/Godot_v4.7-stable_export_templates.tpz" \
+          --output /tmp/godot-export-templates.tpz
+        unzip -q -j /tmp/godot-export-templates.tpz 'templates/*' -d "$GODOT_TEMPLATES"
+      fi
+  script:
+    - sh tools/write_online_defaults.sh "$CI_PROJECT_DIR/online_defaults.cfg"
+    - godot --headless --path "$CI_PROJECT_DIR" --editor --quit
+    - godot --headless --path "$CI_PROJECT_DIR" --export-release "Linux" "Build/Linux/boomershooter.x86_64"
+  artifacts:
+    name: "BoomerShooter-Linux-${CI_COMMIT_SHORT_SHA}"
+    expire_in: 30 days
+    paths:
+      - Build/Linux/
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'

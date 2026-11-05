@@ -1,0 +1,1608 @@
+[gd_scene load_steps=13 format=3]
+
+[ext_resource type="PackedScene" path="res://Levels/ArenaBase.tscn" id="1_base"]
+[ext_resource type="Script" path="res://Scripts/space_arena.gd" id="2_script"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_1"]
+albedo_color = Color(0.200, 0.190, 0.220, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_2"]
+albedo_color = Color(0.150, 0.150, 0.180, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_3"]
+albedo_color = Color(0.300, 0.280, 0.340, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_4"]
+albedo_color = Color(0.550, 0.580, 0.640, 1)
+roughness = 0.4
+metallic = 0.6
+
+[sub_resource type="StandardMaterial3D" id="Mat_5"]
+albedo_color = Color(0.100, 0.140, 0.260, 1)
+roughness = 0.3
+metallic = 0.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_6"]
+albedo_color = Color(0.100, 0.020, 0.050, 1)
+roughness = 0.5
+emission_enabled = true
+emission = Color(1.000, 0.100, 0.300, 1)
+emission_energy_multiplier = 2.4
+
+[sub_resource type="StandardMaterial3D" id="Mat_7"]
+albedo_color = Color(0.020, 0.100, 0.140, 1)
+roughness = 0.4
+emission_enabled = true
+emission = Color(0.200, 0.850, 1.000, 1)
+emission_energy_multiplier = 1.8
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_Moon"]
+sky_top_color = Color(0.012, 0.014, 0.060, 1)
+sky_horizon_color = Color(0.280, 0.160, 0.380, 1)
+ground_bottom_color = Color(0.010, 0.010, 0.020, 1)
+ground_horizon_color = Color(0.280, 0.160, 0.380, 1)
+
+[sub_resource type="Sky" id="Sky_Moon"]
+sky_material = SubResource("SkyMat_Moon")
+
+[sub_resource type="Environment" id="Env_Moon"]
+background_mode = 2
+sky = SubResource("Sky_Moon")
+ambient_light_source = 2
+ambient_light_color = Color(0.300, 0.280, 0.480, 1)
+ambient_light_energy = 0.8
+tonemap_mode = 2
+glow_enabled = false
+fog_enabled = true
+fog_light_color = Color(0.300, 0.180, 0.400, 1)
+fog_density = 0.006
+
+[node name="SpaceArena" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="WorldEnvironment" parent="Environment" index="0"]
+environment = SubResource("Env_Moon")
+
+[node name="DirectionalLight3D" parent="Environment" index="1"]
+transform = Transform3D(-0.86603, -0.28679, 0.40958, 0.00000, 0.81915, 0.57358, -0.50000, 0.49673, -0.70941, 0, 0, 0)
+light_color = Color(0.620, 0.680, 1.000, 1)
+light_energy = 1.0
+shadow_enabled = false
+
+[node name="Ground" type="CSGBox3D" parent="Map"]
+position = Vector3(0, -0.5, 0)
+size = Vector3(112, 1, 112)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_1")
+
+[node name="CraterRock0" type="CSGSphere3D" parent="Map"]
+position = Vector3(11.0, 0.6, 0.0)
+scale = Vector3(1, 0.55, 1)
+radius = 2.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock1" type="CSGSphere3D" parent="Map"]
+position = Vector3(9.91, 0.6, 4.77)
+scale = Vector3(1, 0.55, 1)
+radius = 3.0999999999999996
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock2" type="CSGSphere3D" parent="Map"]
+position = Vector3(6.86, 0.6, 8.6)
+scale = Vector3(1, 0.55, 1)
+radius = 3.8
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock3" type="CSGSphere3D" parent="Map"]
+position = Vector3(2.45, 0.6, 10.72)
+scale = Vector3(1, 0.55, 1)
+radius = 2.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock4" type="CSGSphere3D" parent="Map"]
+position = Vector3(-2.45, 0.6, 10.72)
+scale = Vector3(1, 0.55, 1)
+radius = 3.0999999999999996
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock5" type="CSGSphere3D" parent="Map"]
+position = Vector3(-6.86, 0.6, 8.6)
+scale = Vector3(1, 0.55, 1)
+radius = 3.8
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock6" type="CSGSphere3D" parent="Map"]
+position = Vector3(-9.91, 0.6, 4.77)
+scale = Vector3(1, 0.55, 1)
+radius = 2.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock7" type="CSGSphere3D" parent="Map"]
+position = Vector3(-11.0, 0.6, 0.0)
+scale = Vector3(1, 0.55, 1)
+radius = 3.0999999999999996
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock8" type="CSGSphere3D" parent="Map"]
+position = Vector3(-9.91, 0.6, -4.77)
+scale = Vector3(1, 0.55, 1)
+radius = 3.8
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock9" type="CSGSphere3D" parent="Map"]
+position = Vector3(-6.86, 0.6, -8.6)
+scale = Vector3(1, 0.55, 1)
+radius = 2.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock10" type="CSGSphere3D" parent="Map"]
+position = Vector3(-2.45, 0.6, -10.72)
+scale = Vector3(1, 0.55, 1)
+radius = 3.0999999999999996
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock11" type="CSGSphere3D" parent="Map"]
+position = Vector3(2.45, 0.6, -10.72)
+scale = Vector3(1, 0.55, 1)
+radius = 3.8
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock12" type="CSGSphere3D" parent="Map"]
+position = Vector3(6.86, 0.6, -8.6)
+scale = Vector3(1, 0.55, 1)
+radius = 2.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="CraterRock13" type="CSGSphere3D" parent="Map"]
+position = Vector3(9.91, 0.6, -4.77)
+scale = Vector3(1, 0.55, 1)
+radius = 3.0999999999999996
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Peak0" type="CSGBox3D" parent="Map"]
+position = Vector3(52.57, 10.0, 0.0)
+rotation = Vector3(0, 1.41372, 0)
+size = Vector3(7, 20, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip0" type="CSGBox3D" parent="Map"]
+position = Vector3(52.57, 21.8, 0.0)
+rotation = Vector3(0, 0.62832, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak1" type="CSGBox3D" parent="Map"]
+position = Vector3(50.13, 6.0, 12.36)
+rotation = Vector3(0, 1.13446, 0)
+size = Vector3(7, 12, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip1" type="CSGBox3D" parent="Map"]
+position = Vector3(50.13, 13.8, 12.36)
+rotation = Vector3(0, 0.40143, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak2" type="CSGBox3D" parent="Map"]
+position = Vector3(45.65, 6.0, 23.96)
+rotation = Vector3(0, 0.01745, 0)
+size = Vector3(4, 12, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip2" type="CSGBox3D" parent="Map"]
+position = Vector3(45.65, 13.8, 23.96)
+rotation = Vector3(0, 0.82030, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak3" type="CSGBox3D" parent="Map"]
+position = Vector3(37.65, 7.5, 33.36)
+rotation = Vector3(0, 0.31416, 0)
+size = Vector3(4, 15, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip3" type="CSGBox3D" parent="Map"]
+position = Vector3(37.65, 16.8, 33.36)
+rotation = Vector3(0, 0.50615, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak4" type="CSGBox3D" parent="Map"]
+position = Vector3(28.59, 10.0, 41.43)
+rotation = Vector3(0, 0.95993, 0)
+size = Vector3(4, 20, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip4" type="CSGBox3D" parent="Map"]
+position = Vector3(28.59, 21.8, 41.43)
+rotation = Vector3(0, 0.90757, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak5" type="CSGBox3D" parent="Map"]
+position = Vector3(18.17, 4.5, 47.91)
+rotation = Vector3(0, 1.20428, 0)
+size = Vector3(6, 9, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip5" type="CSGBox3D" parent="Map"]
+position = Vector3(18.17, 10.8, 47.91)
+rotation = Vector3(0, 1.09956, 0)
+size = Vector3(2.7, 4, 2.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak6" type="CSGBox3D" parent="Map"]
+position = Vector3(6.15, 9.5, 50.64)
+rotation = Vector3(0, 0.03491, 0)
+size = Vector3(6, 19, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip6" type="CSGBox3D" parent="Map"]
+position = Vector3(6.15, 20.8, 50.64)
+rotation = Vector3(0, 0.33161, 0)
+size = Vector3(2.7, 4, 2.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak7" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.13, 5.0, 50.5)
+rotation = Vector3(0, 0.03491, 0)
+size = Vector3(4, 10, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip7" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.13, 11.8, 50.5)
+rotation = Vector3(0, 1.01229, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak8" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.64, 10.0, 49.16)
+rotation = Vector3(0, 0.89012, 0)
+size = Vector3(6, 20, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip8" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.64, 21.8, 49.16)
+rotation = Vector3(0, 1.08210, 0)
+size = Vector3(2.7, 4, 2.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak9" type="CSGBox3D" parent="Map"]
+position = Vector3(-29.89, 9.5, 43.3)
+rotation = Vector3(0, 1.04720, 0)
+size = Vector3(4, 19, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip9" type="CSGBox3D" parent="Map"]
+position = Vector3(-29.89, 20.8, 43.3)
+rotation = Vector3(0, 0.52360, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak10" type="CSGBox3D" parent="Map"]
+position = Vector3(-39.54, 6.0, 35.03)
+rotation = Vector3(0, 1.50098, 0)
+size = Vector3(5, 12, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip10" type="CSGBox3D" parent="Map"]
+position = Vector3(-39.54, 13.8, 35.03)
+rotation = Vector3(0, 1.46608, 0)
+size = Vector3(2.25, 4, 2.25)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak11" type="CSGBox3D" parent="Map"]
+position = Vector3(-45.01, 10.5, 23.62)
+rotation = Vector3(0, 0.15708, 0)
+size = Vector3(8, 21, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip11" type="CSGBox3D" parent="Map"]
+position = Vector3(-45.01, 22.8, 23.62)
+rotation = Vector3(0, 0.26180, 0)
+size = Vector3(3.6, 4, 3.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak12" type="CSGBox3D" parent="Map"]
+position = Vector3(-49.91, 8.5, 12.31)
+rotation = Vector3(0, 0.43633, 0)
+size = Vector3(7, 17, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip12" type="CSGBox3D" parent="Map"]
+position = Vector3(-49.91, 18.8, 12.31)
+rotation = Vector3(0, 0.75049, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak13" type="CSGBox3D" parent="Map"]
+position = Vector3(-50.33, 8.5, 0.0)
+rotation = Vector3(0, 0.64577, 0)
+size = Vector3(7, 17, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip13" type="CSGBox3D" parent="Map"]
+position = Vector3(-50.33, 18.8, 0.0)
+rotation = Vector3(0, 0.80285, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak14" type="CSGBox3D" parent="Map"]
+position = Vector3(-48.78, 8.5, -12.03)
+rotation = Vector3(0, 0.69813, 0)
+size = Vector3(7, 17, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip14" type="CSGBox3D" parent="Map"]
+position = Vector3(-48.78, 18.8, -12.03)
+rotation = Vector3(0, 1.08210, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak15" type="CSGBox3D" parent="Map"]
+position = Vector3(-45.96, 4.5, -24.12)
+rotation = Vector3(0, 0.34907, 0)
+size = Vector3(4, 9, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip15" type="CSGBox3D" parent="Map"]
+position = Vector3(-45.96, 10.8, -24.12)
+rotation = Vector3(0, 1.09956, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak16" type="CSGBox3D" parent="Map"]
+position = Vector3(-39.7, 5.0, -35.18)
+rotation = Vector3(0, 1.32645, 0)
+size = Vector3(8, 10, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip16" type="CSGBox3D" parent="Map"]
+position = Vector3(-39.7, 11.8, -35.18)
+rotation = Vector3(0, 1.15192, 0)
+size = Vector3(3.6, 4, 3.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak17" type="CSGBox3D" parent="Map"]
+position = Vector3(-29.77, 9.0, -43.12)
+rotation = Vector3(0, 1.23918, 0)
+size = Vector3(6, 18, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip17" type="CSGBox3D" parent="Map"]
+position = Vector3(-29.77, 19.8, -43.12)
+rotation = Vector3(0, 1.37881, 0)
+size = Vector3(2.7, 4, 2.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak18" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.7, 9.5, -49.29)
+rotation = Vector3(0, 1.39626, 0)
+size = Vector3(5, 19, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip18" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.7, 20.8, -49.29)
+rotation = Vector3(0, 0.76794, 0)
+size = Vector3(2.25, 4, 2.25)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak19" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.1, 7.0, -50.22)
+rotation = Vector3(0, 1.32645, 0)
+size = Vector3(6, 14, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip19" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.1, 15.8, -50.22)
+rotation = Vector3(0, 0.68068, 0)
+size = Vector3(2.7, 4, 2.7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak20" type="CSGBox3D" parent="Map"]
+position = Vector3(6.31, 5.5, -51.95)
+rotation = Vector3(0, 0.38397, 0)
+size = Vector3(4, 11, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip20" type="CSGBox3D" parent="Map"]
+position = Vector3(6.31, 12.8, -51.95)
+rotation = Vector3(0, 0.94248, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak21" type="CSGBox3D" parent="Map"]
+position = Vector3(18.42, 9.5, -48.57)
+rotation = Vector3(0, 1.50098, 0)
+size = Vector3(4, 19, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip21" type="CSGBox3D" parent="Map"]
+position = Vector3(18.42, 20.8, -48.57)
+rotation = Vector3(0, 1.15192, 0)
+size = Vector3(1.8, 4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak22" type="CSGBox3D" parent="Map"]
+position = Vector3(28.63, 6.0, -41.48)
+rotation = Vector3(0, 0.34907, 0)
+size = Vector3(7, 12, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip22" type="CSGBox3D" parent="Map"]
+position = Vector3(28.63, 13.8, -41.48)
+rotation = Vector3(0, 1.30900, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak23" type="CSGBox3D" parent="Map"]
+position = Vector3(39.69, 7.0, -35.15)
+rotation = Vector3(0, 1.11701, 0)
+size = Vector3(7, 14, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip23" type="CSGBox3D" parent="Map"]
+position = Vector3(39.69, 15.8, -35.15)
+rotation = Vector3(0, 0.83776, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak24" type="CSGBox3D" parent="Map"]
+position = Vector3(45.24, 6.0, -23.74)
+rotation = Vector3(0, 1.23918, 0)
+size = Vector3(5, 12, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="PeakTip24" type="CSGBox3D" parent="Map"]
+position = Vector3(45.24, 13.8, -23.74)
+rotation = Vector3(0, 0.13963, 0)
+size = Vector3(2.25, 4, 2.25)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Peak25" type="CSGBox3D" parent="Map"]
+position = Vector3(50.25, 7.5, -12.39)
+rotation = Vector3(0, 0.12217, 0)
+size = Vector3(7, 15, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PeakTip25" type="CSGBox3D" parent="Map"]
+position = Vector3(50.25, 16.8, -12.39)
+rotation = Vector3(0, 0.62832, 0)
+size = Vector3(3.15, 4, 3.15)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="WallN" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 3.0, -55)
+size = Vector3(112.5, 6, 2.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="WallS" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 3.0, 55)
+size = Vector3(112.5, 6, 2.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="WallE" type="CSGBox3D" parent="Map"]
+position = Vector3(55, 3.0, 0)
+size = Vector3(2.5, 6, 112.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="WallW" type="CSGBox3D" parent="Map"]
+position = Vector3(-55, 3.0, 0)
+size = Vector3(2.5, 6, 112.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater1" type="CSGSphere3D" parent="Map"]
+position = Vector3(-38.09, 0.4, 0.25)
+scale = Vector3(1, 0.4, 1)
+radius = 3.31
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater2" type="CSGSphere3D" parent="Map"]
+position = Vector3(45.30, 0.4, 38.41)
+scale = Vector3(1, 0.4, 1)
+radius = 3.27
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock3" type="CSGSphere3D" parent="Map"]
+position = Vector3(-5.89, 0.6, -49.75)
+scale = Vector3(1, 0.55, 1)
+radius = 1.8
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover4" type="CSGBox3D" parent="Map"]
+position = Vector3(-24.85, 0.9, 47.99)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewRock5" type="CSGSphere3D" parent="Map"]
+position = Vector3(49.97, 0.6, 1.36)
+scale = Vector3(1, 0.55, 1)
+radius = 2.9
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater6" type="CSGSphere3D" parent="Map"]
+position = Vector3(-40.93, 0.4, 39.10)
+scale = Vector3(1, 0.4, 1)
+radius = 3.1
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover7" type="CSGBox3D" parent="Map"]
+position = Vector3(-0.90, 0.9, 41.68)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCrater8" type="CSGSphere3D" parent="Map"]
+position = Vector3(6.40, 0.4, 48.23)
+scale = Vector3(1, 0.4, 1)
+radius = 3.13
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock9" type="CSGSphere3D" parent="Map"]
+position = Vector3(-47.46, 0.6, -27.55)
+scale = Vector3(1, 0.55, 1)
+radius = 3.07
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock10" type="CSGSphere3D" parent="Map"]
+position = Vector3(38.43, 0.6, 34.96)
+scale = Vector3(1, 0.55, 1)
+radius = 2.73
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater11" type="CSGSphere3D" parent="Map"]
+position = Vector3(42.95, 0.4, 48.72)
+scale = Vector3(1, 0.4, 1)
+radius = 2.75
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater12" type="CSGSphere3D" parent="Map"]
+position = Vector3(-9.79, 0.4, 49.82)
+scale = Vector3(1, 0.4, 1)
+radius = 3.52
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover13" type="CSGBox3D" parent="Map"]
+position = Vector3(38.45, 0.9, -6.69)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCrater14" type="CSGSphere3D" parent="Map"]
+position = Vector3(-49.07, 0.4, -35.02)
+scale = Vector3(1, 0.4, 1)
+radius = 3.74
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover15" type="CSGBox3D" parent="Map"]
+position = Vector3(30.35, 0.9, 42.70)
+size = Vector3(3.5, 1.8, 1.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewRock16" type="CSGSphere3D" parent="Map"]
+position = Vector3(-18.33, 0.6, 41.68)
+scale = Vector3(1, 0.55, 1)
+radius = 2.39
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover17" type="CSGBox3D" parent="Map"]
+position = Vector3(21.65, 0.9, 46.22)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover18" type="CSGBox3D" parent="Map"]
+position = Vector3(42.20, 0.9, -31.70)
+size = Vector3(2.6, 1.8, 2.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover19" type="CSGBox3D" parent="Map"]
+position = Vector3(-2.09, 0.9, -43.57)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover20" type="CSGBox3D" parent="Map"]
+position = Vector3(41.65, 0.9, -40.78)
+size = Vector3(2.6, 1.8, 2.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCrater21" type="CSGSphere3D" parent="Map"]
+position = Vector3(-37.92, 0.4, -45.53)
+scale = Vector3(1, 0.4, 1)
+radius = 3.74
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock22" type="CSGSphere3D" parent="Map"]
+position = Vector3(44.99, 0.6, -0.80)
+scale = Vector3(1, 0.55, 1)
+radius = 2.58
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater23" type="CSGSphere3D" parent="Map"]
+position = Vector3(-2.70, 0.4, -36.88)
+scale = Vector3(1, 0.4, 1)
+radius = 3.63
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater24" type="CSGSphere3D" parent="Map"]
+position = Vector3(16.86, 0.4, 43.51)
+scale = Vector3(1, 0.4, 1)
+radius = 2.83
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater25" type="CSGSphere3D" parent="Map"]
+position = Vector3(26.95, 0.4, -47.42)
+scale = Vector3(1, 0.4, 1)
+radius = 3.07
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock26" type="CSGSphere3D" parent="Map"]
+position = Vector3(-46.58, 0.6, 14.72)
+scale = Vector3(1, 0.55, 1)
+radius = 1.68
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCrater27" type="CSGSphere3D" parent="Map"]
+position = Vector3(37.78, 0.4, -37.09)
+scale = Vector3(1, 0.4, 1)
+radius = 2.71
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock28" type="CSGSphere3D" parent="Map"]
+position = Vector3(-36.23, 0.6, 16.12)
+scale = Vector3(1, 0.55, 1)
+radius = 2.3
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover29" type="CSGBox3D" parent="Map"]
+position = Vector3(-42.13, 0.9, -19.51)
+size = Vector3(3.5, 1.8, 1.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover30" type="CSGBox3D" parent="Map"]
+position = Vector3(37.86, 0.9, 14.57)
+size = Vector3(2.6, 1.8, 2.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover31" type="CSGBox3D" parent="Map"]
+position = Vector3(3.84, 0.9, -39.03)
+size = Vector3(2.6, 1.8, 2.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover32" type="CSGBox3D" parent="Map"]
+position = Vector3(17.03, 0.9, -36.74)
+size = Vector3(3.5, 1.8, 1.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover33" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.91, 0.9, -43.71)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover34" type="CSGBox3D" parent="Map"]
+position = Vector3(11.51, 0.9, 42.47)
+size = Vector3(2.6, 1.8, 2.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover35" type="CSGBox3D" parent="Map"]
+position = Vector3(18.65, 0.9, 36.13)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewRock36" type="CSGSphere3D" parent="Map"]
+position = Vector3(-44.24, 0.6, 21.52)
+scale = Vector3(1, 0.55, 1)
+radius = 2.11
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover37" type="CSGBox3D" parent="Map"]
+position = Vector3(8.56, 0.9, -47.97)
+size = Vector3(3.5, 1.8, 1.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover38" type="CSGBox3D" parent="Map"]
+position = Vector3(-38.17, 0.9, -37.43)
+size = Vector3(2.6, 1.8, 2.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover39" type="CSGBox3D" parent="Map"]
+position = Vector3(-47.12, 0.9, 7.81)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCover40" type="CSGBox3D" parent="Map"]
+position = Vector3(-47.66, 0.9, -22.32)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewRock41" type="CSGSphere3D" parent="Map"]
+position = Vector3(44.42, 0.6, 9.37)
+scale = Vector3(1, 0.55, 1)
+radius = 2.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover42" type="CSGBox3D" parent="Map"]
+position = Vector3(-48.86, 0.9, 47.81)
+size = Vector3(3.5, 1.8, 1.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewRock43" type="CSGSphere3D" parent="Map"]
+position = Vector3(47.02, 0.6, 17.91)
+scale = Vector3(1, 0.55, 1)
+radius = 3.27
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewRock44" type="CSGSphere3D" parent="Map"]
+position = Vector3(47.62, 0.6, 45.10)
+scale = Vector3(1, 0.55, 1)
+radius = 2.61
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="NewCover45" type="CSGBox3D" parent="Map"]
+position = Vector3(-22.42, 0.9, 36.12)
+size = Vector3(1.2, 1.8, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="NewCrater46" type="CSGSphere3D" parent="Map"]
+position = Vector3(-14.56, 0.4, 45.55)
+scale = Vector3(1, 0.4, 1)
+radius = 3.38
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="ModuleMain" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.6, -2)
+size = Vector3(12, 5.2, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Dome" type="CSGCylinder3D" parent="Map"]
+position = Vector3(0, 5.4, -2)
+radius = 4.4
+height = 1.2
+sides = 20
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="ModuleWindow" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 3.2, 2.05)
+size = Vector3(8, 1.2, 0.1)
+material = SubResource("Mat_7")
+
+[node name="ModuleDoor" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 1.3, 2.05)
+size = Vector3(2, 2.6, 0.1)
+material = SubResource("Mat_6")
+
+[node name="ModuleWingW" type="CSGBox3D" parent="Map"]
+position = Vector3(-10, 2.0, -2)
+size = Vector3(8, 4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="ModuleWingE" type="CSGBox3D" parent="Map"]
+position = Vector3(10, 2.0, -2)
+size = Vector3(8, 4, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Corridor" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 1.6, -12)
+size = Vector3(4, 3.2, 14)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Antenna0" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-22, 4, 14)
+radius = 0.35
+height = 8
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Dish0" type="CSGSphere3D" parent="Map"]
+position = Vector3(-22, 8.4, 14)
+scale = Vector3(1, 0.4, 1)
+radius = 1.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Beacon0" type="CSGSphere3D" parent="Map"]
+position = Vector3(-22, 9.4, 14)
+radius = 0.35
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Antenna1" type="CSGCylinder3D" parent="Map"]
+position = Vector3(22, 4, 14)
+radius = 0.35
+height = 8
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Dish1" type="CSGSphere3D" parent="Map"]
+position = Vector3(22, 8.4, 14)
+scale = Vector3(1, 0.4, 1)
+radius = 1.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Beacon1" type="CSGSphere3D" parent="Map"]
+position = Vector3(22, 9.4, 14)
+radius = 0.35
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Antenna2" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-22, 4, -20)
+radius = 0.35
+height = 8
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Dish2" type="CSGSphere3D" parent="Map"]
+position = Vector3(-22, 8.4, -20)
+scale = Vector3(1, 0.4, 1)
+radius = 1.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Beacon2" type="CSGSphere3D" parent="Map"]
+position = Vector3(-22, 9.4, -20)
+radius = 0.35
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Antenna3" type="CSGCylinder3D" parent="Map"]
+position = Vector3(22, 4, -20)
+radius = 0.35
+height = 8
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Dish3" type="CSGSphere3D" parent="Map"]
+position = Vector3(22, 8.4, -20)
+scale = Vector3(1, 0.4, 1)
+radius = 1.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Beacon3" type="CSGSphere3D" parent="Map"]
+position = Vector3(22, 9.4, -20)
+radius = 0.35
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Solar0" type="CSGBox3D" parent="Map"]
+position = Vector3(-8, 1.2, 20)
+size = Vector3(6, 0.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="SolarLeg0" type="CSGBox3D" parent="Map"]
+position = Vector3(-8, 0.6, 20)
+size = Vector3(0.5, 1.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Solar1" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 1.2, 20)
+size = Vector3(6, 0.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="SolarLeg1" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 0.6, 20)
+size = Vector3(0.5, 1.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Solar2" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 1.2, 20)
+size = Vector3(6, 0.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="SolarLeg2" type="CSGBox3D" parent="Map"]
+position = Vector3(8, 0.6, 20)
+size = Vector3(0.5, 1.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate0" type="CSGBox3D" parent="Map"]
+position = Vector3(-14, 1.2, 8)
+rotation = Vector3(0, -0.52360, 0)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate1" type="CSGBox3D" parent="Map"]
+position = Vector3(14, 1.2, 8)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate2" type="CSGBox3D" parent="Map"]
+position = Vector3(-16, 1.2, -10)
+rotation = Vector3(0, -0.52360, 0)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate3" type="CSGBox3D" parent="Map"]
+position = Vector3(16, 1.2, -10)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate4" type="CSGBox3D" parent="Map"]
+position = Vector3(-6, 1.2, 14)
+rotation = Vector3(0, 0.43633, 0)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate5" type="CSGBox3D" parent="Map"]
+position = Vector3(7, 1.2, 15)
+rotation = Vector3(0, 0.43633, 0)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate6" type="CSGBox3D" parent="Map"]
+position = Vector3(-26, 1.2, 2)
+rotation = Vector3(0, -0.52360, 0)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Crate7" type="CSGBox3D" parent="Map"]
+position = Vector3(26, 1.2, 2)
+rotation = Vector3(0, -0.52360, 0)
+size = Vector3(3.2, 2.4, 3.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Boulder0" type="CSGSphere3D" parent="Map"]
+position = Vector3(22.89, 0.8, -17.56)
+scale = Vector3(1, 0.7, 1)
+radius = 1.8517271094411627
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder2" type="CSGSphere3D" parent="Map"]
+position = Vector3(26.11, 0.8, 1.58)
+scale = Vector3(1, 0.7, 1)
+radius = 1.6452540970012886
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder3" type="CSGSphere3D" parent="Map"]
+position = Vector3(24.84, 0.8, 7.59)
+scale = Vector3(1, 0.7, 1)
+radius = 1.5012944565249176
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder4" type="CSGSphere3D" parent="Map"]
+position = Vector3(-10.68, 0.8, -0.22)
+scale = Vector3(1, 0.7, 1)
+radius = 1.2525980423620677
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder5" type="CSGSphere3D" parent="Map"]
+position = Vector3(6.02, 0.8, 13.21)
+scale = Vector3(1, 0.7, 1)
+radius = 1.6261418120208326
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder6" type="CSGSphere3D" parent="Map"]
+position = Vector3(19.41, 0.8, 23.97)
+scale = Vector3(1, 0.7, 1)
+radius = 1.755607972776598
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder7" type="CSGSphere3D" parent="Map"]
+position = Vector3(10.16, 0.8, -21.43)
+scale = Vector3(1, 0.7, 1)
+radius = 1.256019554431085
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Boulder8" type="CSGSphere3D" parent="Map"]
+position = Vector3(26.88, 0.8, -12.07)
+scale = Vector3(1, 0.7, 1)
+radius = 1.413362708617081
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Core" type="OmniLight3D" parent="Map"]
+position = Vector3(0, 6, 4)
+light_color = Color(0.300, 0.800, 1.000, 1)
+light_energy = 2.4
+omni_range = 26
+shadow_enabled = false
+
+[node name="Alarm0" type="OmniLight3D" parent="Map"]
+position = Vector3(-10, 5, 4)
+light_color = Color(1.000, 0.200, 0.300, 1)
+light_energy = 1.8
+omni_range = 18
+shadow_enabled = false
+
+[node name="Alarm1" type="OmniLight3D" parent="Map"]
+position = Vector3(10, 5, 4)
+light_color = Color(1.000, 0.200, 0.300, 1)
+light_energy = 1.8
+omni_range = 18
+shadow_enabled = false
+
+[node name="MoonSign" type="Label3D" parent="Map"]
+position = Vector3(0, 10, 8)
+text = "LUNAR OUTPOST"
+font_size = 64
+outline_size = 14
+modulate = Color(0.600, 0.800, 1.000, 1)
+billboard = 1
+
+[node name="SpawnPoint1" parent="SpawnPoints" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1, -26)
+
+[node name="SpawnPoint2" parent="SpawnPoints" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1, -26)
+
+[node name="SpawnPoint3" parent="SpawnPoints" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 1, 24)
+
+[node name="SpawnPoint4" parent="SpawnPoints" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 1, 24)
+
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -26)
+
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 26)
+

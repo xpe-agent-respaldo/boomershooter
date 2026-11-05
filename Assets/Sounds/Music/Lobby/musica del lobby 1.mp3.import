@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://blksipssookg5"
+path="res://.godot/imported/musica del lobby 1.mp3-20889df9fdc501735ed575bad9dbe004.mp3str"
+
+[deps]
+
+source_file="res://Assets/Sounds/Music/Lobby/musica del lobby 1.mp3"
+dest_files=["res://.godot/imported/musica del lobby 1.mp3-20889df9fdc501735ed575bad9dbe004.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4

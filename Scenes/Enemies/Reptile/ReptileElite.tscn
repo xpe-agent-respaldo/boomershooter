@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://Scenes/Enemies/Beetle/Beetle.tscn" id="1_beetle"]
+[ext_resource type="Texture2D" path="res://Assets/Enemies/Reptile/reptile_orig.png" id="2_texture"]
+
+[node name="ReptileElite" instance=ExtResource("1_beetle")]
+health = 10
+damage = 18
+speed = 220
+proximity_sound_range = 19.0
+scale = Vector3(1.35, 1.35, 1.35)
+
+[node name="ReptileMark" type="Sprite3D" parent="."]
+position = Vector3(0, 1.2, 0)
+texture = ExtResource("2_texture")
+pixel_size = 0.006
+billboard = 1
+no_depth_test = false
