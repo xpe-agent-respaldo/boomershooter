@@ -1,21 +1,21 @@
 {
   "version": "1.2.7",
   "minimum_version": "1.1.6",
-  "notes": "Logros: 27 con aviso dentro de la partida y pantalla nueva en el estilo del juego. Ningun ejecutable abre ya una ventana CMD: el actualizador se lanza oculto. Aliados: cada bot tiene un dueno, maximo 3 por jugador, y solo le habla a el. Los bots hostiles ya no mandan mensajes a toda la sala.",
+  "notes": "Logros: 27 con aviso en partida y pantalla nueva;sin ventana CMD al abrir el juego;aliados con un solo dueno y maximo 3;los bots hostiles ya no escriben a toda la sala;version web para iPhone",
   "windows_url": "https://boomershooter.vercel.app/api/download/windows",
   "linux_url": "https://boomershooter.vercel.app/api/download/linux",
-  "windows_size": 149185280,
-  "windows_sha256": "93c22ac9362f99134aa4c91dab4e64d52e2aaadbb33f3e84a163d73b4508bd64",
-  "linux_size": 113418784,
-  "linux_sha256": "80d09f422fdbb50577a64245d7c49a5a7198c19bda21af4eba2524e1c72c7544",
+  "windows_size": 149191960,
+  "windows_sha256": "c325015c57f61331a48173624a7286d8f5609b90c1b3dd40c19b35de46617f48",
+  "linux_size": 113425480,
+  "linux_sha256": "4238bdb32d6c21cd0a0a11985bced6cec962c78666971a905ce2b812d64216e4",
   "history": [
     {
       "version": "1.2.7",
       "released_at": "2026-11-05",
-      "windows_size": 149185280,
-      "windows_sha256": "93c22ac9362f99134aa4c91dab4e64d52e2aaadbb33f3e84a163d73b4508bd64",
-      "linux_size": 113418784,
-      "linux_sha256": "80d09f422fdbb50577a64245d7c49a5a7198c19bda21af4eba2524e1c72c7544"
+      "windows_size": 149191960,
+      "windows_sha256": "c325015c57f61331a48173624a7286d8f5609b90c1b3dd40c19b35de46617f48",
+      "linux_size": 113425480,
+      "linux_sha256": "4238bdb32d6c21cd0a0a11985bced6cec962c78666971a905ce2b812d64216e4"
     }
   ],
   "released_at": "2026-11-05",
