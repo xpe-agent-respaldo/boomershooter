@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Boomer Shooter"
 config/description="FPS arcade de alta movilidad por Stealth Proyects."
-config/version="1.2.7"
+config/version="1.2.8"
 boot_splash/show_image=true
 boot_splash/fullsize=true
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -49,6 +49,7 @@ PatchLoader="*res://Scripts/patch_loader.gd"
 Global="*res://Scripts/global.gd"
 GameSettings="*res://Scripts/game_settings.gd"
 Mando="*res://Scripts/mando.gd"
+Cargador="*res://Scripts/cargador.gd"
 Nakama="*res://addons/com.heroiclabs.nakama/Nakama.gd"
 UpdateManager="*res://Scripts/update_manager.gd"
 OnlineManager="*res://Scripts/online_manager.gd"

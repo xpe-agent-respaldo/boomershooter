@@ -805,17 +805,129 @@ func _gpu_muy_limitada() -> bool:
 	return false
 
 
+## Decide el perfil mirando la grafica, los nucleos y la RAM. Es una funcion pura
+## para poder probarla con equipos simulados (ver tools/tests/calidad_auto_test.gd).
+##
+## Antes bastaba con tener 8 nucleos o menos para caer en "Bajo", asi que un PC
+## normal quedaba capado y el perfil "Alto" no se alcanzaba nunca (y sin "Alto" no
+## hay ragdoll). Ahora se mira la GPU primero y el resto despues.
+static func calcular_perfil(cores: int, ram_gb: float, gpu: String, es_movil: bool) -> Dictionary:
+	var g := gpu.to_lower()
+	var software := false
+	for pista in ["llvmpipe", "software", "basic render", "gdi", "swiftshader", "softpipe"]:
+		if g.contains(pista):
+			software = true
+			break
+	var muy_vieja := false
+	for pista in ["hd 8330", "hd 8250", "hd 8280", "hd 8210", "hd 7340", "hd 6310", "hd 6290",
+			"gma ", "hd graphics family", "hd graphics 2", "hd graphics 3", "hd graphics 4",
+			"radeon hd 6", "radeon hd 7", "geforce 7", "geforce 8", "geforce 9", "gt 2", "gt 4"]:
+		if g.contains(pista):
+			muy_vieja = true
+			break
+	var dedicada := false
+	for pista in ["rtx", "gtx", "geforce", "radeon rx", "radeon pro", "rx 4", "rx 5",
+			"rx 6", "rx 7", "rx 9", "arc a", "quadro", "apple m", "radeon 7", "radeon 6"]:
+		if g.contains(pista):
+			dedicada = true
+			break
+
+	if software:
+		return {"perfil": 0, "plano": true, "render_scale": 0.75, "fps_limit": 60,
+			"motivo": "sin tarjeta grafica (render por software)"}
+	if muy_vieja:
+		return {"perfil": 0, "plano": true, "render_scale": 0.85, "fps_limit": 60,
+			"motivo": "tarjeta grafica muy justa"}
+	if es_movil:
+		# Moviles modernos: pantalla pequena y GPU integrada decente.
+		return {"perfil": 1, "plano": false, "render_scale": 1.0, "fps_limit": 60,
+			"motivo": "movil o tableta"}
+	if dedicada and cores >= 8 and ram_gb >= 12.0:
+		return {"perfil": 2, "plano": false, "render_scale": 1.0, "fps_limit": 0,
+			"motivo": "tarjeta dedicada y equipo sobrado"}
+	if cores >= 6 and (ram_gb <= 0.0 or ram_gb >= 8.0):
+		return {"perfil": 1, "plano": false, "render_scale": 1.0, "fps_limit": 0,
+			"motivo": "equipo de gama media"}
+	return {"perfil": 0, "plano": true, "render_scale": 0.9, "fps_limit": 60,
+		"motivo": "equipo justo de CPU y RAM"}
+
+
 func _autodetect_profile() -> void:
 	var cores: int = OS.get_processor_count()
 	var ram_gb: float = 0.0
 	if OS.has_method("get_memory_info"):
 		var info: Dictionary = OS.get_memory_info()
 		ram_gb = float(info.get("physical", 0)) / 1073741824.0
-	var low_end: bool = cores <= 8 or (ram_gb > 0.0 and ram_gb <= 12.0)
-	_set_performance_profile(0 if low_end else 1)
-	modo_plano = _gpu_muy_limitada()
-	print("Perfil de rendimiento: %s (%d nucleos, %.1f GB de RAM)" % [
-		"Bajo" if low_end else "Medio", cores, ram_gb])
+	var gpu := RenderingServer.get_video_adapter_name()
+	var movil: bool = OS.has_feature("mobile") or OS.get_name() == "Web"
+	var datos := calcular_perfil(cores, ram_gb, gpu, movil)
+
+	performance_profile = int(datos["perfil"])
+	modo_plano = bool(datos["plano"])
+	render_scale = float(datos["render_scale"])
+	fps_limit = int(datos["fps_limit"])
+	_apply()
+	_save()
+
+	var nombre: String = ["BAJO", "MEDIO", "ALTO"][clampi(performance_profile, 0, 2)]
+	print("Perfil de rendimiento: %s (%s) | %d nucleos, %.1f GB, %s" % [
+		nombre, datos["motivo"], cores, ram_gb, gpu])
+	_avisar_perfil(nombre, str(datos["motivo"]), cores, ram_gb)
+
+
+## Aviso de una sola vez: "CALIDAD AJUSTADA A TU EQUIPO". Se va solo y no bloquea
+## nada (raton ignorado), con la tipografia y los colores del juego.
+func _avisar_perfil(nombre: String, motivo: String, cores: int, ram_gb: float) -> void:
+	var capa := CanvasLayer.new()
+	capa.layer = 101
+	add_child(capa)
+	var panel := PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	panel.anchor_left = 0.5
+	panel.anchor_right = 0.5
+	panel.offset_left = -330.0
+	panel.offset_right = 330.0
+	panel.offset_top = 88.0
+	panel.offset_bottom = 88.0
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var st := StyleBoxFlat.new()
+	st.bg_color = Color(0.03, 0.02, 0.025, 0.92)
+	st.border_color = Color(1.0, 0.42, 0.12, 1.0)
+	st.set_border_width_all(1)
+	st.border_width_left = 5
+	st.content_margin_left = 18.0
+	st.content_margin_right = 18.0
+	st.content_margin_top = 10.0
+	st.content_margin_bottom = 10.0
+	panel.add_theme_stylebox_override("panel", st)
+	capa.add_child(panel)
+	var caja := VBoxContainer.new()
+	caja.add_theme_constant_override("separation", 1)
+	caja.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	panel.add_child(caja)
+	var titulo := Label.new()
+	titulo.text = "CALIDAD AJUSTADA A TU EQUIPO: " + nombre
+	titulo.add_theme_font_size_override("font_size", 17)
+	titulo.add_theme_color_override("font_color", Color(1.0, 0.55, 0.25))
+	if ResourceLoader.exists("res://Assets/Fonts/Geizer.otf"):
+		titulo.add_theme_font_override("font", load("res://Assets/Fonts/Geizer.otf"))
+	caja.add_child(titulo)
+	var detalle := Label.new()
+	var ram := "%.0f GB" % ram_gb if ram_gb > 0.0 else "RAM desconocida"
+	detalle.text = "%s · %d nucleos · %s. Puedes cambiarlo en AJUSTES." % [motivo, cores, ram]
+	detalle.add_theme_font_size_override("font_size", 11)
+	detalle.add_theme_color_override("font_color", Color(0.72, 0.62, 0.56))
+	caja.add_child(detalle)
+	panel.modulate.a = 0.0
+	var tw := panel.create_tween()
+	tw.tween_property(panel, "modulate:a", 1.0, 0.35)
+	tw.tween_interval(7.0)
+	tw.tween_property(panel, "modulate:a", 0.0, 0.8)
+	tw.tween_callback(func() -> void:
+		if is_instance_valid(capa):
+			capa.queue_free()
+	)
+
 
 
 func _render_scale_index() -> int:

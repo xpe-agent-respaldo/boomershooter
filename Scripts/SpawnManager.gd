@@ -19,6 +19,8 @@ const WAVE_BREAK_SECONDS := 4
 var current_wave := 0
 var is_spawning := false
 var wave_active := false
+## Escenas de enemigos ya cargadas en memoria (evita tirones al aparecer).
+var _cache_enemigos: Dictionary = {}
 var ammo_pool: Array[Pickup] = []
 var health_pool: Array[Pickup] = []
 
@@ -38,7 +40,16 @@ func _ready() -> void:
 	add_to_group("wave_director")
 	ammo_pool = _create_pool(ammo_scene)
 	health_pool = _create_pool(health_scene)
+	_precargar_enemigos()
 	call_deferred("_begin_next_wave")
+
+
+## Carga las escenas de enemigos ANTES de la primera oleada. Antes se hacía `load()`
+## dentro del bucle de aparición: el primer AshCrawler, ScrapBrute o AcidShriek de cada
+## partida llegaba con un tirón de decenas de milisegundos en mitad del combate.
+func _precargar_enemigos() -> void:
+	for ruta in NUEVOS:
+		_cache_enemigos[ruta] = load(ruta) as PackedScene
 
 
 func _process(_delta: float) -> void:
@@ -100,8 +111,11 @@ func _pick_enemy_scene(index: int, total: int, has_elite: bool) -> PackedScene:
 		return elite_scene
 	if current_wave >= 3 and index % 4 == 1:
 		var ruta: String = NUEVOS[(current_wave + index) % NUEVOS.size()]
+		if _cache_enemigos.has(ruta):
+			return _cache_enemigos[ruta] as PackedScene
 		if ResourceLoader.exists(ruta):
-			return load(ruta) as PackedScene
+			_cache_enemigos[ruta] = load(ruta) as PackedScene
+			return _cache_enemigos[ruta] as PackedScene
 	if enemy_scene_alt != null and current_wave >= 2 and index % 3 == 2:
 		return enemy_scene_alt
 	return enemy_scene

@@ -44,6 +44,11 @@ static func change_scene(tree: SceneTree, path: String) -> void:
 	if not ResourceLoader.exists(path):
 		push_warning("No se pudo cargar la escena: %s" % path)
 		return
+	# Carga en segundo plano con pantalla propia: entrar a un mapa ya no congela el juego.
+	var cargador := tree.root.get_node_or_null("Cargador")
+	if cargador != null and cargador.has_method("cambiar"):
+		cargador.cambiar(path)
+		return
 	tree.change_scene_to_file(path)
 
 
