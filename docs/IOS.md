@@ -84,3 +84,22 @@ python3 tools/validar_ipa.py BoomerShooter-1.2.9-unsigned.ipa
 * Los botones respetan la muesca / Dynamic Island y la barra de inicio.
 * Si se conecta un mando, los botones tactiles se esconden solos.
 * Micrófono: el sistema pide permiso la primera vez que se entra a una partida con voz.
+
+
+## Compilar la IPA en GitLab (runner macOS M1)
+
+El job `build_ios` de `.gitlab-ci.yml` ya esta listo: usa el runner `saas-macos-medium-m1`
+con la imagen `macos-26-xcode-26`, descarga Godot 4.7 y sus plantillas, exporta, compila
+sin firma, valida con `tools/validar_ipa.py` y deja `BoomerShooter.ipa` como artifact.
+Se lanza solo con cada tag `vX.Y.Z`.
+
+**Requisito de GitLab:** los runners macOS solo estan disponibles en planes **Premium /
+Ultimate** o en el programa **GitLab for Open Source** (proyecto publico con licencia
+aprobada por la OSI). En una cuenta `free` el job falla con `no_matching_runner` (se
+comprobo con el pipeline 3034503099).
+
+Formas de activarlo:
+1. Prueba gratuita de Premium/Ultimate: GitLab > Settings > Billing > "Start free trial".
+2. Programa Open Source: hace falta repo publico + licencia (MIT, GPL...).
+3. Runner macOS propio (un Mac con `gitlab-runner` y el tag `saas-macos-medium-m1`).
+4. Mientras tanto la IPA se construye en GitHub con `.github/workflows/ios-ipa.yml`.
