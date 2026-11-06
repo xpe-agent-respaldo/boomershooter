@@ -1,13 +1,13 @@
 {
-  "version": "1.2.8",
+  "version": "1.2.9",
   "minimum_version": "1.1.6",
-  "notes": "Sin tirones al entrar a partida: carga en hilo con pantalla propia;escenas de enemigos precargadas;calidad automatica segun tu equipo (GPU, nucleos y RAM) con aviso la primera vez",
+  "notes": "Controles tactiles nuevos para iPhone con aim assist y zona segura;microfono con permiso en iPhone;orientacion horizontal fija;IPA validada antes de entregarse;sin cambios de jugabilidad en PC",
   "windows_url": "https://boomershooter.vercel.app/api/download/windows",
   "linux_url": "https://boomershooter.vercel.app/api/download/linux",
-  "windows_size": 151758464,
-  "windows_sha256": "844c0bbc641f3e1b2258d382a69a3f4774ebe8fb0dd793e02a41b2df8ca639c0",
-  "linux_size": 115992000,
-  "linux_sha256": "8e020e8fc226421dd45fb2ff37a4b2121699e615befb7b1886181f9c602cba33",
+  "windows_size": 151784600,
+  "windows_sha256": "265745f21d3c97e81294818898a244ffc059b837c74b7066c186e056f7b83cb7",
+  "linux_size": 116018104,
+  "linux_sha256": "aa56f8c0b9644b94b4b44d15e9359deff57b915d6ab897694d110f598b1643d7",
   "history": [
     {
       "version": "1.2.7",
@@ -24,8 +24,16 @@
       "windows_sha256": "844c0bbc641f3e1b2258d382a69a3f4774ebe8fb0dd793e02a41b2df8ca639c0",
       "linux_size": 115992000,
       "linux_sha256": "8e020e8fc226421dd45fb2ff37a4b2121699e615befb7b1886181f9c602cba33"
+    },
+    {
+      "version": "1.2.9",
+      "released_at": "2026-11-06",
+      "windows_size": 151784600,
+      "windows_sha256": "265745f21d3c97e81294818898a244ffc059b837c74b7066c186e056f7b83cb7",
+      "linux_size": 116018104,
+      "linux_sha256": "aa56f8c0b9644b94b4b44d15e9359deff57b915d6ab897694d110f598b1643d7"
     }
   ],
-  "released_at": "2026-11-05",
+  "released_at": "2026-11-06",
   "updates_soportadas": 100
 }

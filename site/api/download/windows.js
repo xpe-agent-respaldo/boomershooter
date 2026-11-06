@@ -6,7 +6,7 @@
 // WINDOWS_DOWNLOAD_URL en Vercel, manda esa; si no, se usa la release publicada.
 
 const RELEASE_FALLBACK =
-  'https://gitlab.com/api/v4/projects/88475071/packages/generic/boomershooter/1.2.8/BoomerShooter.exe';
+  'https://gitlab.com/api/v4/projects/88475071/packages/generic/boomershooter/1.2.9/BoomerShooter.exe';
 
 module.exports = function handler(_request, response) {
   const url = process.env.WINDOWS_DOWNLOAD_URL || RELEASE_FALLBACK;
