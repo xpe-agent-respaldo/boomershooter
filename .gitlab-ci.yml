@@ -34,6 +34,8 @@ build_windows:
       - Build/Windows/BoomerShooter.exe
       - Build/Windows/BoomerShooter.pck
   rules:
+    - if: '$SOLO_IOS == "1"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG'
 
 # Linux: se construye con las mismas plantillas y no bloquea el pipeline si
@@ -61,6 +63,8 @@ build_linux:
     paths:
       - Build/Linux/
   rules:
+    - if: '$SOLO_IOS == "1"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG'
 
 
@@ -92,6 +96,8 @@ build_web:
       - Build/Web/
   allow_failure: true
   rules:
+    - if: '$SOLO_IOS == "1"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == "main" || $CI_COMMIT_TAG'
 
 # ---------------------------------------------------------------------------
@@ -213,5 +219,5 @@ build_ios:
   rules:
     - if: '$CI_COMMIT_TAG =~ /^v\d+\.\d+\.\d+$/'
       allow_failure: true
-    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$SOLO_IOS == "1"'
       allow_failure: true
