@@ -53,6 +53,9 @@ def cuerpo_release(version: str, notas: str, plataformas: list[str]) -> dict:
     return {
         "name": f"v{version}",
         "tag_name": f"v{version}",
+        # El tag vive en GitHub; si no existe en GitLab, este lo crea desde main.
+        # Sin "ref" la API responde 422 "Ref is not specified".
+        "ref": os.environ.get("RELEASE_REF", "main"),
         "description": descripcion,
         "assets": {"links": enlaces},
     }
