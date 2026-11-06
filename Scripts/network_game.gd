@@ -25,6 +25,49 @@ func _ready() -> void:
 	OnlineManager.wave_state_received.connect(_on_estado_partida)
 	OnlineManager.bot_positions_received.connect(_on_posiciones_bots)
 	OnlineManager.bot_dijo.connect(_on_bot_dijo)
+	OnlineManager.entrenado_disparo.connect(_on_entrenado_disparo)
+
+
+## Un bot del servidor dispara: se oye desde su posicion y se ve la traza hacia quien apunta.
+## Sin esto el servidor quitaba vida y el cliente no mostraba ni sonaba nada.
+func _on_entrenado_disparo(desde: Vector3, objetivo_id: String, acerto: bool, _nombre: String) -> void:
+	var jugador: Player = Global.player
+	var boca := desde + Vector3(0, 1.35, 0)
+	var d := 0.0
+	if jugador != null and is_instance_valid(jugador):
+		d = jugador.global_position.distance_to(desde)
+	if d > 60.0:
+		return
+	SfxArmas.sonar_en(self, ["rifle", "subfusil", "escopeta"][int(abs(hash(_nombre))) % 3], boca, -4.0 - d * 0.12, 60.0)
+	# traza visible hacia el objetivo (si es el jugador local, hacia su pecho)
+	var destino := boca + Vector3(0, 0, -8)
+	if jugador != null and is_instance_valid(jugador) and objetivo_id == OnlineManager.get_local_user_id():
+		destino = jugador.global_position + Vector3(0, 1.1, 0)
+	elif jugador != null and is_instance_valid(jugador):
+		destino = boca + (jugador.global_position + Vector3(0, 1.1, 0) - boca).normalized() * 12.0
+	_traza(boca, destino, acerto)
+
+
+func _traza(desde: Vector3, hasta: Vector3, acerto: bool) -> void:
+	var largo := desde.distance_to(hasta)
+	if largo < 0.5 or get_tree().current_scene == null:
+		return
+	var haz := MeshInstance3D.new()
+	var cil := CylinderMesh.new()
+	cil.top_radius = 0.02
+	cil.bottom_radius = 0.02
+	haz.mesh = cil
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.albedo_color = Color(1.0, 0.75, 0.35) if acerto else Color(0.85, 0.85, 0.9, 0.7)
+	haz.material_override = mat
+	haz.add_to_group("traza_bot")
+	get_tree().current_scene.add_child(haz)
+	haz.global_position = (desde + hasta) * 0.5
+	haz.look_at(hasta, Vector3.UP)
+	haz.rotate_object_local(Vector3.RIGHT, PI / 2.0)
+	haz.scale = Vector3(1, largo, 1)
+	get_tree().create_timer(0.06).timeout.connect(haz.queue_free)
 
 
 ## Lo que dicen los bots llega al chat de la partida. Si el chat no existe, no pasa nada.

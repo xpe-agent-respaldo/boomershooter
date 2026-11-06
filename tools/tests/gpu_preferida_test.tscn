@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tools/tests/gpu_preferida_test.gd" id="1"]
+[node name="GpuTest" type="Node"]
+script = ExtResource("1")

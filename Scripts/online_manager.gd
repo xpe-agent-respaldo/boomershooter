@@ -29,6 +29,8 @@ signal revive_result(ok: bool, info: Dictionary)
 signal player_down_changed(user_id: String, is_down: bool, info: Dictionary)
 signal entrenado_hit_received(damage: int, from: Vector3, nombre: String)
 signal entrenado_cayo(nombre: String)
+## Un bot del servidor disparo: posicion de su arma, a quien apuntaba y si dio. Sirve para oirlo y verlo.
+signal entrenado_disparo(desde: Vector3, objetivo_id: String, acerto: bool, nombre: String)
 ## Aviso de la calle: se acerca una pandilla, viene uno por libre o alguien quiere hablar.
 signal gang_alert_received(datos: Dictionary)
 signal amistad_hecha(nombre: String, total: int)
@@ -305,10 +307,14 @@ func fetch_rooms(mode: String = "") -> Array:
 
 ## CREAR una sala nueva (nunca se mete en otra). Devuelve {ok, code, private, error}.
 ## privada = true: no sale en la lista, solo entra quien tenga el codigo.
-func create_room(mode: String, map_id: String, privada: bool, nombre_sala: String = "") -> Dictionary:
+func create_room(mode: String, map_id: String, privada: bool, nombre_sala: String = "", opciones: Dictionary = {}) -> Dictionary:
 	if not await connect_device():
 		return {"ok": false, "error": "Sin conexion con el servicio online."}
 	var payload := {"mode": mode, "map": map_id, "private": privada, "bots": 3}
+	# Opciones de sala (monstruos, bots, aforo): el servidor las valida y recorta.
+	for k in ["monsters", "bots", "max_players"]:
+		if opciones.has(k):
+			payload[k] = opciones[k]
 	if nombre_sala.strip_edges() != "":
 		payload["name"] = nombre_sala.strip_edges()
 	var reply = await client.rpc_async(session, "create_room", JSON.stringify(payload))
@@ -507,6 +513,13 @@ func handle_server_message(op_code: int, raw_payload: String) -> void:
 			amistad_hecha.emit(str(payload.get("nombre", "")), int(payload.get("total", 0)))
 		OP_BOT_DEATH:
 			entrenado_cayo.emit(str(payload.get("name", "")))
+		OP_ENTRENADO_SHOT:
+			var pos = payload.get("pos", {})
+			if pos is Dictionary:
+				entrenado_disparo.emit(
+					Vector3(float(pos.get("x", 0)), float(pos.get("y", 0)), float(pos.get("z", 0))),
+					str(payload.get("target_user_id", "")), payload.get("hit", false) == true,
+					str(payload.get("name", "")))
 		OP_ENTRENADO_HIT:
 			# Un jugador entrenado de la Sala de los Freestylers te acerto.
 			var desde = payload.get("from", {})

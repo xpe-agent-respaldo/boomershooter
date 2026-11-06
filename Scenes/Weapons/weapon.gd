@@ -40,6 +40,9 @@ func _ready() -> void:
 		await player.ready
 	if fps_arms == null:
 		fps_arms = player.FPS_ARMS
+	# El sonido se prepara AHORA y no en el primer disparo: sintetizarlo cuesta un bucle de miles
+	# de muestras y, en un equipo flojo, el primer tiro salia tarde o mudo.
+	_preparar_voces()
 	weapon_data.used.connect(_on_weapon_used)
 	weapon_data.empty.connect(_on_weapon_empty)
 	weapon_data.needs_reload.connect(_on_weapon_needs_reload)
@@ -95,17 +98,22 @@ func _on_weapon_used() -> void:
 			_bullet_hole(player.aimcast.get_collision_point(), player.aimcast.get_collision_normal())
 
 
+func _preparar_voces() -> void:
+	if not _shot_voices.is_empty():
+		return
+	for i in SHOT_VOICES:
+		var v := AudioStreamPlayer.new()
+		v.bus = &"SFX"
+		v.stream = SfxArmas.stream(timbre_disparo) if timbre_disparo != "" else %ShotSound.stream
+		if timbre_disparo != "":
+			v.volume_db = 4.0
+		add_child(v)
+		_shot_voices.append(v)
+
+
 ## Reparte el disparo entre varias voces para que no se corte el anterior.
 func _play_shot_sound() -> void:
-	if _shot_voices.is_empty():
-		for i in SHOT_VOICES:
-			var v := AudioStreamPlayer.new()
-			v.bus = &"SFX"
-			v.stream = SfxArmas.stream(timbre_disparo) if timbre_disparo != "" else %ShotSound.stream
-			if timbre_disparo != "":
-				v.volume_db = 2.0
-			add_child(v)
-			_shot_voices.append(v)
+	_preparar_voces()
 	var voice: AudioStreamPlayer = _shot_voices[_shot_voice_index]
 	_shot_voice_index = (_shot_voice_index + 1) % _shot_voices.size()
 	if voice.stream == null:

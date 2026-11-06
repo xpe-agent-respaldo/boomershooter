@@ -177,7 +177,7 @@ def scenario_calle():
             lados.setdefault(p.get("side"), []).append(uid)
     check("hay pandilla en cualquier sala", len(lados.get("pandilla", [])) >= 2, str(lados))
     check("hay uno que va por libre", len(lados.get("solo", [])) == 1, str(lados.get("solo")))
-    check("hay buena gente reclutable para repartir", len(lados.get("amigo", [])) == 3,
+    check("hay un amigo reclutable (tope de 5 bots)", len(lados.get("amigo", [])) == 1,
           str(lados.get("amigo")))
     check("la pandilla tiene nombre propio", bool(estado.get("gang_name")), str(estado.get("gang_name")))
     check("salta el aviso de que se acercan", len(h.ops(87)) >= 1, str(len(h.ops(87))))
@@ -228,7 +228,18 @@ def scenario_aliados():
     h.tick(2)
     estado = h.py(h.state)
     amigos = sorted(uid for uid, p in estado["players"].items() if p.get("side") == "amigo")
-    check("hay 3 candidatos", len(amigos) == 3, str(amigos))
+    # El tope de 5 bots por sala deja UN solo amigo reclutable de serie.
+    check("hay 1 candidato (tope de 5 bots por sala)", len(amigos) == 1, str(amigos))
+    # Para seguir probando el limite de 3 aliados POR JUGADOR se fabrican dos candidatos mas
+    # copiando al primero (la regla del servidor sigue siendo MAX_ALIADOS = 3).
+    base = estado["players"][amigos[0]]
+    for n in (2, 3):
+        nuevo = dict(base); nuevo["user_id"] = f"ami-{n}"; nuevo["session_id"] = f"ami-{n}"
+        nuevo["username"] = f"Amigo{n}"; nuevo["owner"] = None; nuevo["friend"] = False
+        nuevo["pos"] = dict(base["pos"])
+        h.state["players"][f"ami-{n}"] = h.lua.table_from(nuevo, recursive=True)
+    estado = h.py(h.state)
+    amigos = sorted(uid for uid, p in estado["players"].items() if p.get("side") == "amigo")
     nombres = {estado["players"][a]["username"] for a in amigos}
     check("los candidatos tienen nombres distintos", len(nombres) == 3, str(nombres))
     check("ninguno empieza con dueno",

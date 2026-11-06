@@ -37,6 +37,15 @@ var _entrando := false
 var _vis_buttons: Array[Button] = []
 var _code_input: LineEdit
 var _join_button: Button
+## Opciones de la sala que se crea (se mandan al servidor).
+const JUGADORES_OPC := [2, 4, 8, 12, 20]
+const BOTS_OPC := [0, 1, 2, 3, 5]
+var _monstruos := true
+var _bots_i := 3            # 3 bots por defecto (igual que el servidor)
+var _jug_i := 4             # 20 jugadores por defecto
+var _opt_monstruos: Button
+var _opt_bots: Button
+var _opt_jug: Button
 
 
 func _ready() -> void:
@@ -149,6 +158,22 @@ func _build() -> void:
 		_vis_buttons.append(v)
 	vis_desc = UIKit.label("", 15, UIKit.COL_DIM)
 	left.add_child(vis_desc)
+
+	left.add_child(UIKit.label("// 05 OPCIONES DE SALA", 15, UIKit.COL_DIM))
+	var opts := HBoxContainer.new()
+	opts.add_theme_constant_override("separation", 8)
+	left.add_child(opts)
+	_opt_monstruos = UIKit.menu_button("", "", 20)
+	_opt_bots = UIKit.menu_button("", "", 20)
+	_opt_jug = UIKit.menu_button("", "", 20)
+	for ob in [_opt_monstruos, _opt_bots, _opt_jug]:
+		ob.custom_minimum_size = Vector2(196, 46)
+		ob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		opts.add_child(ob)
+	_opt_monstruos.pressed.connect(func() -> void: _monstruos = not _monstruos; _refrescar_opciones())
+	_opt_bots.pressed.connect(func() -> void: _bots_i = (_bots_i + 1) % BOTS_OPC.size(); _refrescar_opciones())
+	_opt_jug.pressed.connect(func() -> void: _jug_i = (_jug_i + 1) % JUGADORES_OPC.size(); _refrescar_opciones())
+	_refrescar_opciones()
 
 	play_button = UIKit.menu_button("CREAR SALA", "", 36)
 	play_button.custom_minimum_size = Vector2(0, 70)
@@ -273,7 +298,8 @@ func _room_row(room: Dictionary) -> Control:
 	# En el juego nadie es un "bot": los entrenados cuentan como jugadores.
 	var total := players + bots
 	var nombre := str(room.get("name", "Sala"))
-	row.text = "%s\n%s · %s — %d/%d jugadores · oleada %d" % [nombre, mode_label.to_upper(), map_label.to_upper(), total, cap, wave]
+	var estado := "oleada %d" % wave if bool(room.get("monsters", true)) else "SIN MONSTRUOS"
+	row.text = "%s\n%s · %s — %d/%d jugadores · %s" % [nombre, mode_label.to_upper(), map_label.to_upper(), total, cap, estado]
 	row.custom_minimum_size = Vector2(0, 58)
 	row.add_theme_font_size_override("font_size", 16)
 	var codigo := str(room.get("code", ""))
@@ -306,6 +332,17 @@ func _select_vis(privada: bool) -> void:
 	vis_desc.text = "Solo entra quien tenga el codigo. No sale en la lista." if privada else "Sale en la lista de salas: cualquiera puede unirse."
 
 
+func _refrescar_opciones() -> void:
+	_opt_monstruos.text = "MONSTRUOS: " + ("SI" if _monstruos else "NO")
+	_opt_bots.text = "BOTS: %d" % BOTS_OPC[_bots_i]
+	_opt_jug.text = "MAX: %d" % JUGADORES_OPC[_jug_i]
+
+
+## Las opciones elegidas, tal cual viajan al servidor.
+func opciones_sala() -> Dictionary:
+	return {"monsters": _monstruos, "bots": BOTS_OPC[_bots_i], "max_players": JUGADORES_OPC[_jug_i]}
+
+
 ## CREAR: siempre abre una sala nueva con el modo, mapa y visibilidad elegidos.
 func _on_online_queue_pressed() -> void:
 	if _entrando:
@@ -314,7 +351,7 @@ func _on_online_queue_pressed() -> void:
 	_bloquear_botones(true)
 	status_label.text = "Creando sala en %s..." % MAPS[_map_index].name
 	OnlineManager.username = name_input.text.strip_edges() if name_input.text.strip_edges() != "" else OnlineManager.username
-	var r: Dictionary = await OnlineManager.create_room(str(MODES[_mode_index].id), str(MAPS[_map_index].id), _privada)
+	var r: Dictionary = await OnlineManager.create_room(str(MODES[_mode_index].id), str(MAPS[_map_index].id), _privada, "", opciones_sala())
 	_terminar_intento(r)
 
 

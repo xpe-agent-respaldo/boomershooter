@@ -56,7 +56,7 @@ local DEFAULT_MAP = "recycling_plant"
 -- Bots: companeros simulados por el servidor. Cuentan como jugadores en la sala,
 -- caminan por el mapa y se retiran solos cuando entran humanos (nunca ocupan su hueco).
 local BOTS_DEFAULT = 3
-local BOTS_MAX = 6
+local BOTS_MAX = 5              -- tope de bots por sala (companeros + pandilla + solitario + amigos)
 local BOT_STEP = 2.2              -- metros por segundo
 local BOT_NAMES = { "Rojo-7", "Cenizas", "Gancho", "Pelusa", "Oxido", "Tuerca", "Vaca", "Mecha" }
 -- La calle: pandillas con nombre propio, gente que va por libre y buena gente con la
@@ -74,14 +74,14 @@ local AMIGO_NAMES = { "Tato el Reciclador", "Dona Pila", "Chente el Manitas", "N
 local GANG_SIZE = 3                -- pandilleros por pandilla
 local GANG_ALERT_DIST = 60.0       -- a esta distancia salta el aviso en pantalla
 local GANG_CALM_DIST = 85.0        -- y no se repite hasta que se alejan
-local GANG_RANGE = 34.0
+local GANG_RANGE = 22.0        -- alcance real de un disparo (antes 34 m: quitaba vida desde fuera de la vista)
 local GANG_FIRE_S = 1.9
 local GANG_DAMAGE = 4
 local GANG_SPEED = 0.52            -- metros por tick de 100 ms = 5,2 m/s, a la velocidad de un jugador corriendo (antes 2,6 = 26 m/s: teletransporte)
 local AMIGO_TALK_DIST = 9.0        -- a esta distancia puedes hacerte su amigo
 local AMIGO_FOLLOW_DIST = 3.0
 local MAX_ALIADOS = 3              -- aliados maximos por jugador
-local AMIGOS_CANDIDATOS = 3        -- buena gente disponible en la partida para repartir
+local AMIGOS_CANDIDATOS = 1        -- el tope de 5 bots por sala manda: solo hay un amigo reclutable
 -- Chat de voz: el servidor decide quien oye a quien.
 local VOICE_MAX_BYTES = 1400     -- 160 muestras mu-law = 216 caracteres en base64; 1400 deja aire
 local VOICE_PROX_M = 24.0        -- alcance de la voz de proximidad, en metros
@@ -94,10 +94,10 @@ local FREESTYLER_NAMES = {
   "Rushido", "Tilt", "Bl4ze", "Camper_X", "Pixel", "Havoc",
 }
 local FREESTYLE_BOTS = 4
-local FREESTYLE_FIRE_S = 2.6     -- cadencia con la que cada uno dispara
-local FREESTYLE_ACCURACY = 0.96   -- no fallan un tiro
+local FREESTYLE_FIRE_S = 1.6     -- cadencia con la que cada uno dispara
+local FREESTYLE_ACCURACY = 0.55   -- fallan casi la mitad: un humano entrenado, no un aimbot
 local FREESTYLE_DAMAGE = 5
-local FREESTYLE_RANGE = 70.0
+local FREESTYLE_RANGE = 28.0
 local FREESTYLE_HP = 100          -- aguanta lo mismo que un jugador
 local FREESTYLE_RESPAWN_TICKS = 40  -- vuelve al combate a los 4 segundos (10 ticks por segundo)
 local MAP_MIN = { x = -120, y = -5, z = -120 }
@@ -172,12 +172,13 @@ local CHARLA = require("charla_bots")
 -- amigo) y la gente aparecia toda junta. Ahora cada modo decide quien hay en la sala:
 --   companions = compañeros bot que cuentan como jugadores; calle = pandilla/solitario/amigo;
 --   gang = pandilleros; solo = solitarios hostiles; amigo = buena gente reclutable.
+-- TOPE: companions + gang + solo + amigos <= BOTS_MAX (5) en TODOS los modos.
 local PLAN = {
-  coop_waves  = { companions = 3, calle = true,  gang = 3, solo = 1, amigo = 1 },
-  survival    = { companions = 0, calle = true,  gang = 0, solo = 1, amigo = 0 },
-  horde       = { companions = 4, calle = false, gang = 0, solo = 0, amigo = 0 },
-  boss_rush   = { companions = 2, calle = false, gang = 0, solo = 0, amigo = 0 },
-  freestylers = { companions = 6, calle = false, gang = 0, solo = 0, amigo = 0 },
+  coop_waves  = { companions = 1, calle = true,  gang = 2, solo = 1, amigo = 1 },   -- 1+2+1+1 = 5
+  survival    = { companions = 0, calle = true,  gang = 0, solo = 1, amigo = 0 },   -- 1
+  horde       = { companions = 3, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 3
+  boss_rush   = { companions = 2, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 2
+  freestylers = { companions = 4, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 4
 }
 local function plan_de(state)
   return PLAN[state.mode or "coop_waves"] or PLAN.coop_waves
@@ -206,6 +207,27 @@ end
 -- Celda de 2 m: MISMO redondeo que el cliente y los tests (floor(x/2+0.5)*2).
 local function celda_de(x, z)
   return math.floor(x / 2 + 0.5) * 2, math.floor(z / 2 + 0.5) * 2
+end
+
+-- Linea de vision aproximada sobre el plano medido: recorre el segmento de a a b cada ~1 m y
+-- exige SUELO real en cada paso, sin saltos de altura de mas de 1.6 m (una pared, una caja alta
+-- o un hueco cortan la vista). Antes el bot daba a traves de edificios y desde 34-70 m.
+local function hay_vision(state, a, b)
+  local set = suelo_set(state.map or DEFAULT_MAP)
+  local dx, dz = b.x - a.x, b.z - a.z
+  local largo = math.sqrt(dx * dx + dz * dz)
+  if largo < 1.0 then return true end
+  local pasos = math.ceil(largo / 1.0)
+  local y_prev = a.y or 0.0
+  for i = 1, pasos - 1 do
+    local f = i / pasos
+    local cx, cz = celda_de(a.x + dx * f, a.z + dz * f)
+    local h = set[cx .. "," .. cz]
+    if h == nil then return false end
+    if math.abs(h - y_prev) > 1.6 then return false end
+    y_prev = h
+  end
+  return true
 end
 
 -- Mueve al bot (dx,dz) SOLO si la celda de llegada esta medida en el plano. Asi no se cuela en un
@@ -467,6 +489,7 @@ local function room_label(state)
     max = state.max_players or MAX_PLAYERS,
     players = humans,
     bots = bots,
+    monsters = state.monsters ~= false,
     wave = state.wave or 0,
     phase = state.phase,
   })
@@ -700,10 +723,13 @@ local function freestyle_tick(state, dispatcher, t)
           paso_hacia(state, p, objetivo.pos, BOT_STEP * 1.7 * 0.1)
         end
         p.yaw = atan2(objetivo.pos.x - p.pos.x, objetivo.pos.z - p.pos.z)
-        if mejor <= FREESTYLE_RANGE and t >= (p.next_fire or 0) then
+        -- solo dispara quien VE al objetivo y esta a tiro: nada de dano a traves de paredes
+        if mejor <= FREESTYLE_RANGE and t >= (p.next_fire or 0) and hay_vision(state, p.pos, objetivo.pos) then
           p.next_fire = t + FREESTYLE_FIRE_S
-          -- punteria casi perfecta: falla 4 de cada 100
-          if math.random() <= FREESTYLE_ACCURACY then
+          -- la punteria baja con la distancia: de cerca acierta mas, de lejos falla mas
+          local prob = FREESTYLE_ACCURACY * (1.0 - 0.5 * (mejor / FREESTYLE_RANGE))
+          local acierta = math.random() <= prob
+          if acierta then
             local dano = FREESTYLE_DAMAGE + math.random(0, 4)
             local destino = state.presences[objetivo.user_id]
             if destino ~= nil then
@@ -713,10 +739,11 @@ local function freestyle_tick(state, dispatcher, t)
               })
             end
           end
+          -- el disparo se ve SIEMPRE (fogonazo y sonido), y "hit" dice si dio de verdad
           broadcast(dispatcher, OP_BOT_SHOT, {
             user_id = p.user_id, name = p.username,
             pos = { x = p.pos.x, y = p.pos.y, z = p.pos.z },
-            target_user_id = objetivo.user_id, hit = true,
+            target_user_id = objetivo.user_id, hit = acierta,
           })
         end
       end
@@ -929,6 +956,8 @@ local function sembrar_calle(state)
   local plan = plan_de(state)
   state.gang_ids = {}
   if not plan.calle then return end
+  -- "Sala vacia": si la sala pide cero bots, tampoco hay gente de la calle (pandilla, solitario, amigos).
+  if state.bots_wanted ~= nil and state.bots_wanted <= 0 then return end
   math.randomseed((state.tick or 0) + os.time())
   local origen = celda_real(state)
   if (plan.gang or 0) > 0 then
@@ -1007,16 +1036,19 @@ local function calle_tick(state, dispatcher, t)
             p.avisado = false
           end
           mover_hacia(p, objetivo, GANG_SPEED, 9.0, state)
-          if d <= GANG_RANGE and t >= (p.next_fire or 0) then
+          if d <= GANG_RANGE and t >= (p.next_fire or 0) and hay_vision(state, p.pos, objetivo.pos) then
             p.next_fire = t + GANG_FIRE_S
             if math.random() < 0.25 then bot_dice(state, dispatcher, p, "disparo", t, objetivo) end
+            local acierta = math.random() <= (0.75 - 0.4 * (d / GANG_RANGE))
             broadcast(dispatcher, OP_BOT_SHOT, {
               user_id = p.user_id, name = p.username, pos = p.pos,
-              target_user_id = objetivo.user_id, hit = true,
+              target_user_id = objetivo.user_id, hit = acierta,
             })
-            send_one(dispatcher, OP_BOT_HIT, {
-              damage = GANG_DAMAGE, from = p.pos, nombre = p.username,
-            }, state.presences[objetivo.user_id])
+            if acierta then
+              send_one(dispatcher, OP_BOT_HIT, {
+                damage = GANG_DAMAGE, from = p.pos, nombre = p.username,
+              }, state.presences[objetivo.user_id])
+            end
           end
         end
       end
@@ -1038,15 +1070,18 @@ local function calle_tick(state, dispatcher, t)
         solo.avisado = false
       end
       mover_hacia(solo, objetivo, GANG_SPEED * 0.85, 12.0, state)
-      if d <= GANG_RANGE and t >= (solo.next_fire or 0) then
+      if d <= GANG_RANGE and t >= (solo.next_fire or 0) and hay_vision(state, solo.pos, objetivo.pos) then
         solo.next_fire = t + GANG_FIRE_S * 1.4
+        local acierta = math.random() <= (0.75 - 0.4 * (d / GANG_RANGE))
         broadcast(dispatcher, OP_BOT_SHOT, {
           user_id = solo.user_id, name = solo.username, pos = solo.pos,
-          target_user_id = objetivo.user_id, hit = true,
+          target_user_id = objetivo.user_id, hit = acierta,
         })
-        send_one(dispatcher, OP_BOT_HIT, {
-          damage = GANG_DAMAGE - 1, from = solo.pos, nombre = solo.username,
-        }, state.presences[objetivo.user_id])
+        if acierta then
+          send_one(dispatcher, OP_BOT_HIT, {
+            damage = GANG_DAMAGE - 1, from = solo.pos, nombre = solo.username,
+          }, state.presences[objetivo.user_id])
+        end
       end
     end
   end
@@ -1130,6 +1165,7 @@ end
 
 local function spawn_wave_enemies(state, dispatcher)
   if es_pvp(state) then return end   -- puro enfrentamiento: ni un monstruo
+  if state.monsters == false then return end   -- sala configurada sin monstruos
   local wave = state.wave
   local mode = state.mode
   local cfg = MODES[mode] or MODES.coop_waves
@@ -1588,6 +1624,9 @@ function M.match_init(context, setupstate)
     private = setupstate.private == true,
     code = tostring(setupstate.code or ""):upper():sub(1, 8),
     bots_wanted = math.max(0, math.min(math.floor(tonumber(setupstate.bots) or BOTS_DEFAULT), BOTS_MAX)),
+    -- Sala sin monstruos: nadie genera oleadas. Solo se desactiva si se pide EXPLICITAMENTE (false);
+    -- una sala antigua o sin el campo conserva sus monstruos.
+    monsters = setupstate.monsters ~= false,
     last_bot_tick = 0,
   }
   sync_bots(state)
@@ -1716,7 +1755,12 @@ function M.match_loop(context, dispatcher, tick, state, messages)
     end
   end
   if state.phase == "lobby" or state.phase == "break" then
-    if state.break_ends_at and t >= state.break_ends_at and count_presences(state) >= MIN_PLAYERS_START then
+    if state.monsters == false and not es_pvp(state) then
+      -- Sala sin monstruos: no hay oleadas que contar ni esperar. Queda en fase "free" (libre).
+      state.phase = "free"
+      state.wave_active = false
+      state.break_ends_at = nil
+    elseif state.break_ends_at and t >= state.break_ends_at and count_presences(state) >= MIN_PLAYERS_START then
       state.wave = state.wave + 1
       state.break_ends_at = nil
       spawn_wave_enemies(state, dispatcher)
@@ -2061,13 +2105,18 @@ local function rpc_create_room(context, payload)
     codigo = generar_codigo()
   end
   local privada = req.private == true
+  local aforo = math.floor(tonumber(req.max_players) or MAX_PLAYERS)
+  aforo = math.max(1, math.min(aforo, MAX_PLAYERS_HARD))
+  local bots = req.bots
+  if bots ~= nil then bots = math.max(0, math.min(math.floor(tonumber(bots) or BOTS_DEFAULT), BOTS_MAX)) end
   local match_id = nk.match_create("coopwave", {
-    mode = mode, max_players = MAX_PLAYERS, private = privada, code = codigo,
-    map = map, room_name = nombre, bots = req.bots,
+    mode = mode, max_players = aforo, private = privada, code = codigo,
+    map = map, room_name = nombre, bots = bots, monsters = req.monsters ~= false,
   })
   reservar(match_id)
   return nk.json_encode({
     match_id = match_id, code = codigo, private = privada, mode = mode, map = map, name = nombre,
+    max_players = aforo, monsters = req.monsters ~= false, bots = bots,
   })
 end
 
@@ -2127,6 +2176,7 @@ local function rpc_list_rooms(context, payload)
           players = players,
           bots = tonumber(label.bots) or 0,
           max = cap,
+          monsters = label.monsters ~= false,
           wave = tonumber(label.wave) or 0,
           joinable = true,
         }

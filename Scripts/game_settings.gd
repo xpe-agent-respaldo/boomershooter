@@ -67,6 +67,7 @@ func _ready() -> void:
 		_migrar_rendimiento()
 	_apply()
 	_aplicar_microfono_guardado()
+	_pedir_gpu_dedicada()
 	# garantia final: pase lo que pase con el guardado, el juego abre a pantalla completa
 	# salvo que el jugador la haya quitado a mano despues de la migracion.
 	DisplayServer.window_set_mode(window_mode)
@@ -475,6 +476,27 @@ func _add_volume_control(parent: VBoxContainer, title: String, bus_name: String)
 		_set_volume(bus_name, value, slider, title))
 	row.add_child(slider)
 	parent.add_child(row)
+
+
+## Pide a Windows la grafica dedicada para este juego. La primera vez que se escribe la preferencia
+## hay que relanzar el juego (Windows solo la lee al arrancar); se hace una unica vez y se recuerda
+## en el archivo de ajustes para no entrar nunca en un bucle de relanzamientos.
+func _pedir_gpu_dedicada() -> void:
+	if OS.get_name() != "Windows" or OS.has_feature("editor"):
+		return
+	var config := ConfigFile.new()
+	config.load(SETTINGS_PATH)
+	if bool(config.get_value("gpu", "relanzado", false)):
+		return
+	var resultado := GpuPreferida.aplicar()
+	if resultado == "aplicada":
+		config.set_value("gpu", "relanzado", true)
+		config.save(SETTINGS_PATH)
+		OS.create_process(OS.get_executable_path(), OS.get_cmdline_args())
+		get_tree().quit()
+	elif resultado == "ya_estaba":
+		config.set_value("gpu", "relanzado", true)
+		config.save(SETTINGS_PATH)
 
 
 ## Devuelve true si el nombre del dispositivo parece unos audifonos.

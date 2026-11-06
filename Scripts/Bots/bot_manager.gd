@@ -5,10 +5,12 @@ extends Node
 ## y pinta en una esquina los nombres del equipo.
 
 const BOT_SCENE := "res://Player/RemotePlayer.tscn"
-const RECRUITABLES := 4
+## Tope de bots por partida: 5 (antes 13 entre reclutables y escuadras, y la partida se sentia
+## llena de bots). 1 reclutable + un escuadron de 2 hostiles + una pareja inseparable = 5.
+const MAX_BOTS := 5
+const RECRUITABLES := 1
 const SQUADS := [
-	{"size": 4, "id": "alfa"},
-	{"size": 3, "id": "bravo"},
+	{"size": 2, "id": "alfa"},
 	{"size": 2, "id": "pareja", "inseparable": true},
 ]
 const MAX_ALLIES := 3
@@ -86,12 +88,19 @@ func _spawn_all(scene: Node) -> void:
 		return
 	var player: Player = Global.player
 	var origin: Vector3 = player.global_position if player != null else Vector3.ZERO
+	var creados := 0
 	for i in RECRUITABLES:
+		if creados >= MAX_BOTS:
+			break
 		_spawn(scene, _scatter(origin, 12.0, 42.0), Bot.Mode.RECRUITABLE, "")
+		creados += 1
 	for squad in SQUADS:
 		var squad_id: String = squad["id"]
 		var centre := _scatter(origin, 28.0, 65.0)
 		for k in int(squad["size"]):
+			if creados >= MAX_BOTS:
+				break
+			creados += 1
 			var b := _spawn(scene, centre + Vector3(cos(k * 1.7) * 2.2, 0, sin(k * 1.7) * 2.2), Bot.Mode.HOSTILE, squad_id)
 			if b != null and squad.get("inseparable", false):
 				b.is_inseparable = true

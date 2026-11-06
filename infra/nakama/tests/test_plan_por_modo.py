@@ -16,13 +16,14 @@ def alturas(mapa):
     bloque = SUELO.split(f"M.{mapa} = {{")[1].split("\n}")[0]
     return {(int(a), int(b)): float(y) for a, b, y in re.findall(r"\{(-?\d+),(-?\d+),(-?[\d.]+)\}", bloque)}
 
-ESPERADO = {  # companeros, pandilleros, solitarios, amigos
-    "coop_waves":  (3, 3, 1, 3),   # 3 buenos: cada jugador puede llevar hasta 3 aliados
+ESPERADO = {  # companeros, pandilleros, solitarios, amigos   (TOPE: la suma nunca pasa de 5)
+    "coop_waves":  (1, 2, 1, 1),   # 5
     "survival":    (0, 0, 1, 0),
-    "horde":       (4, 0, 0, 0),
+    "horde":       (3, 0, 0, 0),
     "boss_rush":   (2, 0, 0, 0),
-    "freestylers": (6, 0, 0, 0),
+    "freestylers": (4, 0, 0, 0),
 }
+assert all(sum(v) <= 5 for v in ESPERADO.values()), "ningun modo puede pasar de 5 bots"
 fallos = 0
 def check(nombre, ok, det=""):
     global fallos

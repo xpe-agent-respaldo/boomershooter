@@ -1,10 +1,13 @@
-extends Node3D
+## Hereda de network_game: este script REEMPLAZA al de ArenaBase, y sin la herencia el mapa espacial
+## perdia todo el multijugador (jugadores remotos, bots online, su dano y sus disparos).
+extends "res://Scripts/network_game.gd"
 
 const SPACE_TRACK := preload("res://Assets/Sounds/Music/Maps/Arabesque.mp3")
 const SPACE_AMBIENCE := preload("res://Assets/Sounds/SFX/Ambience/spaceship.wav")
 
 
 func _ready() -> void:
+	super._ready()
 	var music: AudioStreamPlayer = $Music
 	music.stream = SPACE_TRACK
 	music.play()

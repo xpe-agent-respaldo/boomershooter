@@ -417,9 +417,30 @@ func _animate(delta: float) -> void:
 	_look.animate(delta, spd, _dodge_timer > 0.0, _sliding)
 
 
+## True si hay linea de vision limpia hacia el punto: un rayo de la boca del bot al objetivo contra el
+## mundo (capa 1). Antes el dano al jugador se aplicaba solo por distancia, asi que los bots quitaban
+## vida a traves de paredes sin que se les viera disparar.
+func ve_al_objetivo(punto: Vector3) -> bool:
+	var origen := global_position + Vector3(0, 1.35, 0)
+	var mundo := get_world_3d()
+	if mundo == null:
+		return false
+	var q := PhysicsRayQueryParameters3D.create(origen, punto, 1)
+	if _body != null:
+		q.exclude = [_body.get_rid()]
+	var golpe := mundo.direct_space_state.intersect_ray(q)
+	if golpe.is_empty():
+		return true
+	# Algo del mundo corta el rayo: solo cuenta si queda a menos de 0.6 m del objetivo (suelo/borde).
+	return (golpe["position"] as Vector3).distance_to(punto) < 0.6
+
+
 ## Dispara con el arma actual. La ráfaga y la cadencia cambian por arma.
 func _try_fire(aim: Vector3, target: Node3D) -> void:
 	if _fire_timer > 0.0:
+		return
+	# Sin vision no se dispara ni se hace dano (antes atravesaba paredes).
+	if not ve_al_objetivo(aim):
 		return
 	var w: Dictionary = WEAPONS[_weapon_index]
 	_fire_timer = float(w["cooldown"]) + randf_range(0.0, 0.12)
@@ -480,7 +501,7 @@ func _shoot_nearest_threat(player_pos: Vector3, _delta: float) -> void:
 	if best == null:
 		return
 	rotation.y = atan2(-(best.global_position.x - global_position.x), -(best.global_position.z - global_position.z))
-	if _fire_timer > 0.0:
+	if _fire_timer > 0.0 or not ve_al_objetivo(best.global_position + Vector3(0, 1.0, 0)):
 		return
 	_fire_timer = FIRE_COOLDOWN + randf_range(0.0, 0.25)
 	_fire_at(best.global_position + Vector3(0, 1.0, 0))
@@ -493,9 +514,12 @@ func _shoot_nearest_threat(player_pos: Vector3, _delta: float) -> void:
 func _try_shoot_player(player: Player, dist: float, _delta: float) -> void:
 	if _fire_timer > 0.0 or dist > FIRE_RANGE:
 		return
+	var pecho := player.global_position + Vector3(0, 1.2, 0)
+	if not ve_al_objetivo(pecho):
+		return
 	_fire_timer = FIRE_COOLDOWN + randf_range(0.0, 0.3)
 	_sonido_disparo("Rifle")
-	_fire_at(player.global_position + Vector3(0, 1.2, 0))
+	_fire_at(pecho)
 	player.take_damage(8, global_position)
 
 
