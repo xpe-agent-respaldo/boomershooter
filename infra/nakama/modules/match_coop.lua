@@ -1727,7 +1727,9 @@ function M.match_init(context, setupstate)
     room_name = tostring(setupstate.room_name or "Sala"):sub(1, 24),
     private = setupstate.private == true,
     code = tostring(setupstate.code or ""):upper():sub(1, 8),
-    bots_wanted = math.max(0, math.min(math.floor(tonumber(setupstate.bots) or BOTS_DEFAULT), BOTS_MAX)),
+    -- Sala PRIVADA: nunca lleva bots (no hay nadie a quien rellenar y solo saturan la red).
+    bots_wanted = (setupstate.private == true) and 0
+      or math.max(0, math.min(math.floor(tonumber(setupstate.bots) or BOTS_DEFAULT), BOTS_MAX)),
     -- Sala sin monstruos: nadie genera oleadas. Solo se desactiva si se pide EXPLICITAMENTE (false);
     -- una sala antigua o sin el campo conserva sus monstruos.
     monsters = setupstate.monsters ~= false,
@@ -2216,6 +2218,10 @@ local function rpc_create_room(context, payload)
   aforo = math.max(1, math.min(aforo, MAX_PLAYERS_HARD))
   local bots = req.bots
   if bots ~= nil then bots = math.max(0, math.min(math.floor(tonumber(bots) or BOTS_DEFAULT), BOTS_MAX)) end
+  -- Las salas privadas y el Duelo (solo humanos) no llevan bots ni monstruos, pida lo que pida el cliente.
+  local es_duelo_sala = (MODES[mode] or {}).duelo == true
+  if privada or es_duelo_sala then bots = 0 end
+  if es_duelo_sala then req.monsters = false end
   local match_id = nk.match_create("coopwave", {
     mode = mode, max_players = aforo, private = privada, code = codigo,
     map = map, room_name = nombre, bots = bots, monsters = req.monsters ~= false,

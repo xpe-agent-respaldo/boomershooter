@@ -314,6 +314,8 @@ func _room_row(room: Dictionary) -> Control:
 	var total := players + bots
 	var nombre := str(room.get("name", "Sala"))
 	var estado := "oleada %d" % wave if bool(room.get("monsters", true)) else "SIN MONSTRUOS"
+	if str(room.get("mode", "")) == "duelo":
+		estado = "PvP ENTRE AMIGOS"   # nada de "oleada" ni "sin monstruos": es un duelo
 	row.text = "%s\n%s · %s — %d/%d jugadores · %s" % [nombre, mode_label.to_upper(), map_label.to_upper(), total, cap, estado]
 	row.custom_minimum_size = Vector2(0, 58)
 	row.add_theme_font_size_override("font_size", 16)
@@ -344,7 +346,9 @@ func _select_vis(privada: bool) -> void:
 	_privada = privada
 	for k in _vis_buttons.size():
 		_vis_buttons[k].button_pressed = ((k == 1) == privada)
-	vis_desc.text = "Solo entra quien tenga el codigo. No sale en la lista." if privada else "Sale en la lista de salas: cualquiera puede unirse."
+	vis_desc.text = "Solo entra quien tenga el codigo. No sale en la lista. Sin bots." if privada else "Sale en la lista de salas: cualquiera puede unirse."
+	if _opt_monstruos != null:
+		_refrescar_opciones()
 
 
 func _es_duelo() -> bool:
@@ -355,9 +359,10 @@ func _refrescar_opciones() -> void:
 	# En el duelo no hay monstruos ni bots: se muestra tal cual y no se puede cambiar.
 	var duelo := _es_duelo()
 	_opt_monstruos.text = "MONSTRUOS: " + ("NO" if duelo else ("SI" if _monstruos else "NO"))
-	_opt_bots.text = "BOTS: " + ("0" if duelo else str(BOTS_OPC[_bots_i]))
+	# Duelo y salas privadas: sin bots (y el boton se bloquea).
+	_opt_bots.text = "BOTS: " + ("0" if (duelo or _privada) else str(BOTS_OPC[_bots_i]))
 	_opt_monstruos.disabled = duelo
-	_opt_bots.disabled = duelo
+	_opt_bots.disabled = duelo or _privada
 	_opt_jug.text = "MAX: %d" % JUGADORES_OPC[_jug_i]
 
 
@@ -365,7 +370,7 @@ func _refrescar_opciones() -> void:
 func opciones_sala() -> Dictionary:
 	if _es_duelo():
 		return {"monsters": false, "bots": 0, "max_players": JUGADORES_OPC[_jug_i]}
-	return {"monsters": _monstruos, "bots": BOTS_OPC[_bots_i], "max_players": JUGADORES_OPC[_jug_i]}
+	return {"monsters": _monstruos, "bots": 0 if _privada else BOTS_OPC[_bots_i], "max_players": JUGADORES_OPC[_jug_i]}
 
 
 ## CREAR: siempre abre una sala nueva con el modo, mapa y visibilidad elegidos.

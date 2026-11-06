@@ -38,5 +38,16 @@ func _correr() -> void:
 	_ok(lb.opciones_sala().max_players == 20, "al volver a OLEADAS recupera su aforo (20)")
 	_ok(not lb._opt_monstruos.disabled, "al volver a OLEADAS se desbloquean otra vez")
 	_ok(lb._opt_monstruos.text == "MONSTRUOS: SI", "y recuperan su valor (%s)" % lb._opt_monstruos.text)
+	# la fila de la lista que ve el amigo
+	var fila: Button = lb._room_row({"name": "Duelo de Ana", "mode": "duelo", "mode_label": "Duelo", "map": "space_arena", "map_label": "Arena espacial", "players": 1, "bots": 0, "max": 4, "monsters": false, "code": "K7M2Q", "wave": 0})
+	_ok(fila.text.contains("PvP ENTRE AMIGOS"), "la fila de un duelo dice PvP ENTRE AMIGOS (%s)" % fila.text.replace("\n", " | "))
+	_ok(not fila.text.contains("oleada") and not fila.text.contains("SIN MONSTRUOS"), "y no dice oleada ni sin monstruos")
+	_ok(fila.text.contains("ARENA ESPACIAL") and fila.text.contains("1/4") and fila.text.contains("K7M2Q"), "con mapa, aforo y codigo")
+	# privada: sin bots
+	lb._select_mode(0); lb._select_vis(true)
+	_ok(lb.opciones_sala().bots == 0, "sala PRIVADA manda bots = 0")
+	_ok(lb._opt_bots.disabled and lb._opt_bots.text == "BOTS: 0", "y el boton de bots queda en 0 y bloqueado (%s)" % lb._opt_bots.text)
+	lb._select_vis(false)
+	_ok(not lb._opt_bots.disabled and lb.opciones_sala().bots > 0, "al volver a PUBLICA se desbloquean los bots")
 	print("\nLOBBY DUELO: ", "TODO BIEN" if fallos == 0 else "%d FALLOS" % fallos)
 	a.quit(1 if fallos else 0)
