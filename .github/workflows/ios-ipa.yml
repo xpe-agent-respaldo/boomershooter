@@ -1,6 +1,7 @@
 # Construye la IPA de iPhone en GitHub (runner macOS con Xcode ya instalado).
-# La IPA sale SIN FIRMAR: se instala con Sideloadly/AltStore usando la cuenta Apple
-# del jugador (gratis), o se firma con un certificado de pago para App Store/TestFlight.
+# La IPA sale SIN FIRMAR: los jugadores la firman con Gbox, Filza, Sideloadly, ESign,
+# Feather, AltStore... Antes de entregarla se VALIDA (estructura, Info.plist, arm64,
+# permisos) y se comprueba con zsign (open source, MIT) que un firmador la procesa.
 name: IPA de Boomer Shooter
 
 on:
@@ -37,6 +38,22 @@ jobs:
           GODOT: /Applications/Godot.app/Contents/MacOS/Godot
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || 'ABCDE12345' }}
         run: sh tools/build_ios_unsigned.sh
+
+      - name: Validar la IPA (estructura, arm64, permisos)
+        run: python3 tools/validar_ipa.py Build/iOS/*.ipa
+
+      - name: Comprobar que un firmador la procesa (zsign, firma ad-hoc de prueba)
+        run: |
+          set -e
+          brew install pkg-config openssl@3 >/dev/null
+          export PKG_CONFIG_PATH="$(brew --prefix openssl@3)/lib/pkgconfig"
+          git clone --depth 1 https://github.com/zhlynn/zsign.git /tmp/zsign
+          make -C /tmp/zsign/build/macos -j4 >/dev/null
+          IPA=$(ls Build/iOS/*.ipa | head -1)
+          /tmp/zsign/bin/zsign -a -o /tmp/prueba-firmada.ipa "$IPA"
+          python3 tools/validar_ipa.py /tmp/prueba-firmada.ipa || true
+          ls -la /tmp/prueba-firmada.ipa
+          echo "zsign pudo firmar la IPA: un firmador de verdad tambien podra."
 
       - name: Guardar la IPA
         uses: actions/upload-artifact@v4

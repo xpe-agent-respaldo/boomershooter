@@ -140,11 +140,42 @@ func _process(_delta: float) -> void:
 			peer.poll()
 
 
+## En iOS y Android el micro no se puede abrir sin permiso del usuario: sin esta peticion
+## el sistema lo bloquea en silencio (o cierra la app). En PC no hace nada.
+signal permiso_microfono(concedido: bool)
+var _permiso_pedido := false
+var microfono_permitido := true
+
+
+func pedir_permiso_microfono() -> void:
+	if _permiso_pedido or not (OS.has_feature("mobile") or OS.get_name() in ["iOS", "Android"]):
+		return
+	_permiso_pedido = true
+	if not get_tree().on_request_permissions_result.is_connected(_on_permiso):
+		get_tree().on_request_permissions_result.connect(_on_permiso)
+	var concedidos: PackedStringArray = OS.get_granted_permissions()
+	if "RECORD_AUDIO" in concedidos or "android.permission.RECORD_AUDIO" in concedidos:
+		microfono_permitido = true
+		return
+	OS.request_permission("RECORD_AUDIO")
+
+
+func _on_permiso(permiso: String, concedido: bool) -> void:
+	if not permiso.contains("RECORD_AUDIO"):
+		return
+	microfono_permitido = concedido
+	permiso_microfono.emit(concedido)
+	if not concedido:
+		var avisos := get_tree().get_first_node_in_group("team_alerts")
+		push_warning("Microfono denegado: el chat de voz queda desactivado.")
+
+
 func _setup_microphone_capture() -> void:
 	if _microphone_player:
 		return
 	if not GameSettings.voice_enabled:
 		return
+	pedir_permiso_microfono()
 	var bus_index := AudioServer.get_bus_index(VOICE_BUS)
 	if bus_index < 0:
 		push_warning("No existe el bus Voice. Se desactiva la captura de microfono.")

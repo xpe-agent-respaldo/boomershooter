@@ -1,5 +1,5 @@
 extends Node
-## Pruebas de la version 1.2.7:
+## Pruebas de logros y progreso (sin version grabada):
 ##  * los logros (lista, ids antiguos, progreso guardado, pantalla y aviso)
 ##  * el actualizador ya no abre ninguna ventana de consola
 ##  * los ganchos de logros siguen puestos en el codigo del juego
@@ -301,5 +301,10 @@ func _probar_ganchos() -> void:
 			ok("%s contiene %s" % [ruta, trozo], texto.contains(str(trozo)), "")
 	var proj := FileAccess.get_file_as_string("res://project.godot")
 	ok("el aviso de logros es autoload", proj.contains("LogroAviso=\"*res://Scripts/logro_aviso.gd\""))
-	ok("la version del proyecto es 1.2.7", proj.contains("config/version=\"1.2.7\""))
+	# La version se lee del proyecto: no se graba a fuego (cada release la rompia).
+	var ver := ""
+	for linea in proj.split("\n"):
+		if linea.begins_with("config/version="):
+			ver = linea.trim_prefix("config/version=").strip_edges().trim_prefix("\"").trim_suffix("\"")
+	ok("la version del proyecto tiene formato X.Y.Z (%s)" % ver, ver.split(".").size() == 3 and ver.split(".")[0].is_valid_int())
 	ok("el sonido del aviso existe", FileAccess.file_exists("res://Assets/Sounds/SFX/logro.wav"))

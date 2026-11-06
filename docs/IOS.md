@@ -56,3 +56,31 @@ El script dice exactamente qué falta. Los dos fallos típicos:
   configurar nada; se detecta al conectarlo y aparece el aviso en pantalla.
 - **Táctil**: joystick a la izquierda, disparo/salto/agacharse a la derecha, y
   arrastrar en la mitad derecha para apuntar.
+
+
+## Firmar la IPA (herramientas open source y de la comunidad)
+
+La IPA que sale de GitHub va **sin firmar** y validada (`tools/validar_ipa.py`: estructura
+`Payload/*.app`, Info.plist, ejecutable arm64, permiso de microfono). Cada jugador la firma
+con lo que prefiera:
+
+| Herramienta | Donde corre | Licencia | Notas |
+|---|---|---|---|
+| **zsign** (zhlynn/zsign) | Linux, Windows, macOS | MIT | Linea de comandos. Es la que usa el workflow para comprobar que la IPA se puede firmar. `zsign -k cert.p12 -p CLAVE -m perfil.mobileprovision -o BoomerShooter.ipa original.ipa` |
+| **SideStore** (SideStore/SideStore) | iPhone | AGPLv3 | Firma con el Apple ID del jugador y renueva cada 7 dias sin PC. |
+| **AltStore** (altstoreio/AltStore) | iPhone + PC | AGPLv3 | Igual, necesita AltServer en un ordenador. |
+| **cyan / pyzule-rw** (asdfzxcvbn/pyzule-rw) | Linux, macOS, WSL | sin licencia declarada | Modifica la IPA (nombre, bundle id, icono) y la "fakesigna" para TrollStore. |
+| **Gbox / ESign / Feather / Filza** | iPhone | cerradas o mixtas | Las que ya usan tus jugadores: aceptan esta IPA tal cual. |
+
+### Comprobar una IPA a mano
+
+```bash
+python3 tools/validar_ipa.py BoomerShooter-1.2.9-unsigned.ipa
+```
+
+### Pantalla y controles en iPhone
+
+* Solo horizontal (izquierda o derecha); nunca vertical.
+* Los botones respetan la muesca / Dynamic Island y la barra de inicio.
+* Si se conecta un mando, los botones tactiles se esconden solos.
+* Micrófono: el sistema pide permiso la primera vez que se entra a una partida con voz.

@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Boomer Shooter"
 config/description="FPS arcade de alta movilidad por Stealth Proyects."
-config/version="1.2.8"
+config/version="1.2.9"
 boot_splash/show_image=true
 boot_splash/fullsize=true
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -35,6 +35,10 @@ config/icon="res://Assets/Brand/icon_512.png"
 driver/enable_input=true
 default_bus_layout="res://default_bus_layout.tres"
 
+[input_devices]
+
+pointing/emulate_mouse_from_touch=false
+
 [display]
 
 window/size/viewport_width=1920
@@ -42,6 +46,7 @@ window/size/viewport_height=1080
 window/size/mode=3
 window/vsync/vsync_mode=0
 window/stretch/mode="canvas_items"
+window/handheld/orientation=4
 
 [autoload]
 
