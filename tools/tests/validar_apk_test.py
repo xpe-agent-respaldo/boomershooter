@@ -37,12 +37,13 @@ def axml(paquete, permisos, version="1.3.1"):
     total = 8 + len(pool) + len(cuerpo)
     return struct.pack("<HHI", 0x0003, 8, total) + pool + cuerpo
 
-def apk(permisos, paquete="com.boomershooter.game", arm64=True, online=True, vieja=False, firmado=True, dex=True):
+def apk(permisos, paquete="com.boomershooter.game", arm64=True, online=True, vieja=False, firmado=True, dex=True):  # online: archivo suelto
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
         z.writestr("AndroidManifest.xml", axml(paquete, permisos))
         if dex: z.writestr("classes.dex", b"dex\n035\0")
-        z.writestr("assets/BoomerShooter.pck", (b"online_defaults.cfg" if online else b"") + (V.CLAVE_VIEJA if vieja else b""))
+        if online: z.writestr("assets/online_defaults.cfg", b"[online]\nhost=\"x.onrender.com\"\n")
+        z.writestr("assets/datos.gd", (V.CLAVE_VIEJA if vieja else b"nada"))
         if arm64: z.writestr("lib/arm64-v8a/libgodot_android.so", b"\x7fELF")
         if firmado: z.writestr("META-INF/CERT.SF", b"firma"); z.writestr("META-INF/CERT.RSA", b"x")
     f = tempfile.NamedTemporaryFile(suffix=".apk", delete=False); f.write(buf.getvalue()); f.close()

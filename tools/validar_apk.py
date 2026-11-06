@@ -111,15 +111,20 @@ def main(ruta: str) -> int:
         mal("falta la libreria nativa para arm64-v8a (movil moderno)")
     print(f"  librerias nativas: {len(libs)} ({', '.join(sorted({n.split('/')[1] for n in libs}))})")
 
-    pck = [n for n in nombres if n.endswith(".pck")]
-    if pck:
-        datos = z.read(pck[0])
-        if b"online_defaults.cfg" not in datos:
-            mal("FALTA online_defaults.cfg en los datos: el online estaria muerto")
-        if CLAVE_VIEJA in datos:
-            mal("la clave vieja del servidor sigue dentro")
+    # Godot mete los recursos sueltos en assets/ (o en un .pck): se busca el archivo por nombre.
+    cfg = [n for n in nombres if n.endswith("online_defaults.cfg")]
+    if cfg:
+        d = z.read(cfg[0])
+        if b"host" not in d.lower():
+            mal("online_defaults.cfg esta vacio: el online estaria muerto")
     else:
-        aviso("no hay .pck separado (datos embebidos): no se pudo comprobar online_defaults.cfg")
+        pck = [n for n in nombres if n.endswith(".pck")]
+        if not pck or b"online_defaults.cfg" not in z.read(pck[0]):
+            mal("FALTA online_defaults.cfg: el online estaria muerto")
+    for n in nombres:
+        if n.startswith("assets/") and not n.endswith((".mp3str", ".ctex", ".sample", ".oggvorbisstr", ".png", ".ogg", ".wav", ".mp3")) \
+                and CLAVE_VIEJA in z.read(n):
+            mal(f"la clave vieja del servidor sigue dentro de {n}")
 
     if not any(n.startswith("META-INF/") and n.endswith((".RSA", ".DSA", ".EC", ".SF")) for n in nombres) \
             and not any(n == "META-INF/CERT.SF" for n in nombres):
