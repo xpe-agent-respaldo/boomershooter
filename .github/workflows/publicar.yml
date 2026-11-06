@@ -1,0 +1,218 @@
+# Compila y publica una version de Boomer Shooter desde GitHub Actions.
+#
+# Por que existe: GitLab da 400 minutos de CI al mes en el plan gratuito y se acaban (error
+# "ci_quota_exceeded"). GitHub Actions es gratis y sin limite en repositorios publicos.
+#
+# Que hace con cada tag vX.Y.Z (igual que el pipeline de GitLab):
+#   1. compila Windows, Linux, Web e iOS (IPA sin firmar), todos con el servidor online inyectado,
+#   2. sube los binarios al paquete de descargas de GitLab (donde ya estan las versiones anteriores),
+#   3. regenera site/update.json con los hashes reales,
+#   4. crea la release con sus enlaces,
+#   5. empuja el manifiesto y la web a main de GitLab, que es lo que sirve Vercel.
+#
+# Secretos del repositorio (Settings > Secrets and variables > Actions):
+#   NAKAMA_HOST, NAKAMA_SERVER_KEY  servidor online que se inyecta en cada compilacion
+#   GITLAB_TOKEN                    para subir al paquete, crear la release y empujar el manifiesto
+#
+#   git tag -a v1.3.0 -m "Notas;separadas por punto y coma"
+#   git push origin v1.3.0
+
+name: Publicar version
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version a publicar (ej. 1.3.0). Vacio = la del proyecto."
+        required: false
+        default: ""
+
+env:
+  GODOT_VERSION: "4.7-stable"
+  GITLAB_PROYECTO: "85907027"
+  DESCARGAS_PROYECTO: "88475071"
+
+jobs:
+  escritorio_y_web:
+    name: Windows, Linux y Web
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Godot y plantillas
+        run: |
+          set -e
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends unzip libfontconfig1 osslsigncode
+          curl -fL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot
+          curl -fL -o plantillas.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          PLANTILLAS="$HOME/.local/share/godot/export_templates/4.7.stable"
+          mkdir -p "$PLANTILLAS"
+          unzip -q -j plantillas.tpz 'templates/*' -d "$PLANTILLAS"
+          godot --version
+
+      - name: Inyectar servidor online
+        env:
+          NAKAMA_HOST: ${{ secrets.NAKAMA_HOST }}
+          NAKAMA_SERVER_KEY: ${{ secrets.NAKAMA_SERVER_KEY }}
+        run: sh tools/write_online_defaults.sh "$GITHUB_WORKSPACE/online_defaults.cfg"
+
+      - name: Importar el proyecto
+        run: godot --headless --path "$GITHUB_WORKSPACE" --editor --quit || true
+
+      - name: Compilar Windows
+        run: |
+          mkdir -p Build/Windows
+          godot --headless --path "$GITHUB_WORKSPACE" --export-release "Windows Desktop" "Build/Windows/BoomerShooter.exe"
+          sh tools/sign_windows.sh "Build/Windows/BoomerShooter.exe"
+          ls -la Build/Windows
+
+      - name: Compilar Linux
+        run: |
+          mkdir -p Build/Linux
+          godot --headless --path "$GITHUB_WORKSPACE" --export-release "Linux" "Build/Linux/boomershooter.x86_64"
+          ls -la Build/Linux
+
+      - name: Compilar Web (iPhone en Safari)
+        run: |
+          mkdir -p Build/Web
+          godot --headless --path "$GITHUB_WORKSPACE" --export-release "Web" "Build/Web/index.html"
+          ls -la Build/Web
+
+      - name: Guardar binarios
+        uses: actions/upload-artifact@v4
+        with:
+          name: escritorio-y-web
+          path: Build/
+          retention-days: 30
+          if-no-files-found: error
+
+  ipa:
+    name: IPA de iPhone (sin firmar)
+    runs-on: macos-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar Godot 4.7 y plantillas de exportacion
+        run: |
+          set -e
+          curl -fL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_macos.universal.zip"
+          unzip -q godot.zip
+          sudo mv Godot.app /Applications/
+          GODOT="/Applications/Godot.app/Contents/MacOS/Godot"
+          "$GODOT" --version
+          PLANTILLAS="$HOME/Library/Application Support/Godot/export_templates/4.7.stable"
+          mkdir -p "$PLANTILLAS"
+          curl -fL -o plantillas.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          unzip -q plantillas.tpz
+          cp templates/ios.zip "$PLANTILLAS/"
+          cp templates/version.txt "$PLANTILLAS/" 2>/dev/null || true
+
+      - name: Inyectar servidor online
+        env:
+          NAKAMA_HOST: ${{ secrets.NAKAMA_HOST }}
+          NAKAMA_SERVER_KEY: ${{ secrets.NAKAMA_SERVER_KEY }}
+        run: sh tools/write_online_defaults.sh online_defaults.cfg
+
+      - name: Exportar y empaquetar la IPA sin firmar
+        env:
+          GODOT: /Applications/Godot.app/Contents/MacOS/Godot
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID || 'ABCDE12345' }}
+        run: sh tools/build_ios_unsigned.sh
+
+      - name: Validar la IPA (estructura, arm64, permisos)
+        run: python3 tools/validar_ipa.py Build/iOS/*.ipa
+
+      - name: Comprobar que el servidor online quedo dentro de la IPA
+        run: |
+          python3 - <<'PY'
+          import glob, zipfile
+          z = zipfile.ZipFile(glob.glob("Build/iOS/*.ipa")[0])
+          pck = [n for n in z.namelist() if n.endswith(".pck")][0]
+          datos = z.read(pck)
+          assert b"online_defaults.cfg" in datos, "FALTA online_defaults.cfg dentro de la IPA: el online estaria muerto"
+          assert b"BoomerShooterSecretKey2026" not in datos, "la clave vieja sigue dentro"
+          print("OK: la IPA lleva el servidor online y no la clave vieja")
+          PY
+
+      - name: Guardar la IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: BoomerShooter-ipa-sin-firmar
+          path: Build/iOS/*.ipa
+          if-no-files-found: error
+          retention-days: 90
+
+  publicar:
+    name: Publicar descargas, manifiesto y release
+    needs: [escritorio_y_web, ipa]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Leer las notas del tag
+        uses: actions/checkout@v4
+        with:
+          path: github
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Clonar el repositorio de GitLab (es el que sirve Vercel)
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          set -e
+          git clone --depth 50 "https://oauth2:${GITLAB_TOKEN}@gitlab.com/rewardnexus000/boomershooter.git" repo
+          git -C repo config user.name "Boomer Shooter CI"
+          git -C repo config user.email "ci@xpe.nettt"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: escritorio-y-web
+          path: repo/Build
+
+      - name: Subir binarios, generar manifiesto y crear la release
+        working-directory: repo
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          set -e
+          VERSION="${GITHUB_REF_NAME#v}"
+          echo "Publicando $VERSION"
+          test -f Build/Windows/BoomerShooter.exe
+          # Las notas son el mensaje del tag anotado (partes separadas por punto y coma)
+          CI_COMMIT_TAG_MESSAGE="$(git -C "$GITHUB_WORKSPACE/github" tag -l --format='%(contents)' "$GITHUB_REF_NAME" | sed '/^$/d' | head -20)"
+          export CI_COMMIT_TAG_MESSAGE
+          echo "notas: $CI_COMMIT_TAG_MESSAGE"
+          subir() {
+            curl --fail --silent --show-error --header "PRIVATE-TOKEN: ${GITLAB_TOKEN}" \
+              --upload-file "$1" \
+              "https://gitlab.com/api/v4/projects/${DESCARGAS_PROYECTO}/packages/generic/boomershooter/${VERSION}/$2"
+          }
+          subir Build/Windows/BoomerShooter.exe BoomerShooter.exe
+          subir Build/Linux/boomershooter.x86_64 boomershooter.x86_64
+          ARGS="--version ${VERSION} --windows Build/Windows/BoomerShooter.exe --linux Build/Linux/boomershooter.x86_64"
+          python3 tools/publish_update.py $ARGS
+          cat site/update.json
+          python3 tools/crear_release.py --version "${VERSION}" --plataformas "windows,linux"
+
+      - name: Empujar manifiesto y version web a GitLab (Vercel los publica)
+        working-directory: repo
+        env:
+          GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
+        run: |
+          set -e
+          VERSION="${GITHUB_REF_NAME#v}"
+          if [ -d Build/Web ]; then rm -rf site/play && mkdir -p site/play && cp -r Build/Web/. site/play/; fi
+          git add site/update.json site/api/download/windows.js site/api/download/linux.js
+          [ -d site/play ] && git add -f site/play
+          git diff --cached --quiet || git commit -m "Publicada la ${VERSION} (manifiesto y descargas)"
+          git pull --rebase -q origin main
+          git push origin HEAD:main
