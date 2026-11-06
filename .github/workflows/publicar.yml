@@ -251,9 +251,9 @@ jobs:
           printf '**Boomer Shooter %s**\n\n%s\n\nIPA sin firmar: se instala con Gbox, Sideloadly o AltStore. Windows y Linux: https://boomershooter.vercel.app\n' "$VERSION" "$CUERPO" > notas.md
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             gh release upload "$GITHUB_REF_NAME" "$IPA" --clobber --repo "$GITHUB_REPOSITORY"
-            gh release edit "$GITHUB_REF_NAME" --notes-file notas.md --repo "$GITHUB_REPOSITORY"
+            gh release edit "$GITHUB_REF_NAME" --notes-file notas.md --draft=false --latest --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$GITHUB_REF_NAME" "$IPA" --title "v${VERSION}" --notes-file notas.md --repo "$GITHUB_REPOSITORY"
+            gh release create "$GITHUB_REF_NAME" "$IPA" --title "v${VERSION}" --notes-file notas.md --draft=false --latest --repo "$GITHUB_REPOSITORY"
           fi
 
       - name: Empujar manifiesto y version web a GitLab (Vercel los publica)
