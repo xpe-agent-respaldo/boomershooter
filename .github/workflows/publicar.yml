@@ -267,5 +267,8 @@ jobs:
           git add site
           [ -d site/play ] && git add -f site/play
           git diff --cached --quiet || git commit -m "Publicada la ${VERSION} (manifiesto y descargas)"
+          # Binarios compilados y herramientas copiadas no se versionan: se descartan del arbol
+          # (si no, "git pull --rebase" se niega por cambios sin confirmar).
+          git stash push -u -q || true
           git pull --rebase -q origin main
           git push origin HEAD:main
