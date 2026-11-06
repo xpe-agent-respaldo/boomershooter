@@ -188,6 +188,9 @@ jobs:
           # site/play y update.json, que se regeneran mas abajo). Asi Vercel recibe, por ejemplo,
           # /api/download/ios-patch y el boton de iPhone.
           rsync -a --exclude 'play' --exclude 'update.json' fuente/site/ repo/site/
+          # Las herramientas de publicacion tambien son las de ESTA version, no las que haya en
+          # el repo de GitLab (que puede ir por detras).
+          rsync -a fuente/tools/ repo/tools/
 
       - uses: actions/download-artifact@v4
         with:
