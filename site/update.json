@@ -1,7 +1,7 @@
 {
   "version": "1.3.0",
   "minimum_version": "1.3.0",
-  "notes": "CI en GitHub Actions: compila Windows, Linux, Web e iOS y publica (GitLab se quedo sin minutos)",
+  "notes": "El online vuelve a funcionar: clave nueva del servidor;Actualizacion obligatoria: las versiones anteriores ya no conectan;Controles tactiles nuevos y microfono para iPhone;Ajuste automatico de calidad segun tu equipo",
   "windows_url": "https://boomershooter.vercel.app/api/download/windows",
   "linux_url": "https://boomershooter.vercel.app/api/download/linux",
   "windows_size": 149235968,
