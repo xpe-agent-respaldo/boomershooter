@@ -45,12 +45,16 @@ func _ready() -> void:
 	ok("los %d presets de exportacion incluyen online_defaults.cfg" % nombres.size(),
 		nombres.size() >= 5 and con_filtro == nombres.size(), "%d de %d: %s" % [con_filtro, nombres.size(), str(nombres)])
 
-	# El CI lo genera antes de exportar en los 4 trabajos de compilacion.
+	# El CI lo genera antes de exportar. Compila GitHub Actions (publicar.yml): una vez para
+	# escritorio y web (job escritorio_y_web) y otra para la IPA (job ipa). Si falta una, ese
+	# build sale sin servidor online.
+	var gh := FileAccess.get_file_as_string("res://.github/workflows/publicar.yml")
+	ok("GitHub Actions genera online_defaults.cfg en escritorio/web e iOS (2 veces)",
+		gh.count("write_online_defaults.sh") >= 2, str(gh.count("write_online_defaults.sh")))
+	# El CI de GitLab quedo como respaldo manual: si se reactiva, tambien debe inyectarlo.
 	var ci := FileAccess.get_file_as_string("res://.gitlab-ci.yml")
-	ok("el CI de GitLab genera online_defaults.cfg al menos 4 veces (win, linux, web, ios)",
+	ok("el CI de GitLab (respaldo) sigue inyectando online_defaults.cfg",
 		ci.count("write_online_defaults.sh") >= 4, str(ci.count("write_online_defaults.sh")))
-	var gh := FileAccess.get_file_as_string("res://.github/workflows/ios-ipa.yml")
-	ok("el workflow de GitHub genera online_defaults.cfg", gh.contains("write_online_defaults.sh"))
 	ok("el archivo generado no se versiona (.gitignore)",
 		FileAccess.get_file_as_string("res://.gitignore").contains("online_defaults.cfg"))
 

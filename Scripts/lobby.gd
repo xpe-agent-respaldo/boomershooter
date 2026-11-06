@@ -21,11 +21,9 @@ var name_input: LineEdit
 var map_preview: TextureRect
 var map_title: Label
 var mode_desc: Label
-var lobby_music: AudioStreamPlayer
 var play_button: Button
 var vis_desc: Label
 
-var _last_music_path := ""
 var _mode_index := 0
 var _map_index := 0
 var _mode_buttons: Array[Button] = []
@@ -44,9 +42,6 @@ var _join_button: Button
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
-	_play_next_lobby_track()
-	if lobby_music:
-		lobby_music.finished.connect(_play_next_lobby_track)
 	MenuFX.attach(self)
 	OnlineManager.status_changed.connect(_on_online_status_changed)
 	OnlineManager.match_ready.connect(_on_online_match_ready)
@@ -233,9 +228,6 @@ func _build() -> void:
 	var foot := UIKit.label("© 2026 xpe.nettt · Stealth Proyects", 16, UIKit.COL_DIM)
 	root.add_child(foot)
 
-	lobby_music = AudioStreamPlayer.new()
-	lobby_music.bus = &"Music"
-	add_child(lobby_music)
 
 
 func _select_mode(i: int) -> void:
@@ -378,6 +370,3 @@ func _on_back_button_pressed() -> void:
 	OnlineManager.leave_online()
 	LobbyAudio.change_scene(get_tree(), "res://Levels/MainMenu.tscn")
 
-
-func _play_next_lobby_track() -> void:
-	_last_music_path = LobbyAudio.play_next(lobby_music, _last_music_path)

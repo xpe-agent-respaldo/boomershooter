@@ -6,19 +6,14 @@ extends Control
 const BACKDROP := "res://Assets/Images/menu_bg.png"
 
 var online_button: Button
-var lobby_music: AudioStreamPlayer
 var version_label: Label
 
-var _last_music_path := ""
 var _buttons: Array[Button] = []
 
 
 func _ready() -> void:
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build()
-	_play_next_lobby_track()
-	if lobby_music:
-		lobby_music.finished.connect(_play_next_lobby_track)
 	if online_button:
 		online_button.grab_focus()
 	_intro_animation()
@@ -120,9 +115,6 @@ func _build() -> void:
 	var version: String = str(ProjectSettings.get_setting("application/config/version", ""))
 	version_label.text = "v" + version if version != "" else ""
 
-	lobby_music = AudioStreamPlayer.new()
-	lobby_music.bus = &"Music"
-	add_child(lobby_music)
 
 
 func _mode(title: String, subtitle: String, action: Callable) -> Button:
@@ -140,6 +132,3 @@ func _intro_animation() -> void:
 	var tw := create_tween()
 	tw.tween_property(self, "modulate:a", 1.0, 0.6)
 
-
-func _play_next_lobby_track() -> void:
-	_last_music_path = LobbyAudio.play_next(lobby_music, _last_music_path)

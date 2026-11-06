@@ -1,20 +1,21 @@
 extends Node
-## Musica por mapa. Escucha los cambios de escena y pone la pista que toca,
-## siempre por el bus "Music" para que el control de volumen de Ajustes mande.
+## Musica de PARTIDA, por mapa. Escucha los cambios de escena y pone la pista que toca,
+## por el bus "Music" (volumen "MUSICA DE PARTIDA" en Ajustes).
+## La musica de los menus es de LobbyMusic, con su propio bus y volumen.
 
 const PISTAS := {
 	"StormVillage": "res://Assets/Sounds/Music/Maps/aldea_tormenta.wav",
 	"SpaceArena": "res://Assets/Sounds/Music/Maps/estacion_lunar.wav",
 	"LunarPost": "res://Assets/Sounds/Music/Maps/estacion_lunar.wav",
 	"RecyclingPlant": "res://Assets/Sounds/Music/Maps/planta_reciclaje.wav",
-	"ArenaSelect": "res://Assets/Sounds/Music/Lobby/musica del lobby 1.mp3",
-	"Shop": "res://Assets/Sounds/Music/Lobby/musica del lobby 1.mp3",
-	"Achievements": "res://Assets/Sounds/Music/Lobby/musica del lobby 1.mp3",
-	"MainMenu": "res://Assets/Sounds/Music/Lobby/musica del lobby 1.mp3",
 	"TestLevel": "res://Assets/Sounds/Music/Maps/aldea_tormenta.wav",
 }
-## El lobby tiene su propio reproductor con lista de temas: no se toca.
-const ESCENAS_SIN_DIRECTOR := ["Lobby"]
+## Los menus y el lobby los lleva LobbyMusic: aqui solo se calla la musica de partida.
+## Por archivo: el nombre del nodo no sirve ("Shop" y "Achievements" son tambien autoloads).
+const ESCENAS_SIN_DIRECTOR := [
+	"res://Levels/MainMenu.tscn", "res://Levels/Lobby.tscn", "res://Levels/ArenaSelect.tscn",
+	"res://Levels/Shop.tscn", "res://Levels/Achievements.tscn",
+]
 
 var _player: AudioStreamPlayer
 var _actual: String = ""
@@ -37,7 +38,7 @@ func _watch() -> void:
 		if escena == null:
 			continue
 		var nombre := escena.name
-		if nombre in ESCENAS_SIN_DIRECTOR:
+		if escena.scene_file_path in ESCENAS_SIN_DIRECTOR:
 			_parar()
 			continue
 		if PISTAS.has(nombre) and _actual != nombre:

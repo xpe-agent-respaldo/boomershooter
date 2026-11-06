@@ -2,22 +2,91 @@ extends CanvasLayer
 
 # Match chat presentation. Transport is intentionally separate: gameplay chat is
 # only enabled after the server-side match authority is installed.
+#
+# El chat es de PARTIDA. Como es un autoload existe siempre, asi que se vigila la escena:
+# en cualquier menu (menu principal, lobby, tienda, logros...) se oculta, se vacia y Enter
+# no hace nada; al empezar otra partida arranca limpio, sin las lineas de la anterior.
 const MAX_LINES := 6
+
+## Escenas donde NO hay partida: el chat no se ve ni se puede abrir. Por archivo y no por el
+## nombre del nodo: "Shop" y "Achievements" chocan con autoloads y Godot las renombra.
+const ESCENAS_MENU := [
+	"res://Levels/MainMenu.tscn", "res://Levels/Lobby.tscn", "res://Levels/ArenaSelect.tscn",
+	"res://Levels/Shop.tscn", "res://Levels/Achievements.tscn",
+]
 
 var _panel: PanelContainer
 var _history: RichTextLabel
 var _entry: LineEdit
 var _open := false
 var _lines: Array[String] = []
+var _en_partida := false
+var _escena_id := 0   # instancia de la escena activa: cambia con cada mapa nuevo
 
 
 func _ready() -> void:
 	layer = 20
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_create_interface()
+	_vigilar_escena()
+
+
+## True si la escena es un menu (sin partida).
+static func es_menu_escena(escena: Node) -> bool:
+	return escena != null and escena.scene_file_path in ESCENAS_MENU
+
+
+func _vigilar_escena() -> void:
+	# Un fotograma de margen: current_scene aun es null al arrancar el autoload.
+	await get_tree().process_frame
+	while true:
+		await get_tree().process_frame
+		_sincronizar_escena()
+
+
+## Pone _en_partida al dia con la escena activa; al cambiar, limpia el chat.
+func _sincronizar_escena() -> void:
+	var escena := get_tree().current_scene
+	if escena == null:
+		return
+	var en_partida := not es_menu_escena(escena)
+	var nueva := escena.get_instance_id() != _escena_id
+	_escena_id = escena.get_instance_id()
+	# Una partida nueva (aunque venga de otra partida, sin pasar por un menu) empieza con el
+	# chat limpio: las lineas de la anterior no se arrastran.
+	if en_partida and nueva and _en_partida:
+		_limpiar()
+	if en_partida == _en_partida:
+		return
+	_en_partida = en_partida
+	if en_partida:
+		_limpiar()
+	else:
+		salir_de_partida()
+
+
+## Al volver a un menu: cierra el chat, borra el historial y lo esconde.
+func salir_de_partida() -> void:
+	_limpiar()
+	if _panel:
+		_panel.visible = false
+
+
+func _limpiar() -> void:
+	_lines.clear()
+	if _history:
+		_history.text = ""
+	_open = false
+	if _entry:
+		_entry.clear()
+		_entry.release_focus()
+	if _panel:
+		_panel.visible = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not _en_partida:
+		return
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_ENTER:
 		if _open:
 			_submit()
@@ -114,6 +183,11 @@ func _submit() -> void:
 
 
 func _add_line(line: String) -> void:
+	# Se mira la escena en este instante (no solo la ultima vigilada): asi un aviso que llega
+	# en el primer fotograma de un mapa no se pierde, y uno que llega en un menu se descarta.
+	_sincronizar_escena()
+	if not _en_partida:
+		return
 	_lines.append(line)
 	if _lines.size() > MAX_LINES:
 		_lines.pop_front()

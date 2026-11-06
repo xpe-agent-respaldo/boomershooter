@@ -9,10 +9,17 @@ const PATCH_INFO := "user://patch/content.json"
 const SENTINEL := "user://patch/.mounted_once"
 
 static var mounted_version: String = ""
+## Solo para pruebas: monta el parche aunque se corra desde el editor (en el juego real es false).
+static var montar_en_editor := false
 
 
 func _enter_tree() -> void:
-	if OS.has_feature("editor") or not FileAccess.file_exists(PATCH_PATH):
+	montar_parche()
+
+
+## Monta el parche descargado si es valido. Separado de _enter_tree para poder probarlo.
+func montar_parche() -> void:
+	if (OS.has_feature("editor") and not montar_en_editor) or not FileAccess.file_exists(PATCH_PATH):
 		return
 	var info = JSON.parse_string(FileAccess.get_file_as_string(PATCH_INFO)) if FileAccess.file_exists(PATCH_INFO) else null
 	if not info is Dictionary:

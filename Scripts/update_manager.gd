@@ -12,6 +12,7 @@ signal update_state_changed(state: String)
 
 const MANIFEST_URL := "https://boomershooter.vercel.app/update.json"
 const LOCAL_MANIFEST_PATH := "res://site/update.json"
+const PAGINA_IPA := "https://boomershooter.vercel.app/#ios"
 const COPYRIGHT := "© 2026 xpe.nettt · Stealth Proyects"
 const UPDATE_DIR := "user://update"
 const FONT_PATH := "res://Assets/Fonts/Geizer.otf"
@@ -36,6 +37,8 @@ var _status: Label
 var _action_button: Button
 var _later_button: Button
 var _pulse_time: float = 0.0
+var _scroll_notas: ScrollContainer
+var _alto_scroll_maximo := 400.0
 var _title_label: Label
 var _installing: bool = false
 
@@ -119,7 +122,23 @@ func _current_version() -> String:
 # Datos del manifiesto
 # --------------------------------------------------------------------------
 
+## iOS no puede reemplazar la app ni ejecutar un binario nuevo: solo recibe parches de contenido
+## (content.pck), que se montan al arrancar. Android/iOS nunca deben recibir el .exe de Windows.
+## Solo para pruebas: simula un movil en escritorio ("iOS"). Vacio = la plataforma real.
+static var plataforma_simulada: String = ""
+## Solo para pruebas: permite actualizar aunque se corra desde el editor (en el juego real es siempre false).
+static var permitir_en_editor := false
+
+
+static func es_movil() -> bool:
+	var nombre := plataforma_simulada if plataforma_simulada != "" else OS.get_name()
+	return nombre in ["iOS", "Android"]
+
+
 func _platform_url() -> String:
+	# En movil no hay binario de escritorio que descargar: se devuelve vacio a proposito.
+	if es_movil():
+		return ""
 	return str(_manifest.get("linux_url", "")) if OS.get_name() == "Linux" else str(_manifest.get("windows_url", ""))
 
 
@@ -128,9 +147,27 @@ func _platform_sha256() -> String:
 	return str(_manifest.get(key, "")).to_lower()
 
 
-## Un parche solo existe para Windows/Linux y si el manifiesto lo declara para ESTE motor.
+## Clave del manifiesto con el parche de ESTA plataforma. Cada preset exporta un pack distinto
+## (texturas e importados cambian), asi que un parche de iOS jamas se ofrece a PC ni al reves.
+func _patch_key() -> String:
+	var nombre := plataforma_simulada if plataforma_simulada != "" else OS.get_name()
+	match nombre:
+		"iOS":
+			return "patch_ios"
+		"Android":
+			return "patch_android"
+		_:
+			return "patch"
+
+
+func _patch() -> Dictionary:
+	var p = _manifest.get(_patch_key(), {})
+	return p if p is Dictionary else {}
+
+
+## Un parche existe si el manifiesto lo declara para ESTA plataforma y ESTE motor.
 func _patch_available() -> bool:
-	var patch = _manifest.get("patch", {})
+	var patch = _patch()
 	if not patch is Dictionary or str(patch.get("url", "")) == "":
 		return false
 	if str(patch.get("engine_revision", "")) != str(ProjectSettings.get_setting("application/config/engine_revision", "1")):
@@ -140,7 +177,7 @@ func _patch_available() -> bool:
 
 
 func _download_size_text() -> String:
-	var bytes := int(_manifest.get("patch", {}).get("size", 0)) if _patch_available() else _platform_size()
+	var bytes := int(_patch().get("size", 0)) if _patch_available() else _platform_size()
 	return "%.0f MB" % (bytes / 1048576.0) if bytes > 0 else ""
 
 
@@ -176,11 +213,12 @@ static func is_game_executable(path: String) -> bool:
 
 ## Puede actualizarse sin navegador: hay URL y la instalacion permite reemplazar el ejecutable.
 func can_self_update() -> bool:
-	if OS.has_feature("editor") or OS.get_name() == "Web":
+	if (OS.has_feature("editor") and not permitir_en_editor) or OS.get_name() == "Web":
 		return false
 	if _patch_available():
 		return true
-	if _platform_url() == "":
+	# En movil sin parche valido no hay autoinstalacion posible: se avisa de reinstalar la IPA.
+	if es_movil() or _platform_url() == "":
 		return false
 	return is_game_executable(OS.get_executable_path())
 
@@ -246,8 +284,11 @@ func _show_update_screen(new_version: String) -> void:
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_layer.add_child(center)
 
+	var ventana := get_viewport().get_visible_rect().size
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(640, 0)
+	# En un iPhone en horizontal (~844x390) 640 px fijos y ~640 de alto no caben: el boton quedaba
+	# fuera de pantalla. El panel se limita a la ventana (con margen de seguridad) y el resto es scroll.
+	panel.custom_minimum_size = Vector2(minf(640.0, ventana.x - 48.0), 0)
 	var style := StyleBoxFlat.new()
 	style.bg_color = COL_BG
 	style.border_color = COL_BLOOD
@@ -263,9 +304,21 @@ func _show_update_screen(new_version: String) -> void:
 	panel.add_theme_stylebox_override("panel", style)
 	center.add_child(panel)
 
+	var marco := VBoxContainer.new()
+	marco.add_theme_constant_override("separation", 12)
+	panel.add_child(marco)
+	# Todo el contenido va en un scroll cuyo alto maximo es el de la ventana; los botones
+	# (fuera del scroll) siempre se ven y se pueden pulsar.
+	var scroll := ScrollContainer.new()
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	marco.add_child(scroll)
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 12)
-	panel.add_child(box)
+	box.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(box)
+	_scroll_notas = scroll
+	_alto_scroll_maximo = maxf(120.0, ventana.y - 48.0 - 54.0 - 12.0 - 28.0 - 24.0)
 
 	var kicker := _label("// SISTEMA DE ACTUALIZACION", 14, COL_DIM)
 	box.add_child(kicker)
@@ -275,7 +328,8 @@ func _show_update_screen(new_version: String) -> void:
 
 	var subtitle := _label(
 		"Esta version ya no puede jugar. Actualiza para volver a la arena." if _forced
-		else "Hay una version nueva esperandote. Se instala sola y el juego se reinicia.", 17, COL_TEXT)
+		else ("Hay una version nueva esperandote. Se descarga y se aplica sin reinstalar la app." if _patch_available() and es_movil()
+			else "Hay una version nueva esperandote. Se instala sola y el juego se reinicia."), 17, COL_TEXT)
 	box.add_child(subtitle)
 
 	box.add_child(_divider())
@@ -343,7 +397,8 @@ func _show_update_screen(new_version: String) -> void:
 	var buttons := HBoxContainer.new()
 	buttons.add_theme_constant_override("separation", 12)
 	var size_text := _download_size_text()
-	_action_button = _button("ACTUALIZAR Y REINICIAR" + (" (%s)" % size_text if size_text != "" else ""), true)
+	var accion := "ACTUALIZAR" if es_movil() and _patch_available() else ("DESCARGAR LA IPA" if es_movil() else "ACTUALIZAR Y REINICIAR")
+	_action_button = _button(accion + (" (%s)" % size_text if size_text != "" else ""), true)
 	_action_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_action_button.pressed.connect(_on_action_pressed)
 	buttons.add_child(_action_button)
@@ -357,14 +412,26 @@ func _show_update_screen(new_version: String) -> void:
 		leave.custom_minimum_size = Vector2(130, 54)
 		leave.pressed.connect(func() -> void: get_tree().quit())
 		buttons.add_child(leave)
-	box.add_child(buttons)
+	marco.add_child(buttons)
 
 	var foot := _label(COPYRIGHT, 12, Color(0.5, 0.42, 0.4))
 	foot.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	box.add_child(foot)
+	marco.add_child(foot)
 
+	# El scroll crece hasta su contenido pero nunca pasa del alto disponible.
+	scroll.custom_minimum_size.y = 0.0
+	_ajustar_alto.call_deferred()
 	_action_button.grab_focus()
 	update_state_changed.emit("shown")
+
+
+## Da al scroll el alto de su contenido, sin pasar del maximo que cabe en la ventana.
+func _ajustar_alto() -> void:
+	if _scroll_notas == null or not is_instance_valid(_scroll_notas):
+		return
+	var contenido := _scroll_notas.get_child(0) as Control
+	var alto := contenido.get_combined_minimum_size().y
+	_scroll_notas.custom_minimum_size.y = minf(alto, _alto_scroll_maximo)
 
 
 func _divider() -> ColorRect:
@@ -392,6 +459,12 @@ func _on_action_pressed() -> void:
 	if not can_self_update():
 		# Instalacion que no se puede reemplazar sola (editor, carpeta de solo lectura...).
 		var url := _platform_url()
+		if es_movil():
+			# La IPA nueva se descarga de la pagina oficial; el juego no se cierra solo en iOS.
+			url = PAGINA_IPA
+			OS.shell_open(url)
+			_set_status("Descarga la IPA nueva desde la pagina y vuelve a firmarla.", false)
+			return
 		if url != "":
 			OS.shell_open(url)
 		get_tree().quit()
@@ -426,7 +499,7 @@ func _start_download() -> void:
 	_download.timeout = 0.0
 	_download.request_completed.connect(_on_download_completed)
 	add_child(_download)
-	var err := _download.request(str(_manifest["patch"]["url"]) if _patch_available() else _platform_url())
+	var err := _download.request(str(_patch()["url"]) if _patch_available() else _platform_url())
 	if err != OK:
 		_fail("No se pudo iniciar la descarga (error %d)." % err)
 		return
@@ -459,14 +532,14 @@ func _on_download_completed(result: int, response_code: int, _headers: PackedStr
 	_progress.value = 100.0
 	_set_status("Comprobando integridad...")
 	await get_tree().process_frame
-	var expected := str(_manifest["patch"].get("sha256", "")).to_lower() if _patch_available() else _platform_sha256()
+	var expected := str(_patch().get("sha256", "")).to_lower() if _patch_available() else _platform_sha256()
 	if expected != "":
 		var actual := FileAccess.get_sha256(_target_path).to_lower()
 		if actual != expected:
 			DirAccess.remove_absolute(_target_path)
 			_fail("El archivo descargado esta corrupto. No se instalo nada.")
 			return
-	var expected_size := int(_manifest["patch"].get("size", 0)) if _patch_available() else _platform_size()
+	var expected_size := int(_patch().get("size", 0)) if _patch_available() else _platform_size()
 	if expected_size > 0:
 		var file := FileAccess.open(_target_path, FileAccess.READ)
 		var real_size := file.get_length() if file else 0
@@ -508,8 +581,8 @@ func _install_patch_and_restart() -> void:
 		return
 	var info := {
 		"version": str(_manifest.get("version", "")),
-		"sha256": str(_manifest["patch"].get("sha256", "")),
-		"engine_revision": str(_manifest["patch"].get("engine_revision", "1")),
+		"sha256": str(_patch().get("sha256", "")),
+		"engine_revision": str(_patch().get("engine_revision", "1")),
 	}
 	var file := FileAccess.open(patch_dir.path_join("content.json"), FileAccess.WRITE)
 	if file == null:
@@ -517,8 +590,26 @@ func _install_patch_and_restart() -> void:
 		return
 	file.store_string(JSON.stringify(info))
 	file.close()
+	if es_movil():
+		# iOS no permite relanzar el proceso (OS.create_process no existe). Se monta el parche
+		# aqui mismo y se recarga la escena principal: scripts y escenas salen ya parcheados.
+		_montar_parche_y_recargar()
+		return
 	OS.create_process(OS.get_executable_path(), OS.get_cmdline_user_args())
 	get_tree().quit()
+
+
+## Movil: monta el parche recien descargado y vuelve al menu principal ya actualizado.
+func _montar_parche_y_recargar() -> void:
+	var pck := ProjectSettings.globalize_path("user://patch/content.pck")
+	if not ProjectSettings.load_resource_pack(pck, true):
+		_fail("No se pudo aplicar el parche. Cierra el juego y vuelve a abrirlo.")
+		return
+	PatchLoader.mounted_version = str(_manifest.get("version", ""))
+	_close_screen()
+	update_state_changed.emit("applied")
+	# Las escenas ya cargadas en cache son las viejas: se vuelve al menu para releerlas del parche.
+	LobbyAudio.change_scene(get_tree(), "res://Levels/MainMenu.tscn")
 
 
 ## Escribe el script de relevo, lo lanza y cierra el juego para que pueda reemplazarse.

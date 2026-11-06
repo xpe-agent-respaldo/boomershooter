@@ -100,6 +100,10 @@ def main() -> int:
     p.add_argument("--linux", default="")
     p.add_argument("--windows-url", default="")
     p.add_argument("--linux-url", default="")
+    p.add_argument("--patch-ios", default="", help="parche de contenido de iOS (content.pck) ya generado")
+    p.add_argument("--patch-ios-url", default="", help="URL publica de ese parche")
+    p.add_argument("--base-ios", default="1.3.0", help="version de la IPA instalada sobre la que se aplica el parche")
+    p.add_argument("--engine-revision", default="1")
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
 
@@ -135,6 +139,27 @@ def main() -> int:
         datos[f"{plataforma}_sha256"] = huella
         print(f"  {plataforma}: {tamano} bytes  sha256={huella}")
 
+    # Parche de contenido para iPhone/iPad: iOS no puede reemplazar la app, asi que recibe un
+    # content.pck que se monta al arrancar. Va en su propia clave (patch_ios): el pack de iOS
+    # es distinto al de PC y jamas debe ofrecerse a Windows/Linux.
+    if args.patch_ios:
+        if not os.path.exists(args.patch_ios):
+            print(f"ERROR: no existe el parche de iOS: {args.patch_ios}")
+            return 2
+        huella, tamano = sha256_y_tamano(args.patch_ios)
+        datos["patch_ios"] = {
+            "url": args.patch_ios_url or f"{BASE_DESCARGAS}/ios-patch",
+            "size": tamano,
+            "sha256": huella,
+            "min_base": args.base_ios,
+            "engine_revision": args.engine_revision,
+            "version": version,
+        }
+        print(f"  parche iOS: {tamano} bytes  sha256={huella}  base>={args.base_ios}")
+    elif isinstance(previo.get("patch_ios"), dict) and previo["patch_ios"].get("version") == version:
+        datos["patch_ios"] = previo["patch_ios"]
+    # Sin parche nuevo no se arrastra el de una version anterior: ofreceria contenido viejo.
+
     # Historial: las ultimas 100 versiones publicadas, para poder volver atras o
     # consultar que se entrego cada dia sin depender del repositorio.
     historial = [h for h in previo.get("history", []) if isinstance(h, dict)]
@@ -162,7 +187,7 @@ def main() -> int:
         return 0
 
     escribir_manifiesto(datos)
-    for nombre in ("windows", "linux"):
+    for nombre in ("windows", "linux", "ios-patch"):
         if apuntar_descarga(nombre, version):
             print(f"  site/api/download/{nombre}.js -> {version}")
         else:

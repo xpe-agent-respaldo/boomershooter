@@ -45,3 +45,6 @@ __pycache__/
 
 # Capturas locales de revision (no forman parte del juego)
 capturas/
+
+# Godot los regenera al abrir el proyecto con la web compilada dentro
+site/play/*.import

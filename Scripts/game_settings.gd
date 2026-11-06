@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 const SETTINGS_PATH := "user://settings.cfg"
-const BUS_NAMES := ["Master", "Music", "SFX"]
+const BUS_NAMES := ["Master", "Music", "Lobby", "SFX"]
 const REMAPPABLE_ACTIONS := ["move_forward", "move_backward", "move_left", "move_right", "jump", "crouch", "sprint", "attack", "aim", "reload", "interact", "weapon1", "weapon2", "weapon3", "weapon4", "weapon_wheel", "push_to_talk", "help_call", "ping_mark", "exit"]
 const FPS_LIMITS := [0, 30, 60, 90, 120, 144, 165, 240]
 # Palabras que delatan unos audifonos en el nombre del dispositivo de salida.
@@ -11,7 +11,7 @@ signal audio_device_changed(device_name: String, is_headphones: bool)
 
 var _panel: PanelContainer
 var _fps_label: Label
-var _values := {"Master": 0.8, "Music": 0.7, "SFX": 0.8}
+var _values := {"Master": 0.8, "Music": 0.7, "Lobby": 0.7, "SFX": 0.8}
 var mouse_sensitivity: float = 0.33
 var controller_sensitivity: float = 2.0
 var fps_limit: int = 0
@@ -210,7 +210,8 @@ func _create_panel() -> void:
 	# AUDIO
 	var audio := _new_tab(tabs, "AUDIO")
 	_add_volume_control(audio, "VOLUMEN GENERAL", "Master")
-	_add_volume_control(audio, "MUSICA", "Music")
+	_add_volume_control(audio, "MUSICA DEL LOBBY", "Lobby")
+	_add_volume_control(audio, "MUSICA DE PARTIDA", "Music")
 	_add_volume_control(audio, "EFECTOS", "SFX")
 	_add_audio_device_control(audio)
 

@@ -142,11 +142,25 @@ jobs:
           print("OK: la IPA lleva el servidor online y no la clave vieja")
           PY
 
-      - name: Guardar la IPA
+      - name: Parche de contenido para iPhone (actualizacion remota sin reinstalar)
+        env:
+          GODOT: /Applications/Godot.app/Contents/MacOS/Godot
+        run: |
+          set -e
+          mkdir -p Build/Parche
+          # La base es el pack de la IPA instalada (v1.3.0). Siempre se calcula contra ella para
+          # que el parche sirva desde cualquier version intermedia.
+          curl -fL -o Build/Parche/base-ios.pck "https://github.com/${GITHUB_REPOSITORY}/releases/download/v1.3.0/base-ios.pck"
+          sh tools/build_ios_patch.sh Build/Parche/base-ios.pck Build/Parche/content-ios.pck
+          ls -la Build/Parche
+
+      - name: Guardar la IPA y el parche
         uses: actions/upload-artifact@v4
         with:
           name: BoomerShooter-ipa-sin-firmar
-          path: Build/iOS/*.ipa
+          path: |
+            Build/iOS/*.ipa
+            Build/Parche/content-ios.pck
           if-no-files-found: error
           retention-days: 90
 
@@ -171,6 +185,11 @@ jobs:
           name: escritorio-y-web
           path: repo/Build
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: BoomerShooter-ipa-sin-firmar
+          path: repo/Build/IPA
+
       - name: Subir binarios, generar manifiesto y crear la release
         working-directory: repo
         env:
@@ -194,7 +213,12 @@ jobs:
           }
           subir Build/Windows/BoomerShooter.exe BoomerShooter.exe
           subir Build/Linux/boomershooter.x86_64 boomershooter.x86_64
+          # Parche de iPhone: se sube al paquete y se declara en patch_ios (aparte del de PC).
+          PARCHE="$(find Build/IPA -name content-ios.pck | head -1)"
+          test -f "$PARCHE"
+          subir "$PARCHE" content-ios.pck
           ARGS="--version ${VERSION} --windows Build/Windows/BoomerShooter.exe --linux Build/Linux/boomershooter.x86_64"
+          ARGS="$ARGS --patch-ios $PARCHE --patch-ios-url https://boomershooter.vercel.app/api/download/ios-patch --base-ios 1.3.0"
           python3 tools/publish_update.py $ARGS
           cat site/update.json
           python3 tools/crear_release.py --version "${VERSION}" --plataformas "windows,linux"
