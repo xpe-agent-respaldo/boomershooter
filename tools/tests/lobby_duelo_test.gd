@@ -33,7 +33,9 @@ func _correr() -> void:
 	_ok(lb.mode_desc.text.contains("Tab"), "la descripcion explica el marcador con Tab")
 	lb._monstruos = true
 	_ok(lb.opciones_sala().monsters == false, "aunque el interruptor interno estuviera en SI, el duelo manda NO")
+	_ok(int(d.max_players) == 4, "el duelo empieza con aforo 4 (%s)" % str(d.max_players))
 	lb._select_mode(0)
+	_ok(lb.opciones_sala().max_players == 20, "al volver a OLEADAS recupera su aforo (20)")
 	_ok(not lb._opt_monstruos.disabled, "al volver a OLEADAS se desbloquean otra vez")
 	_ok(lb._opt_monstruos.text == "MONSTRUOS: SI", "y recuperan su valor (%s)" % lb._opt_monstruos.text)
 	print("\nLOBBY DUELO: ", "TODO BIEN" if fallos == 0 else "%d FALLOS" % fallos)

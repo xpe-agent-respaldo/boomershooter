@@ -256,8 +256,20 @@ func _build() -> void:
 
 
 
+const DUELO_JUG_I := 1      # aforo inicial del duelo: 4 jugadores (amigos), se puede cambiar
+var _jug_antes_duelo := -1
+
+
 func _select_mode(i: int) -> void:
+	var venia_de_duelo := _es_duelo()
 	_mode_index = i
+	# Al entrar al duelo el aforo baja a 4; al salir se devuelve el que el jugador tenia.
+	if _es_duelo() and not venia_de_duelo:
+		_jug_antes_duelo = _jug_i
+		_jug_i = DUELO_JUG_I
+	elif venia_de_duelo and not _es_duelo() and _jug_antes_duelo >= 0:
+		_jug_i = _jug_antes_duelo
+		_jug_antes_duelo = -1
 	for k in _mode_buttons.size():
 		_mode_buttons[k].button_pressed = (k == i)
 	mode_desc.text = MODES[i].desc
