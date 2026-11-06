@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Boomer Shooter"
 config/description="FPS arcade de alta movilidad por Stealth Proyects."
-config/version="1.3.5"
+config/version="1.3.6"
 boot_splash/show_image=true
 boot_splash/fullsize=true
 boot_splash/bg_color=Color(0, 0, 0, 1)

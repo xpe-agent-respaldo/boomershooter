@@ -261,6 +261,11 @@ jobs:
           # Las herramientas de publicacion tambien son las de ESTA version, no las que haya en
           # el repo de GitLab (que puede ir por detras).
           rsync -a fuente/tools/ repo/tools/
+          # El SERVIDOR (Nakama en Render) se reconstruye desde GitLab: sus modulos Lua, el Dockerfile
+          # y el arranque tienen que ser los de ESTA version, o las salas/Duelo/bots en vivo van por detras.
+          mkdir -p repo/infra/nakama
+          rsync -a --delete fuente/infra/nakama/modules/ repo/infra/nakama/modules/
+          cp fuente/infra/nakama/Dockerfile fuente/infra/nakama/start-nakama.sh repo/infra/nakama/
 
       - uses: actions/download-artifact@v4
         with:
@@ -341,6 +346,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           if [ -d Build/Web ]; then rm -rf site/play && mkdir -p site/play && cp -r Build/Web/. site/play/; fi
           git add site
+          git add -A infra/nakama   # servidor: Render lo reconstruye desde aqui
           [ -d site/play ] && git add -f site/play
           git diff --cached --quiet || git commit -m "Publicada la ${VERSION} (manifiesto y descargas)"
           # Binarios compilados y herramientas copiadas no se versionan: se descartan del arbol
