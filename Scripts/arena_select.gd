@@ -7,19 +7,22 @@ extends Control
 const LEVELS := [
 	"res://Levels/RecyclingPlant.tscn",
 	"res://Levels/StormVillage.tscn",
-	"res://Levels/SpaceArena.tscn"
+	"res://Levels/SpaceArena.tscn",
+	"res://Levels/SnowFields.tscn"
 ]
 # Orden = LEVELS. La planta usa una captura generada del propio mapa; la aldea y la
 # luna usan las referencias: aldea de tejados rojos y picos oscuros con cielo violeta.
 const PREVIEWS := [
 	"res://Assets/Maps/Previews/recycling_plant.png",
 	"res://Assets/Maps/References/village_scenery_idea.png",
-	"res://Assets/Maps/References/2_fog_dwell_peaks.png"
+	"res://Assets/Maps/References/2_fog_dwell_peaks.png",
+	"res://Assets/Maps/References/3_frozen_snow_fields.png"
 ]
 const BRIEFINGS := [
 	"Patio expuesto, pasarela de dos accesos, compactadoras y tuneles de mantenimiento. Aprende a rotar, no a quedarte quieto.",
 	"Casas, patios traseros, escondites y rutas elevadas bajo una tormenta. La visibilidad es poder, pero cada ventana tiene dos angulos.",
-	"Un puesto abandonado sobre roca lunar. Los corredores estrechos favorecen la escopeta; el exterior abierto exige precision."
+	"Un puesto abandonado sobre roca lunar. Los corredores estrechos favorecen la escopeta; el exterior abierto exige precision.",
+	"Un refugio central, una torre de vigia y un lago helado sin cobertura. Rota por los muros de hielo o apuesta por cruzar el lago."
 ]
 
 

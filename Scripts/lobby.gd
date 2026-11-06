@@ -9,12 +9,16 @@ const MODES := [
 	{"id": "horde", "name": "HORDA", "desc": "Enjambres masivos de enemigos. Dispara sin parar."},
 	{"id": "boss_rush", "name": "JEFES", "desc": "Un jefe tras otro. Sin enemigos menores."},
 	{"id": "freestylers", "name": "FREESTYLERS", "desc": "Sala de los Freestylers: puro enfrentamiento contra jugadores entrenados. Sin monstruos."},
-	{"id": "duelo", "name": "DUELO", "desc": "Tu contra tus amigos. Sin monstruos ni bots: el que mas bajas haga gana. Tab muestra el marcador."},
+	{"id": "duelo", "name": "DUELO", "pvp": true, "desc": "Tu contra tus amigos. Sin monstruos ni bots: el primero en llegar a 15 bajas gana. Tab muestra el marcador."},
+	{"id": "tdm", "name": "EQUIPOS", "pvp": true, "desc": "Rojo contra Azul. Cada baja suma al equipo: el primero en llegar a 50 gana. Sin fuego amigo."},
+	{"id": "dominio", "name": "DOMINAR", "pvp": true, "desc": "Tres puntos que capturar quedandote 4 s en ellos sin rivales. Cada punto tuyo suma 1 por segundo: gana el primero en llegar a 200."},
+	{"id": "caliente", "name": "PUNTO CALIENTE", "pvp": true, "desc": "Un solo punto activo que cambia de sitio cada 45 s. Solo suma quien lo ocupa sin rivales dentro. Gana el primero en llegar a 150."},
 ]
 const MAPS := [
-	{"id": "recycling_plant", "name": "PLANTA DE RECICLAJE", "level": "res://Levels/RecyclingPlant.tscn", "preview": "res://Assets/Maps/References/village_scenery_idea.png"},
-	{"id": "storm_village", "name": "ALDEA DE LA TORMENTA", "level": "res://Levels/StormVillage.tscn", "preview": "res://Assets/Maps/References/2_fog_dwell_peaks.png"},
-	{"id": "space_arena", "name": "ARENA ESPACIAL", "level": "res://Levels/SpaceArena.tscn", "preview": "res://Assets/Maps/References/7_level_moon.png"},
+	{"id": "recycling_plant", "short": "RECICLAJE", "name": "PLANTA DE RECICLAJE", "level": "res://Levels/RecyclingPlant.tscn", "preview": "res://Assets/Maps/References/village_scenery_idea.png"},
+	{"id": "storm_village", "short": "ALDEA", "name": "ALDEA DE LA TORMENTA", "level": "res://Levels/StormVillage.tscn", "preview": "res://Assets/Maps/References/2_fog_dwell_peaks.png"},
+	{"id": "space_arena", "short": "ESPACIO", "name": "ARENA ESPACIAL", "level": "res://Levels/SpaceArena.tscn", "preview": "res://Assets/Maps/References/7_level_moon.png"},
+	{"id": "snow_fields", "short": "NIEVE", "name": "CAMPOS DE NIEVE", "level": "res://Levels/SnowFields.tscn", "preview": "res://Assets/Maps/References/3_frozen_snow_fields.png"},
 ]
 
 var status_label: Label
@@ -124,8 +128,10 @@ func _build() -> void:
 	maps.add_theme_constant_override("separation", 8)
 	left.add_child(maps)
 	for i in MAPS.size():
-		var m := UIKit.menu_button(["RECICLAJE", "ALDEA", "ESPACIO"][i], "", 22)
-		m.custom_minimum_size = Vector2(196, 50)
+		var m := UIKit.menu_button(str(MAPS[i].short), "", 22)
+		# 4 mapas en una fila: el ancho se reparte (antes 196 fijo cabia solo para 3)
+		m.custom_minimum_size = Vector2(146, 50)
+		m.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		m.toggle_mode = true
 		m.pressed.connect(_select_map.bind(i))
 		maps.add_child(m)
@@ -314,8 +320,10 @@ func _room_row(room: Dictionary) -> Control:
 	var total := players + bots
 	var nombre := str(room.get("name", "Sala"))
 	var estado := "oleada %d" % wave if bool(room.get("monsters", true)) else "SIN MONSTRUOS"
-	if str(room.get("mode", "")) == "duelo":
-		estado = "PvP ENTRE AMIGOS"   # nada de "oleada" ni "sin monstruos": es un duelo
+	var modo_sala := str(room.get("mode", ""))
+	for m in MODES:
+		if str(m.id) == modo_sala and bool(m.get("pvp", false)):
+			estado = "PvP POR EQUIPOS" if modo_sala != "duelo" else "PvP ENTRE AMIGOS"   # nada de "oleada" ni "sin monstruos"
 	row.text = "%s\n%s · %s — %d/%d jugadores · %s" % [nombre, mode_label.to_upper(), map_label.to_upper(), total, cap, estado]
 	row.custom_minimum_size = Vector2(0, 58)
 	row.add_theme_font_size_override("font_size", 16)
@@ -351,8 +359,10 @@ func _select_vis(privada: bool) -> void:
 		_refrescar_opciones()
 
 
+## "Duelo" aqui significa cualquier modo jugador-contra-jugador (duelo y los de equipos): sin
+## monstruos ni bots, y aforo de amigos. Se lee del propio modo para que anadir otro no exija tocar esto.
 func _es_duelo() -> bool:
-	return str(MODES[_mode_index].id) == "duelo"
+	return bool(MODES[_mode_index].get("pvp", false))
 
 
 func _refrescar_opciones() -> void:

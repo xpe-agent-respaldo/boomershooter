@@ -1,0 +1,2039 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="PackedScene" path="res://Levels/ArenaBase.tscn" id="1_base"]
+[ext_resource type="Script" path="res://Scripts/snow_fields.gd" id="2_script"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_1"]
+albedo_color = Color(0.860, 0.920, 0.970, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_2"]
+albedo_color = Color(0.620, 0.720, 0.820, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_3"]
+albedo_color = Color(0.550, 0.780, 0.920, 1)
+roughness = 0.12
+metallic = 0.15
+
+[sub_resource type="StandardMaterial3D" id="Mat_4"]
+albedo_color = Color(0.340, 0.370, 0.430, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Mat_5"]
+albedo_color = Color(0.300, 0.200, 0.140, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_6"]
+albedo_color = Color(0.920, 0.950, 0.980, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Mat_7"]
+albedo_color = Color(0.070, 0.220, 0.160, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Mat_8"]
+albedo_color = Color(0.200, 0.120, 0.040, 1)
+roughness = 0.5
+emission_enabled = true
+emission = Color(1.000, 0.720, 0.300, 1)
+emission_energy_multiplier = 2.0
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_Snow"]
+sky_top_color = Color(0.550, 0.700, 0.860, 1)
+sky_horizon_color = Color(0.860, 0.930, 0.980, 1)
+ground_bottom_color = Color(0.800, 0.880, 0.940, 1)
+ground_horizon_color = Color(0.860, 0.930, 0.980, 1)
+
+[sub_resource type="Sky" id="Sky_Snow"]
+sky_material = SubResource("SkyMat_Snow")
+
+[sub_resource type="Environment" id="Env_Snow"]
+background_mode = 2
+sky = SubResource("Sky_Snow")
+ambient_light_source = 2
+ambient_light_color = Color(0.700, 0.800, 0.920, 1)
+ambient_light_energy = 1.05
+tonemap_mode = 2
+glow_enabled = false
+fog_enabled = true
+fog_light_color = Color(0.840, 0.910, 0.970, 1)
+fog_density = 0.014
+
+[node name="SnowFields" instance=ExtResource("1_base")]
+script = ExtResource("2_script")
+
+[node name="WorldEnvironment" parent="Environment" index="0"]
+environment = SubResource("Env_Snow")
+
+[node name="DirectionalLight3D" parent="Environment" index="1"]
+transform = Transform3D(0.86603, -0.37157, 0.33457, 0.00000, 0.66913, 0.74314, -0.50000, -0.64358, 0.57948, 0, 0, 0)
+light_color = Color(0.920, 0.960, 1.000, 1)
+light_energy = 1.1
+shadow_enabled = false
+
+[node name="Ground" type="CSGBox3D" parent="Map"]
+position = Vector3(0, -0.5, 0)
+size = Vector3(76, 1, 76)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_1")
+
+[node name="FrozenLake" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 0.02, 20)
+size = Vector3(30, 0.12, 20)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="Drift0" type="CSGSphere3D" parent="Map"]
+position = Vector3(-24, 0.2, -14)
+scale = Vector3(1, 0.3, 1)
+radius = 4.0
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Drift1" type="CSGSphere3D" parent="Map"]
+position = Vector3(25, 0.2, -10)
+scale = Vector3(1, 0.3, 1)
+radius = 4.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Drift2" type="CSGSphere3D" parent="Map"]
+position = Vector3(-27, 0.2, 6)
+scale = Vector3(1, 0.3, 1)
+radius = 3.4
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Drift3" type="CSGSphere3D" parent="Map"]
+position = Vector3(27, 0.2, 12)
+scale = Vector3(1, 0.3, 1)
+radius = 3.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Drift4" type="CSGSphere3D" parent="Map"]
+position = Vector3(-12, 0.2, -27)
+scale = Vector3(1, 0.3, 1)
+radius = 3.8
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Drift5" type="CSGSphere3D" parent="Map"]
+position = Vector3(14, 0.2, -26)
+scale = Vector3(1, 0.3, 1)
+radius = 3.6
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="Ridge0" type="CSGBox3D" parent="Map"]
+position = Vector3(40.15, 4.5, 0.0)
+rotation = Vector3(0, 1.44862, 0)
+size = Vector3(7, 9, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap0" type="CSGBox3D" parent="Map"]
+position = Vector3(40.15, 10.2, 0.0)
+rotation = Vector3(0, 0.10472, 0)
+size = Vector3(4.2, 2.4, 4.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge1" type="CSGBox3D" parent="Map"]
+position = Vector3(39.64, 7.5, 8.43)
+rotation = Vector3(0, 0.80285, 0)
+size = Vector3(4, 15, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap1" type="CSGBox3D" parent="Map"]
+position = Vector3(39.64, 16.2, 8.43)
+rotation = Vector3(0, 1.29154, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge2" type="CSGBox3D" parent="Map"]
+position = Vector3(39.62, 7.5, 17.64)
+rotation = Vector3(0, 0.06981, 0)
+size = Vector3(5, 15, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap2" type="CSGBox3D" parent="Map"]
+position = Vector3(39.62, 16.2, 17.64)
+rotation = Vector3(0, 0.19199, 0)
+size = Vector3(3.0, 2.4, 3.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge3" type="CSGBox3D" parent="Map"]
+position = Vector3(40.37, 4.0, 29.33)
+rotation = Vector3(0, 0.19199, 0)
+size = Vector3(5, 8, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap3" type="CSGBox3D" parent="Map"]
+position = Vector3(40.37, 9.2, 29.33)
+rotation = Vector3(0, 1.22173, 0)
+size = Vector3(3.0, 2.4, 3.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge4" type="CSGBox3D" parent="Map"]
+position = Vector3(36.33, 8.0, 40.35)
+rotation = Vector3(0, 0.48869, 0)
+size = Vector3(4, 16, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap4" type="CSGBox3D" parent="Map"]
+position = Vector3(36.33, 17.2, 40.35)
+rotation = Vector3(0, 1.39626, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge5" type="CSGBox3D" parent="Map"]
+position = Vector3(23.53, 3.5, 40.75)
+rotation = Vector3(0, 1.29154, 0)
+size = Vector3(8, 7, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap5" type="CSGBox3D" parent="Map"]
+position = Vector3(23.53, 8.2, 40.75)
+rotation = Vector3(0, 0.87266, 0)
+size = Vector3(4.8, 2.4, 4.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge6" type="CSGBox3D" parent="Map"]
+position = Vector3(12.87, 5.0, 39.6)
+rotation = Vector3(0, 1.23918, 0)
+size = Vector3(4, 10, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap6" type="CSGBox3D" parent="Map"]
+position = Vector3(12.87, 11.2, 39.6)
+rotation = Vector3(0, 0.29671, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge7" type="CSGBox3D" parent="Map"]
+position = Vector3(4.21, 4.5, 40.08)
+rotation = Vector3(0, 0.26180, 0)
+size = Vector3(8, 9, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap7" type="CSGBox3D" parent="Map"]
+position = Vector3(4.21, 10.2, 40.08)
+rotation = Vector3(0, 1.27409, 0)
+size = Vector3(4.8, 2.4, 4.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge8" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.22, 8.5, 40.12)
+rotation = Vector3(0, 0.22689, 0)
+size = Vector3(5, 17, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap8" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.22, 18.2, 40.12)
+rotation = Vector3(0, 1.29154, 0)
+size = Vector3(3.0, 2.4, 3.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge9" type="CSGBox3D" parent="Map"]
+position = Vector3(-13.21, 5.0, 40.64)
+rotation = Vector3(0, 0.20944, 0)
+size = Vector3(6, 10, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap9" type="CSGBox3D" parent="Map"]
+position = Vector3(-13.21, 11.2, 40.64)
+rotation = Vector3(0, 1.22173, 0)
+size = Vector3(3.5999999999999996, 2.4, 3.5999999999999996)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge10" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.63, 8.0, 40.92)
+rotation = Vector3(0, 1.37881, 0)
+size = Vector3(4, 16, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap10" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.63, 17.2, 40.92)
+rotation = Vector3(0, 0.45379, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge11" type="CSGBox3D" parent="Map"]
+position = Vector3(-36.46, 7.5, 40.49)
+rotation = Vector3(0, 0.69813, 0)
+size = Vector3(7, 15, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap11" type="CSGBox3D" parent="Map"]
+position = Vector3(-36.46, 16.2, 40.49)
+rotation = Vector3(0, 1.02974, 0)
+size = Vector3(4.2, 2.4, 4.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge12" type="CSGBox3D" parent="Map"]
+position = Vector3(-40.67, 7.0, 29.55)
+rotation = Vector3(0, 0.66323, 0)
+size = Vector3(6, 14, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap12" type="CSGBox3D" parent="Map"]
+position = Vector3(-40.67, 15.2, 29.55)
+rotation = Vector3(0, 0.54105, 0)
+size = Vector3(3.5999999999999996, 2.4, 3.5999999999999996)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge13" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.09, 5.0, 18.29)
+rotation = Vector3(0, 1.27409, 0)
+size = Vector3(4, 10, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap13" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.09, 11.2, 18.29)
+rotation = Vector3(0, 0.66323, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge14" type="CSGBox3D" parent="Map"]
+position = Vector3(-40.55, 6.0, 8.62)
+rotation = Vector3(0, 0.62832, 0)
+size = Vector3(7, 12, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap14" type="CSGBox3D" parent="Map"]
+position = Vector3(-40.55, 13.2, 8.62)
+rotation = Vector3(0, 1.34390, 0)
+size = Vector3(4.2, 2.4, 4.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge15" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.46, 4.0, 0.0)
+rotation = Vector3(0, 0.92502, 0)
+size = Vector3(8, 8, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap15" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.46, 9.2, 0.0)
+rotation = Vector3(0, 0.36652, 0)
+size = Vector3(4.8, 2.4, 4.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge16" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.01, 4.5, -8.72)
+rotation = Vector3(0, 0.92502, 0)
+size = Vector3(7, 9, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap16" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.01, 10.2, -8.72)
+rotation = Vector3(0, 0.08727, 0)
+size = Vector3(4.2, 2.4, 4.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge17" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.42, 4.0, -18.44)
+rotation = Vector3(0, 1.27409, 0)
+size = Vector3(8, 8, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap17" type="CSGBox3D" parent="Map"]
+position = Vector3(-41.42, 9.2, -18.44)
+rotation = Vector3(0, 0.69813, 0)
+size = Vector3(4.8, 2.4, 4.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge18" type="CSGBox3D" parent="Map"]
+position = Vector3(-40.18, 6.0, -29.19)
+rotation = Vector3(0, 1.09956, 0)
+size = Vector3(8, 12, 8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap18" type="CSGBox3D" parent="Map"]
+position = Vector3(-40.18, 13.2, -29.19)
+rotation = Vector3(0, 1.29154, 0)
+size = Vector3(4.8, 2.4, 4.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge19" type="CSGBox3D" parent="Map"]
+position = Vector3(-37.0, 4.0, -41.09)
+rotation = Vector3(0, 0.59341, 0)
+size = Vector3(4, 8, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap19" type="CSGBox3D" parent="Map"]
+position = Vector3(-37.0, 9.2, -41.09)
+rotation = Vector3(0, 1.04720, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge20" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.61, 4.0, -40.89)
+rotation = Vector3(0, 1.55334, 0)
+size = Vector3(4, 8, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap20" type="CSGBox3D" parent="Map"]
+position = Vector3(-23.61, 9.2, -40.89)
+rotation = Vector3(0, 0.68068, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge21" type="CSGBox3D" parent="Map"]
+position = Vector3(-13.25, 8.5, -40.79)
+rotation = Vector3(0, 0.62832, 0)
+size = Vector3(7, 17, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap21" type="CSGBox3D" parent="Map"]
+position = Vector3(-13.25, 18.2, -40.79)
+rotation = Vector3(0, 0.85521, 0)
+size = Vector3(4.2, 2.4, 4.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge22" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.34, 6.0, -41.27)
+rotation = Vector3(0, 1.02974, 0)
+size = Vector3(4, 12, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap22" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.34, 13.2, -41.27)
+rotation = Vector3(0, 0.78540, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge23" type="CSGBox3D" parent="Map"]
+position = Vector3(4.19, 4.0, -39.84)
+rotation = Vector3(0, 0.12217, 0)
+size = Vector3(7, 8, 7)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap23" type="CSGBox3D" parent="Map"]
+position = Vector3(4.19, 9.2, -39.84)
+rotation = Vector3(0, 0.47124, 0)
+size = Vector3(4.2, 2.4, 4.2)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge24" type="CSGBox3D" parent="Map"]
+position = Vector3(13.33, 4.5, -41.04)
+rotation = Vector3(0, 0.87266, 0)
+size = Vector3(5, 9, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap24" type="CSGBox3D" parent="Map"]
+position = Vector3(13.33, 10.2, -41.04)
+rotation = Vector3(0, 0.87266, 0)
+size = Vector3(3.0, 2.4, 3.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge25" type="CSGBox3D" parent="Map"]
+position = Vector3(23.86, 7.0, -41.33)
+rotation = Vector3(0, 0.36652, 0)
+size = Vector3(4, 14, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap25" type="CSGBox3D" parent="Map"]
+position = Vector3(23.86, 15.2, -41.33)
+rotation = Vector3(0, 0.99484, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge26" type="CSGBox3D" parent="Map"]
+position = Vector3(36.29, 5.5, -40.3)
+rotation = Vector3(0, 0.95993, 0)
+size = Vector3(5, 11, 5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap26" type="CSGBox3D" parent="Map"]
+position = Vector3(36.29, 12.2, -40.3)
+rotation = Vector3(0, 1.22173, 0)
+size = Vector3(3.0, 2.4, 3.0)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge27" type="CSGBox3D" parent="Map"]
+position = Vector3(40.06, 6.5, -29.1)
+rotation = Vector3(0, 1.51844, 0)
+size = Vector3(6, 13, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_2")
+
+[node name="RidgeCap27" type="CSGBox3D" parent="Map"]
+position = Vector3(40.06, 14.2, -29.1)
+rotation = Vector3(0, 0.83776, 0)
+size = Vector3(3.5999999999999996, 2.4, 3.5999999999999996)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge28" type="CSGBox3D" parent="Map"]
+position = Vector3(41.42, 4.5, -18.44)
+rotation = Vector3(0, 0.38397, 0)
+size = Vector3(4, 9, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap28" type="CSGBox3D" parent="Map"]
+position = Vector3(41.42, 10.2, -18.44)
+rotation = Vector3(0, 0.33161, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="Ridge29" type="CSGBox3D" parent="Map"]
+position = Vector3(39.96, 5.0, -8.49)
+rotation = Vector3(0, 1.08210, 0)
+size = Vector3(4, 10, 4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RidgeCap29" type="CSGBox3D" parent="Map"]
+position = Vector3(39.96, 11.2, -8.49)
+rotation = Vector3(0, 1.30900, 0)
+size = Vector3(2.4, 2.4, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="WallN" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.5, -35)
+size = Vector3(72.5, 5, 2.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="WallS" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.5, 35)
+size = Vector3(72.5, 5, 2.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="WallE" type="CSGBox3D" parent="Map"]
+position = Vector3(35, 2.5, 0)
+size = Vector3(2.5, 5, 72.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="WallW" type="CSGBox3D" parent="Map"]
+position = Vector3(-35, 2.5, 0)
+size = Vector3(2.5, 5, 72.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="RefugioFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 0.05, -4)
+size = Vector3(12, 0.1, 10)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioWall+zA" type="CSGBox3D" parent="Map"]
+position = Vector3(-3.5999999999999996, 2.2, 1.0)
+size = Vector3(4.8, 4.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioWall+zB" type="CSGBox3D" parent="Map"]
+position = Vector3(3.5999999999999996, 2.2, 1.0)
+size = Vector3(4.8, 4.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioLintel+z" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 3.5, 1.0)
+size = Vector3(2.4, 1.8000000000000003, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioWall-z" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.2, -9.0)
+size = Vector3(12, 4.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(6.0, 2.2, -4)
+size = Vector3(0.5, 4.4, 10)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.0, 2.2, -4)
+size = Vector3(0.5, 4.4, 10)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioRoof" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 4.550000000000001, -4)
+size = Vector3(12.6, 0.3, 10.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="RefugioParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 5.15, -9.0)
+size = Vector3(12.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="RefugioParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 5.15, 1.0)
+size = Vector3(12.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="RefugioParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(6.0, 5.15, -4)
+size = Vector3(0.3, 0.9, 10.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="RefugioParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.0, 5.15, -4)
+size = Vector3(0.3, 0.9, 10.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="RefugioLoft" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 2.7, -7.0)
+size = Vector3(11.0, 0.3, 3.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioStair0" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.2, 0.225, 0.15000000000000002)
+size = Vector3(2.0, 0.45, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioStair1" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.2, 0.45, -0.75)
+size = Vector3(2.0, 0.9, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioStair2" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.2, 0.675, -1.65)
+size = Vector3(2.0, 1.35, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioStair3" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.2, 0.9, -2.5500000000000003)
+size = Vector3(2.0, 1.8, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioStair4" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.2, 1.125, -3.45)
+size = Vector3(2.0, 2.25, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioStair5" type="CSGBox3D" parent="Map"]
+position = Vector3(-4.2, 1.35, -4.35)
+size = Vector3(2.0, 2.7, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="RefugioPuertaTrasera" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 1.2, -9.05)
+size = Vector3(2.4, 2.4, 0.5)
+material = SubResource("Mat_8")
+
+[node name="RefugioCalido" type="OmniLight3D" parent="Map"]
+position = Vector3(0, 2.6, -4)
+light_color = Color(1.000, 0.720, 0.400, 1)
+light_energy = 2.2
+omni_range = 14
+shadow_enabled = false
+
+[node name="TorrePata0" type="CSGBox3D" parent="Map"]
+position = Vector3(-5.6, 2.1, -25.6)
+size = Vector3(0.5, 4.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorrePata1" type="CSGBox3D" parent="Map"]
+position = Vector3(-2.4, 2.1, -25.6)
+size = Vector3(0.5, 4.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorrePata2" type="CSGBox3D" parent="Map"]
+position = Vector3(-5.6, 2.1, -22.4)
+size = Vector3(0.5, 4.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorrePata3" type="CSGBox3D" parent="Map"]
+position = Vector3(-2.4, 2.1, -22.4)
+size = Vector3(0.5, 4.2, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorrePlataforma" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 4.35, -24)
+size = Vector3(4.4, 0.3, 4.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreBarandillaN" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 5.05, -26.1)
+size = Vector3(4.4, 1.1, 0.25)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreBarandillaS" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 5.05, -21.9)
+size = Vector3(4.4, 1.1, 0.25)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreBarandillaE" type="CSGBox3D" parent="Map"]
+position = Vector3(-1.9, 5.05, -24)
+size = Vector3(0.25, 1.1, 4.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreBarandillaW" type="CSGBox3D" parent="Map"]
+position = Vector3(-6.1, 5.05, -24)
+size = Vector3(0.25, 1.1, 4.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera0" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 0.21000000000000002, -21.0)
+size = Vector3(2.4, 0.42000000000000004, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera1" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 0.42000000000000004, -21.9)
+size = Vector3(2.4, 0.8400000000000001, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera2" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 0.6300000000000001, -22.8)
+size = Vector3(2.4, 1.2600000000000002, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera3" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 0.8400000000000001, -23.7)
+size = Vector3(2.4, 1.6800000000000002, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera4" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 1.05, -24.6)
+size = Vector3(2.4, 2.1, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera5" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 1.2600000000000002, -25.5)
+size = Vector3(2.4, 2.5200000000000005, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera6" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 1.4700000000000002, -26.4)
+size = Vector3(2.4, 2.9400000000000004, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera7" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 1.6800000000000002, -27.3)
+size = Vector3(2.4, 3.3600000000000003, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera8" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 1.8900000000000001, -28.2)
+size = Vector3(2.4, 3.7800000000000002, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="TorreEscalera9" type="CSGBox3D" parent="Map"]
+position = Vector3(-4, 2.1, -29.1)
+size = Vector3(2.4, 4.2, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(-23, 0.05, 20)
+size = Vector3(7, 0.1, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOWall+z" type="CSGBox3D" parent="Map"]
+position = Vector3(-23, 1.7, 23.0)
+size = Vector3(7, 3.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOWall-z" type="CSGBox3D" parent="Map"]
+position = Vector3(-23, 1.7, 17.0)
+size = Vector3(7, 3.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOWall+xA" type="CSGBox3D" parent="Map"]
+position = Vector3(-19.5, 1.7, 17.9)
+size = Vector3(0.5, 3.4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOWall+xB" type="CSGBox3D" parent="Map"]
+position = Vector3(-19.5, 1.7, 22.1)
+size = Vector3(0.5, 3.4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOLintel+x" type="CSGBox3D" parent="Map"]
+position = Vector3(-19.5, 3.0, 20)
+size = Vector3(0.5, 0.7999999999999998, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaOWall-x" type="CSGBox3D" parent="Map"]
+position = Vector3(-26.5, 1.7, 20)
+size = Vector3(0.5, 3.4, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaORoof" type="CSGBox3D" parent="Map"]
+position = Vector3(-23, 3.55, 20)
+size = Vector3(7.6, 0.3, 6.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaOParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(-23, 4.1499999999999995, 17.0)
+size = Vector3(7.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaOParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(-23, 4.1499999999999995, 23.0)
+size = Vector3(7.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaOParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(-19.5, 4.1499999999999995, 20)
+size = Vector3(0.3, 0.9, 6.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaOParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(-26.5, 4.1499999999999995, 20)
+size = Vector3(0.3, 0.9, 6.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaEFloor" type="CSGBox3D" parent="Map"]
+position = Vector3(23, 0.05, 20)
+size = Vector3(7, 0.1, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaEWall+z" type="CSGBox3D" parent="Map"]
+position = Vector3(23, 1.7, 23.0)
+size = Vector3(7, 3.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaEWall-z" type="CSGBox3D" parent="Map"]
+position = Vector3(23, 1.7, 17.0)
+size = Vector3(7, 3.4, 0.5)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaEWall+x" type="CSGBox3D" parent="Map"]
+position = Vector3(26.5, 1.7, 20)
+size = Vector3(0.5, 3.4, 6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaEWall-xA" type="CSGBox3D" parent="Map"]
+position = Vector3(19.5, 1.7, 17.9)
+size = Vector3(0.5, 3.4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaEWall-xB" type="CSGBox3D" parent="Map"]
+position = Vector3(19.5, 1.7, 22.1)
+size = Vector3(0.5, 3.4, 1.8)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaELintel-x" type="CSGBox3D" parent="Map"]
+position = Vector3(19.5, 3.0, 20)
+size = Vector3(0.5, 0.7999999999999998, 2.4)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="CabanaERoof" type="CSGBox3D" parent="Map"]
+position = Vector3(23, 3.55, 20)
+size = Vector3(7.6, 0.3, 6.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaEParapetN" type="CSGBox3D" parent="Map"]
+position = Vector3(23, 4.1499999999999995, 17.0)
+size = Vector3(7.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaEParapetS" type="CSGBox3D" parent="Map"]
+position = Vector3(23, 4.1499999999999995, 23.0)
+size = Vector3(7.6, 0.9, 0.3)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaEParapetE" type="CSGBox3D" parent="Map"]
+position = Vector3(26.5, 4.1499999999999995, 20)
+size = Vector3(0.3, 0.9, 6.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="CabanaEParapetW" type="CSGBox3D" parent="Map"]
+position = Vector3(19.5, 4.1499999999999995, 20)
+size = Vector3(0.3, 0.9, 6.6)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_6")
+
+[node name="MuroHielo0" type="CSGBox3D" parent="Map"]
+position = Vector3(-13, 1.3, 4)
+rotation = Vector3(0, 0.61087, 0)
+size = Vector3(6.0, 2.6, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="MuroHielo1" type="CSGBox3D" parent="Map"]
+position = Vector3(13, 1.3, 4)
+rotation = Vector3(0, -0.61087, 0)
+size = Vector3(6.0, 2.6, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="MuroHielo2" type="CSGBox3D" parent="Map"]
+position = Vector3(-9, 1.3, -12)
+rotation = Vector3(0, -0.52360, 0)
+size = Vector3(6.0, 2.6, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="MuroHielo3" type="CSGBox3D" parent="Map"]
+position = Vector3(9, 1.3, -12)
+rotation = Vector3(0, 0.52360, 0)
+size = Vector3(6.0, 2.6, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="MuroHielo4" type="CSGBox3D" parent="Map"]
+position = Vector3(0, 1.3, 9)
+size = Vector3(6.0, 2.6, 0.9)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="PinoTronco0" type="CSGCylinder3D" parent="Map"]
+position = Vector3(28.7, 1.2, -26.7)
+radius = 0.3410945937656852
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA0" type="CSGCylinder3D" parent="Map"]
+position = Vector3(28.7, 3.8982239287506872, -26.7)
+radius = 1.8272924666018846
+height = 3.1673069421099336
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB0" type="CSGCylinder3D" parent="Map"]
+position = Vector3(28.7, 5.96915539089949, -26.7)
+radius = 1.1572852288478601
+height = 2.6800289510160975
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco1" type="CSGCylinder3D" parent="Map"]
+position = Vector3(13.5, 1.2, -1.0)
+radius = 0.3286201195412968
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA1" type="CSGCylinder3D" parent="Map"]
+position = Vector3(13.5, 3.7556585090433914, -1.0)
+radius = 1.7604649261140897
+height = 3.0514725385977557
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB1" type="CSGCylinder3D" parent="Map"]
+position = Vector3(13.5, 5.7508520919726935, -1.0)
+radius = 1.1149611198722567
+height = 2.5820152249673316
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco2" type="CSGCylinder3D" parent="Map"]
+position = Vector3(25.2, 1.2, -20.5)
+radius = 0.31429842976711264
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA2" type="CSGCylinder3D" parent="Map"]
+position = Vector3(25.2, 3.5919820544812873, -20.5)
+radius = 1.6837415880381035
+height = 2.918485419266046
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB2" type="CSGCylinder3D" parent="Map"]
+position = Vector3(25.2, 5.5002225209244715, -20.5)
+radius = 1.066369672424132
+height = 2.4694876624558852
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco3" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-19.0, 1.2, -9.2)
+radius = 0.3246421632811695
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA3" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-19.0, 3.7101961517847943, -9.2)
+radius = 1.7391544461491222
+height = 3.0145343733251453
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB3" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-19.0, 5.6812378574204665, -9.2)
+radius = 1.1014644825611106
+height = 2.550759854352046
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco4" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-6.8, 1.2, -29.3)
+radius = 0.3170595597969545
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA4" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-6.8, 3.6235378262509084, -29.3)
+radius = 1.6985333560551132
+height = 2.9441244838288627
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB4" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-6.8, 5.548542296446703, -29.3)
+radius = 1.0757377921682383
+height = 2.4911822555474994
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco5" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-25.8, 1.2, -19.8)
+radius = 0.3462282853362224
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA5" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-25.8, 3.9568946895568278, -19.8)
+radius = 1.8547943857297629
+height = 3.2149769352649225
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB5" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-25.8, 6.058994993383893, -19.8)
+radius = 1.174703110962183
+height = 2.720365099070319
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco6" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-16.2, 1.2, -13.5)
+radius = 0.3297113668165327
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA6" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-16.2, 3.768129906474659, -13.5)
+radius = 1.7663108936599965
+height = 3.0616055490106606
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB6" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-16.2, 5.769948919289322, -13.5)
+radius = 1.1186635659846644
+height = 2.5905893107013283
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco7" type="CSGCylinder3D" parent="Map"]
+position = Vector3(16.7, 1.2, -5.0)
+radius = 0.2820220697998654
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA7" type="CSGCylinder3D" parent="Map"]
+position = Vector3(16.7, 3.223109369141319, -5.0)
+radius = 1.5108325167849932
+height = 2.6187763624273215
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB7" type="CSGCylinder3D" parent="Map"]
+position = Vector3(16.7, 4.9353862214976445, -5.0)
+radius = 0.9568605939638289
+height = 2.2158876912846566
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco8" type="CSGCylinder3D" parent="Map"]
+position = Vector3(22.9, 1.2, 2.6)
+radius = 0.325432057952315
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA8" type="CSGCylinder3D" parent="Map"]
+position = Vector3(22.9, 3.7192235194550287, 2.6)
+radius = 1.7433860247445447
+height = 3.021869109557211
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB8" type="CSGCylinder3D" parent="Map"]
+position = Vector3(22.9, 5.695061014165513, 2.6)
+radius = 1.1041444823382116
+height = 2.5569661696253325
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco9" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-21.5, 1.2, 1.2)
+radius = 0.30881493358903744
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA9" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-21.5, 3.5293135267318565, 1.2)
+radius = 1.6543657156555576
+height = 2.8675672404696333
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB9" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-21.5, 5.404261337808155, 1.2)
+radius = 1.0477649532485198
+height = 2.4264030496281515
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco10" type="CSGCylinder3D" parent="Map"]
+position = Vector3(1.8, 1.2, -19.2)
+radius = 0.35533410380418085
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA10" type="CSGCylinder3D" parent="Map"]
+position = Vector3(1.8, 4.060961186333495, -19.2)
+radius = 1.9035755560938257
+height = 3.2995309638959647
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB10" type="CSGCylinder3D" parent="Map"]
+position = Vector3(1.8, 6.218346816573164, -19.2)
+radius = 1.2055978521927562
+height = 2.791910815604278
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco11" type="CSGCylinder3D" parent="Map"]
+position = Vector3(9.4, 1.2, -4.4)
+radius = 0.2650209167469208
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA11" type="CSGCylinder3D" parent="Map"]
+position = Vector3(9.4, 3.0288104771076663, -4.4)
+radius = 1.4197549111442185
+height = 2.460908512649979
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB11" type="CSGCylinder3D" parent="Map"]
+position = Vector3(9.4, 4.637866043071114, -4.4)
+radius = 0.8991781103913383
+height = 2.0823072030115206
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco12" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-28.3, 1.2, -29.7)
+radius = 0.30262336092818837
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA12" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-28.3, 3.458552696322153, -29.7)
+radius = 1.621196576401009
+height = 2.810074065761749
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB12" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-28.3, 5.295908816243297, -29.7)
+radius = 1.026757831720639
+height = 2.3777549787214802
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco13" type="CSGCylinder3D" parent="Map"]
+position = Vector3(9.3, 1.2, 1.8)
+radius = 0.3602792864050279
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA13" type="CSGCylinder3D" parent="Map"]
+position = Vector3(9.3, 4.1174775589146035, 1.8)
+radius = 1.9300676057412205
+height = 3.3454505166181154
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB13" type="CSGCylinder3D" parent="Map"]
+position = Vector3(9.3, 6.304887512087987, 1.8)
+radius = 1.222376150302773
+height = 2.8307658217537903
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco14" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-11.6, 1.2, 3.3)
+radius = 0.2595728783564916
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA14" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-11.6, 2.966547181217047, 3.3)
+radius = 1.3905689911954908
+height = 2.4103195847388506
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB14" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-11.6, 4.542525371238604, 3.3)
+radius = 0.8806936944238107
+height = 2.03950118708672
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco15" type="CSGCylinder3D" parent="Map"]
+position = Vector3(18.7, 1.2, -15.7)
+radius = 0.333470633246306
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA15" type="CSGCylinder3D" parent="Map"]
+position = Vector3(18.7, 3.811092951386354, -15.7)
+radius = 1.7864498209623534
+height = 3.0965130230014126
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB15" type="CSGCylinder3D" parent="Map"]
+position = Vector3(18.7, 5.835736081810355, -15.7)
+radius = 1.1314182199428238
+height = 2.6201264040781185
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco16" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-21.2, 1.2, 13.4)
+radius = 0.3527872700070878
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA16" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-21.2, 4.031854514366717, 13.4)
+radius = 1.8899318036093988
+height = 3.275881792922958
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB16" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-21.2, 6.173777225124036, 13.4)
+radius = 1.196956808952619
+height = 2.7718999786271183
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco17" type="CSGCylinder3D" parent="Map"]
+position = Vector3(14.3, 1.2, 6.6)
+radius = 0.32021155278987057
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA17" type="CSGCylinder3D" parent="Map"]
+position = Vector3(14.3, 3.6595606033128067, 6.6)
+radius = 1.715419032802878
+height = 2.9733929901916554
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB17" type="CSGCylinder3D" parent="Map"]
+position = Vector3(14.3, 5.603702173822735, 6.6)
+radius = 1.0864320541084893
+height = 2.5159479147775548
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco18" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-27.2, 1.2, 2.8)
+radius = 0.2583971668504639
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA18" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-27.2, 2.9531104782910154, 2.8)
+radius = 1.3842705366989134
+height = 2.39940226361145
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB18" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-27.2, 4.521950419883117, 2.8)
+radius = 0.8767046732426451
+height = 2.0302634538250732
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco19" type="CSGCylinder3D" parent="Map"]
+position = Vector3(17.6, 1.2, -20.8)
+radius = 0.3389321989939566
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA19" type="CSGCylinder3D" parent="Map"]
+position = Vector3(17.6, 3.8735108456452183, -20.8)
+radius = 1.815708208896196
+height = 3.14722756208674
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB19" type="CSGCylinder3D" parent="Map"]
+position = Vector3(17.6, 5.93131348239424, -20.8)
+radius = 1.149948532300924
+height = 2.6630387063810876
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco20" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-10.6, 1.2, -17.5)
+radius = 0.2814948221313134
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA20" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-10.6, 3.2170836815007244, -17.5)
+radius = 1.5080079757034643
+height = 2.6138804912193385
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB20" type="CSGCylinder3D" parent="Map"]
+position = Vector3(-10.6, 4.926159387297984, -17.5)
+radius = 0.9550717179455275
+height = 2.211745031031748
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoTronco21" type="CSGCylinder3D" parent="Map"]
+position = Vector3(26.1, 1.2, -14.3)
+radius = 0.3100569873094652
+height = 2.4
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_5")
+
+[node name="PinoCopaA21" type="CSGCylinder3D" parent="Map"]
+position = Vector3(26.1, 3.543508426393888, -14.3)
+radius = 1.6610195748721348
+height = 2.8791005964450336
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="PinoCopaB21" type="CSGCylinder3D" parent="Map"]
+position = Vector3(26.1, 5.4259972779156405, -14.3)
+radius = 1.0519790640856854
+height = 2.436162043145798
+sides = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_7")
+
+[node name="Roca0" type="CSGSphere3D" parent="Map"]
+position = Vector3(-5.3, 0.7, -19.9)
+scale = Vector3(1, 0.7, 1)
+radius = 1.9121953879779783
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Roca2" type="CSGSphere3D" parent="Map"]
+position = Vector3(10.2, 0.7, 1.3)
+scale = Vector3(1, 0.7, 1)
+radius = 1.7174253472505625
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Roca3" type="CSGSphere3D" parent="Map"]
+position = Vector3(-19.0, 0.7, 5.7)
+scale = Vector3(1, 0.7, 1)
+radius = 1.2101320633253458
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Roca4" type="CSGSphere3D" parent="Map"]
+position = Vector3(-18.7, 0.7, -20.5)
+scale = Vector3(1, 0.7, 1)
+radius = 1.4691802568086407
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Roca5" type="CSGSphere3D" parent="Map"]
+position = Vector3(8.8, 0.7, -21.5)
+scale = Vector3(1, 0.7, 1)
+radius = 1.2474525303235784
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Roca7" type="CSGSphere3D" parent="Map"]
+position = Vector3(-22.9, 0.7, 2.9)
+scale = Vector3(1, 0.7, 1)
+radius = 1.3227114818906642
+radial_segments = 12
+rings = 8
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="Aurora" type="OmniLight3D" parent="Map"]
+position = Vector3(0, 12, 0)
+light_color = Color(0.600, 0.850, 1.000, 1)
+light_energy = 1.4
+omni_range = 40
+shadow_enabled = false
+
+[node name="NieveSign" type="Label3D" parent="Map"]
+position = Vector3(0, 9, 26)
+text = "CAMPOS DE NIEVE"
+font_size = 64
+outline_size = 14
+modulate = Color(0.800, 0.920, 1.000, 1)
+billboard = 1
+
+[node name="SpawnPoint1" parent="SpawnPoints" index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1, -6)
+
+[node name="SpawnPoint2" parent="SpawnPoints" index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 1, -6)
+
+[node name="SpawnPoint3" parent="SpawnPoints" index="2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -17, 1, 30)
+
+[node name="SpawnPoint4" parent="SpawnPoints" index="3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 17, 1, 30)
+
+[node name="SpawnPoint5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 1, -29)
+
+[node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1, 8)
+

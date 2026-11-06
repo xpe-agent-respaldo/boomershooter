@@ -161,6 +161,11 @@ func connect_device() -> bool:
 	for intento in 3:
 		client = Nakama.create_client(server_key, host, port, scheme, 15, NakamaLogger.LOG_LEVEL.ERROR)
 		session = await client.authenticate_device_async(Nakama.get_device_id(), username if not username.is_empty() else null, true)
+		if session != null and session.is_exception() and session.get_exception().status_code == 409:
+			# Ese nombre ya lo usa OTRO dispositivo (dos amigos con el mismo nombre de perfil): Nakama no deja
+			# crear la cuenta. Se entra con un sufijo unico en vez de dejar al jugador sin online.
+			var sufijo := Nakama.get_device_id().substr(0, 4).replace("-", "")
+			session = await client.authenticate_device_async(Nakama.get_device_id(), (username + "_" + sufijo).substr(0, 20), true)
 		if session != null and not session.is_exception():
 			break
 		session = null
@@ -342,10 +347,26 @@ func join_by_code(codigo: String) -> Dictionary:
 		return {"ok": false, "error": "El codigo tiene 5 caracteres."}
 	if not await connect_device():
 		return {"ok": false, "error": "Sin conexion con el servicio online."}
-	var reply = await client.rpc_async(session, "join_room", JSON.stringify({"code": limpio}))
-	if reply == null or reply.is_exception():
-		return {"ok": false, "error": "No se pudo entrar. Intentalo otra vez."}
-	var parsed = JSON.parse_string(reply.payload)
+	# Una sala recien creada puede tardar un instante en ser localizable, y Render a veces tarda en
+	# despertar: se reintenta (hasta 4 veces, con espera creciente) antes de decir que no existe.
+	var parsed = null
+	var fallo_red := false
+	for intento in 4:
+		if intento > 0:
+			status_changed.emit("Buscando la sala %s..." % limpio)
+			await get_tree().create_timer(0.8 * intento).timeout
+		var reply = await client.rpc_async(session, "join_room", JSON.stringify({"code": limpio}))
+		if reply == null or reply.is_exception():
+			fallo_red = true
+			parsed = null
+			continue
+		fallo_red = false
+		parsed = JSON.parse_string(reply.payload)
+		if typeof(parsed) == TYPE_DICTIONARY and str(parsed.get("error", "")) == "code_not_found":
+			continue
+		break
+	if fallo_red:
+		return {"ok": false, "error": "No se pudo entrar. Revisa tu conexion e intentalo otra vez."}
 	if typeof(parsed) != TYPE_DICTIONARY:
 		return {"ok": false, "error": "Respuesta invalida del servidor."}
 	match str(parsed.get("error", "")):

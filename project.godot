@@ -16,7 +16,7 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 
 config/name="Boomer Shooter"
 config/description="FPS arcade de alta movilidad por Stealth Proyects."
-config/version="1.3.6"
+config/version="1.3.7"
 boot_splash/show_image=true
 boot_splash/fullsize=true
 boot_splash/bg_color=Color(0, 0, 0, 1)
@@ -25,6 +25,8 @@ boot_splash/use_filter=true
 boot_splash/minimum_display_time=2
 config/copyright="© 2026 xpe.nettt · Stealth Proyects"
 run/main_scene="res://Levels/MainMenu.tscn"
+run/disable_stdout.template=true
+run/disable_stderr.template=true
 run/max_fps=0
 run/low_processor_mode=false
 config/features=PackedStringArray("4.7", "GL Compatibility")

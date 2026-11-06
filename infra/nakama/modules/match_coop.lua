@@ -53,6 +53,7 @@ local MAPS = {
   recycling_plant = { label = "Planta de Reciclaje" },
   storm_village   = { label = "Aldea de la Tormenta" },
   space_arena     = { label = "Arena Espacial" },
+  snow_fields     = { label = "Campos de Nieve" },
 }
 local DEFAULT_MAP = "recycling_plant"
 -- Bots: companeros simulados por el servidor. Cuentan como jugadores en la sala,
@@ -128,17 +129,32 @@ local LOW_HP_ALERT_RATIO = 0.3
 
 -- Modos de juego. Todos son cooperativos o de supervivencia autoritativos: el
 -- servidor decide la dificultad, quien puede revivir y cuando termina.
+local try_close_match   -- se define mas abajo; DUELO y complete_wave la usan antes
+local EQ                -- sistema de equipos; se define mas abajo (ver EQUIPOS)
+
 local MODES = {
-  coop_waves = { label = "Oleadas", revive = true,  lives = 0, wave_cap = 0,  hp_scale = 1.00, count_scale = 1.00 },
-  survival   = { label = "Supervivencia", revive = false, lives = 1, wave_cap = 0, hp_scale = 1.15, count_scale = 1.25 },
-  horde      = { label = "Horda", revive = true,  lives = 0, wave_cap = 15, hp_scale = 0.85, count_scale = 1.80 },
-  boss_rush  = { label = "Jefes", revive = true,  lives = 0, wave_cap = 10, hp_scale = 1.30, count_scale = 0.60 },
+  -- wave_goal: oleada que hay que SUPERAR para ganar. Sin meta una partida no se puede ganar ni terminar:
+  -- solo se acaba perdiendo, y no tiene sentido jugarla. 0 = sala libre (Matadero).
+  coop_waves = { label = "Oleadas", revive = true,  lives = 0, wave_cap = 0,  wave_goal = 20, hp_scale = 1.00, count_scale = 1.00 },
+  survival   = { label = "Supervivencia", revive = false, lives = 1, wave_cap = 0, wave_goal = 15, hp_scale = 1.15, count_scale = 1.25 },
+  horde      = { label = "Horda", revive = true,  lives = 0, wave_cap = 15, wave_goal = 15, hp_scale = 0.85, count_scale = 1.80 },
+  boss_rush  = { label = "Jefes", revive = true,  lives = 0, wave_cap = 10, wave_goal = 10, hp_scale = 1.30, count_scale = 0.60 },
   -- Puro enfrentamiento contra jugadores entrenados: no aparecen monstruos.
   freestylers = { label = "Matadero", revive = true, lives = 0, wave_cap = 0,
                   hp_scale = 1.0, count_scale = 0.0, pvp = true },
   -- Duelo entre jugadores (amigos contra amigos): sin monstruos ni bots, el servidor lleva la vida.
   duelo = { label = "Duelo", revive = false, lives = 0, wave_cap = 0,
             hp_scale = 1.0, count_scale = 0.0, duelo = true },
+  -- Modos de EQUIPOS: son un duelo (misma vida, impactos y reaparicion) con dos equipos y objetivo.
+  --   tdm      : gana el equipo que llegue antes a META bajas.
+  --   dominio  : 3 puntos fijos; cada punto que tienes suma 1/s. Gana quien llegue a META.
+  --   caliente : UN punto activo que cambia de sitio; solo suma quien lo ocupa sin rivales.
+  tdm      = { label = "Duelo por equipos", revive = false, lives = 0, wave_cap = 0,
+               hp_scale = 1.0, count_scale = 0.0, duelo = true, equipos = "tdm" },
+  dominio  = { label = "Dominar el punto", revive = false, lives = 0, wave_cap = 0,
+               hp_scale = 1.0, count_scale = 0.0, duelo = true, equipos = "dominio" },
+  caliente = { label = "Punto caliente", revive = false, lives = 0, wave_cap = 0,
+               hp_scale = 1.0, count_scale = 0.0, duelo = true, equipos = "caliente" },
 }
 
 -- atan2 portatil: Lua 5.1 lo trae en math.atan2, Lua 5.4 solo math.atan(y,x).
@@ -185,6 +201,9 @@ local PLAN = {
   boss_rush   = { companions = 2, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 2
   freestylers = { companions = 4, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 4
   duelo       = { companions = 0, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 0: solo humanos
+  tdm         = { companions = 0, calle = false, gang = 0, solo = 0, amigo = 0 },
+  dominio     = { companions = 0, calle = false, gang = 0, solo = 0, amigo = 0 },
+  caliente    = { companions = 0, calle = false, gang = 0, solo = 0, amigo = 0 },
 }
 local function plan_de(state)
   return PLAN[state.mode or "coop_waves"] or PLAN.coop_waves
@@ -471,6 +490,8 @@ local function ensure_player(state, presence)
       joined_tick = state.tick or 0,
     }
     state.players[id] = p
+    -- equipo: solo en el alta. Quien reconecta (rama else) conserva el suyo y sus puntos.
+    if EQ then EQ.asignar(state, p) end
   else
     p.session_id = presence.session_id
     p.username = presence.username or p.username
@@ -619,6 +640,7 @@ local function snapshot_players(state)
       rewards = p.rewards,
       pos = p.pos,
       bot = p.bot == true,
+      team = p.team,
       -- quien es quien: "amigo" se puede reclutar, "pandilla" viene a por ti, "solo" va por libre
       side = p.side or (p.bot and "entrenado" or "humano"),
       gang = p.gang or "",
@@ -657,6 +679,7 @@ local function build_match_state_payload(state)
     tick = state.tick,
     players = snapshot_players(state),
     enemies = snapshot_enemies(state),
+    eq = EQ and EQ.estado(state) or nil,
   }
 end
 
@@ -926,6 +949,7 @@ local DUELO = {
   RITMO_MAX = 20,              -- impactos por segundo y jugador (subfusil ~15/s)
   INVULNERABLE_TICKS = 20,     -- 2 s de proteccion al reaparecer
   PUNTOS_BAJA = 1,
+  META_BAJAS = 15,             -- el primero en llegar gana el duelo
 }
 
 local function es_duelo(state)
@@ -938,7 +962,7 @@ function DUELO.marcador(state)
   for _, pr in pairs(state.presences) do
     local p = state.players[pr.user_id]
     if p ~= nil and p.bot ~= true then
-      lista[#lista + 1] = { user_id = p.user_id, name = p.username, kills = p.duel_kills or 0,
+      lista[#lista + 1] = { user_id = p.user_id, name = p.username, kills = p.duel_kills or 0, team = p.team,
                             deaths = p.duel_deaths or 0, hp = p.duel_hp or DUELO.HP, dead = p.dead == true }
     end
   end
@@ -981,9 +1005,22 @@ function DUELO.golpe(state, dispatcher, presence, payload, t)
   objetivo.respawn_at = (state.tick or 0) + DUELO.RESPAWN_TICKS
   tirador.duel_kills = (tirador.duel_kills or 0) + DUELO.PUNTOS_BAJA
   tirador.kills = (tirador.kills or 0) + 1
+  local modo_eq = (MODES[state.mode or ""] or {}).equipos
+  if modo_eq ~= nil and tirador.team ~= nil then
+    EQ.sumar(state, tirador.team, modo_eq == "tdm" and EQ.PUNTOS_BAJA or EQ.PUNTOS_BAJA_OBJETIVO)
+  end
   tirador.rewards = (tirador.rewards or 0) + REWARD_PER_KILL
   broadcast(dispatcher, OP_DUEL_EVENT, { kind = "kill", from = tirador.user_id, to = objetivo.user_id,
     killer = tirador.username, victim = objetivo.username, board = DUELO.marcador(state) })
+  if modo_eq ~= nil then
+    EQ.difundir(state, dispatcher)
+    EQ.comprobar_fin(state, dispatcher)
+  elseif tirador.duel_kills >= DUELO.META_BAJAS then
+    state.victory = true
+    state.winner = tirador.user_id
+    state.winner_text = tirador.username .. " gana el duelo con " .. tirador.duel_kills .. " bajas"
+    try_close_match(state, dispatcher, "duel_won")
+  end
   return state
 end
 
@@ -1008,6 +1045,191 @@ function DUELO.tick(state, dispatcher)
       end
     end
   end
+end
+
+
+-- ============================ EQUIPOS (TDM, dominio, punto caliente) ============================
+-- Todo en la tabla EQ (Lua limita las variables locales por modulo). Reutiliza el DUELO: la vida,
+-- los impactos y la reaparicion son los mismos; aqui solo se anade QUIEN va con QUIEN y QUE puntua.
+EQ = {
+  EQUIPOS = { "rojo", "azul" },
+  META = { tdm = 50, dominio = 200, caliente = 150 },
+  PUNTOS_BAJA = 1,             -- tdm: cada baja suma 1 al equipo (en dominio/caliente suma 2, ver abajo)
+  PUNTOS_BAJA_OBJETIVO = 2,    -- dominio/caliente: una baja vale 2 (el objetivo es lo importante)
+  RADIO = 7.0,                 -- metros: estar dentro de este radio es "ocupar" el punto
+  CAPTURA_S = 4.0,             -- segundos de ocupacion en solitario para capturar un punto
+  ROTA_S = 45,                 -- punto caliente: cada cuantos segundos cambia de sitio
+  CADA_TICKS = 10,             -- el objetivo se evalua una vez por segundo (TICK_RATE = 10)
+  -- puntos por mapa (x, z), CALCULADOS sobre el suelo medido (map_floor.lua): >=85 % del radio caminable,
+  -- sin desniveles grandes, separados >=21 m y a <=30 m del centro. Los dos primeros de cada lista
+  -- son los mas centrales: el dominio usa los 3 primeros; el punto caliente recorre los 5 en orden.
+  -- test_equipos.py comprueba que ninguno cae dentro de una pared.
+  PUNTOS = {
+    recycling_plant = { {0, 12}, {-24, 4}, {-20, -22}, {20, -22}, {24, 2} },
+    storm_village   = { {-2, 0}, {-28, 6}, {-10, 28}, {-18, -24}, {14, -26} },
+    space_arena     = { {-10, -16}, {-28, 0}, {-20, 22}, {20, 22}, {28, -10} },
+    snow_fields     = { {-10, 2}, {-24, 18}, {-4, 28}, {22, 20}, {22, -20} },
+  },
+}
+
+function EQ.modo(state)
+  return (MODES[state.mode or ""] or {}).equipos
+end
+
+function EQ.puntos_del_mapa(state)
+  return EQ.PUNTOS[state.map or ""] or EQ.PUNTOS.space_arena
+end
+
+-- Reparto equilibrado: cada jugador nuevo va al equipo con menos gente (empate: el de menos puntos).
+function EQ.asignar(state, p)
+  if EQ.modo(state) == nil or p == nil or p.bot == true then return end
+  state.eq = state.eq or { puntos = { rojo = 0, azul = 0 } }
+  if p.team ~= nil then return end
+  local n = { rojo = 0, azul = 0 }
+  for id, q in pairs(state.players) do
+    if q.team ~= nil and state.presences[id] and q ~= p then n[q.team] = n[q.team] + 1 end
+  end
+  if n.rojo ~= n.azul then
+    p.team = (n.rojo < n.azul) and "rojo" or "azul"
+  else
+    p.team = (state.eq.puntos.rojo <= state.eq.puntos.azul) and "rojo" or "azul"
+  end
+end
+
+-- Si se van jugadores y un equipo se queda muy corto, pasa uno del equipo mayor al menor.
+function EQ.reequilibrar(state)
+  if EQ.modo(state) == nil then return end
+  local lista = { rojo = {}, azul = {} }
+  for id, pr in pairs(state.presences) do
+    local p = state.players[id]
+    if p ~= nil and p.bot ~= true and p.team ~= nil then table.insert(lista[p.team], p) end
+  end
+  local mayor, menor = "rojo", "azul"
+  if #lista.azul > #lista.rojo then mayor, menor = "azul", "rojo" end
+  if #lista[mayor] - #lista[menor] >= 2 then
+    local mover = lista[mayor][#lista[mayor]]
+    mover.team = menor
+  end
+end
+
+function EQ.sumar(state, equipo, n)
+  state.eq = state.eq or { puntos = { rojo = 0, azul = 0 } }
+  state.eq.puntos[equipo] = (state.eq.puntos[equipo] or 0) + n
+end
+
+-- Estado que ven los clientes: puntos, meta, objetivo(s) y quien es de cada equipo.
+function EQ.estado(state)
+  if EQ.modo(state) == nil then return nil end
+  state.eq = state.eq or { puntos = { rojo = 0, azul = 0 } }
+  local gente = {}
+  for id, pr in pairs(state.presences) do
+    local p = state.players[id]
+    if p ~= nil and p.bot ~= true then gente[id] = p.team end
+  end
+  local objetivos = {}
+  for i, o in ipairs(state.eq.objetivos or {}) do
+    objetivos[#objetivos + 1] = { id = i, x = o.x, z = o.z, dueno = o.dueno, progreso = o.progreso or 0,
+      activo = o.activo ~= false, radio = EQ.RADIO, disputado = o.disputado == true }
+  end
+  return { tipo = EQ.modo(state), puntos = state.eq.puntos, meta = EQ.META[EQ.modo(state)],
+    objetivos = objetivos, equipos = gente, cambia_en = state.eq.cambia_en }
+end
+
+function EQ.difundir(state, dispatcher)
+  local e = EQ.estado(state)
+  if e then broadcast(dispatcher, OP_DUEL_EVENT, { kind = "equipos", eq = e, board = DUELO.marcador(state) }) end
+end
+
+-- Pone los objetivos al empezar: dominio = 3 puntos fijos, caliente = 1 activo que irá rotando.
+function EQ.iniciar(state)
+  local modo = EQ.modo(state)
+  if modo == nil or (state.eq and state.eq.objetivos) then return end
+  state.eq = state.eq or { puntos = { rojo = 0, azul = 0 } }
+  local pts = EQ.puntos_del_mapa(state)
+  state.eq.objetivos = {}
+  if modo == "dominio" then
+    for i = 1, 3 do state.eq.objetivos[i] = { x = pts[i][1], z = pts[i][2], dueno = nil, progreso = 0 } end
+  elseif modo == "caliente" then
+    state.eq.indice = 1
+    state.eq.objetivos[1] = { x = pts[1][1], z = pts[1][2], dueno = nil, progreso = 0, activo = true }
+    state.eq.cambia_en = (state.tick or 0) + EQ.ROTA_S * TICK_RATE
+  end
+end
+
+-- Quien esta dentro de un objetivo: { rojo = n, azul = n } (solo vivos).
+function EQ.ocupantes(state, o)
+  local n = { rojo = 0, azul = 0 }
+  for id, pr in pairs(state.presences) do
+    local p = state.players[id]
+    if p ~= nil and p.bot ~= true and p.team ~= nil and not p.dead and p.pos ~= nil then
+      local dx, dz = (p.pos.x or 0) - o.x, (p.pos.z or 0) - o.z
+      if dx * dx + dz * dz <= EQ.RADIO * EQ.RADIO then n[p.team] = n[p.team] + 1 end
+    end
+  end
+  return n
+end
+
+-- Una vez por segundo: captura (dominio) o puntua (caliente), rota el punto y mira si alguien gano.
+function EQ.tick(state, dispatcher)
+  local modo = EQ.modo(state)
+  if modo == nil or state.phase == "closed" then return end
+  EQ.iniciar(state)
+  if (state.tick or 0) % EQ.CADA_TICKS ~= 0 then return end
+  local eq = state.eq
+  local cambio = false
+  if modo == "dominio" then
+    for idx, o in ipairs(eq.objetivos) do
+      local n = EQ.ocupantes(state, o)
+      o.disputado = n.rojo > 0 and n.azul > 0
+      local solo = (n.rojo > 0 and n.azul == 0) and "rojo" or ((n.azul > 0 and n.rojo == 0) and "azul" or nil)
+      if solo ~= nil and solo ~= o.dueno then
+        -- captura: hacen falta CAPTURA_S segundos seguidos en solitario
+        if o.captor ~= solo then o.captor = solo; o.progreso = 0 end
+        o.progreso = (o.progreso or 0) + 1
+        if o.progreso >= EQ.CAPTURA_S then
+          o.dueno = solo; o.progreso = 0; o.captor = nil
+          cambio = true
+          broadcast(dispatcher, OP_DUEL_EVENT, { kind = "captura", equipo = solo, objetivo = idx, x = o.x, z = o.z })
+        end
+      elseif solo == nil and not o.disputado then
+        o.progreso = 0; o.captor = nil
+      end
+      if o.dueno ~= nil then EQ.sumar(state, o.dueno, 1) end   -- cada punto que tienes suma 1/s
+    end
+    cambio = true
+  elseif modo == "caliente" then
+    local o = eq.objetivos[1]
+    local n = EQ.ocupantes(state, o)
+    o.disputado = n.rojo > 0 and n.azul > 0
+    if n.rojo > 0 and n.azul == 0 then o.dueno = "rojo"; EQ.sumar(state, "rojo", 1)
+    elseif n.azul > 0 and n.rojo == 0 then o.dueno = "azul"; EQ.sumar(state, "azul", 1)
+    else o.dueno = o.dueno end
+    if n.rojo == 0 and n.azul == 0 then o.dueno = nil end
+    cambio = true
+    if (state.tick or 0) >= (eq.cambia_en or 0) then
+      local pts = EQ.puntos_del_mapa(state)
+      eq.indice = (eq.indice % #pts) + 1
+      eq.objetivos[1] = { x = pts[eq.indice][1], z = pts[eq.indice][2], dueno = nil, progreso = 0, activo = true }
+      eq.cambia_en = (state.tick or 0) + EQ.ROTA_S * TICK_RATE
+      broadcast(dispatcher, OP_DUEL_EVENT, { kind = "rota", x = eq.objetivos[1].x, z = eq.objetivos[1].z })
+    end
+  end
+  if cambio then EQ.difundir(state, dispatcher) end
+  EQ.comprobar_fin(state, dispatcher)
+end
+
+function EQ.comprobar_fin(state, dispatcher)
+  local modo = EQ.modo(state)
+  if modo == nil or state.phase == "closed" or state.eq == nil then return end
+  local meta = EQ.META[modo]
+  local r, a = state.eq.puntos.rojo, state.eq.puntos.azul
+  if r < meta and a < meta then return end
+  local ganador = (r > a) and "rojo" or ((a > r) and "azul" or nil)
+  if ganador == nil then return end      -- empate exacto: sigue hasta que uno se despegue
+  state.victory = true
+  state.winner_team = ganador
+  state.winner_text = "Equipo " .. string.upper(ganador) .. " gana " .. math.max(r, a) .. " a " .. math.min(r, a)
+  try_close_match(state, dispatcher, "team_won")
 end
 
 -- Envoltorio defensivo: si algo falla aqui, se registra y la sala sigue viva en vez
@@ -1345,6 +1567,13 @@ local function complete_wave(state, dispatcher)
   end
   broadcast(dispatcher, OP_REWARD, { wave = wave, rewards = rewarded, reason = "wave_clear" })
   broadcast(dispatcher, OP_WAVE_STATE, { event = "wave_completed", wave = wave })
+  local meta = (MODES[state.mode or ""] or {}).wave_goal or 0
+  if meta > 0 and wave >= meta then
+    state.victory = true
+    state.winner_text = "Superasteis las " .. meta .. " oleadas"
+    try_close_match(state, dispatcher, "victory")
+    return
+  end
   begin_wave_break(state, dispatcher)
 end
 
@@ -1354,8 +1583,7 @@ end
 local function final_stats(state)
   local list = {}
   local seconds = math.floor((state.tick or 0) / TICK_RATE)
-  local won = (state.mode == "horde" or state.mode == "boss_rush") and
-    (MODES[state.mode].wave_cap > 0 and state.wave > MODES[state.mode].wave_cap)
+  local won = state.victory == true
   for id, p in pairs(state.players) do
     -- los bots nunca se guardan: su id no es un UUID y romperia el registro
     if not p.bot then
@@ -1370,11 +1598,14 @@ local function final_stats(state)
   return list
 end
 
-local function try_close_match(state, dispatcher, reason)
+try_close_match = function(state, dispatcher, reason)
   if state.phase == "closed" then return state end
   state.phase = "closed"
   local results = {
     mode = state.mode, reason = reason or "closed", wave_reached = state.wave,
+    won = state.victory == true, wave_goal = (MODES[state.mode or ""] or {}).wave_goal or 0,
+    winner = state.winner, winner_text = state.winner_text,
+    winner_team = state.winner_team, team_points = state.eq and state.eq.puntos or nil,
     players = snapshot_players(state), duration_ticks = state.tick,
     stats = final_stats(state),
   }
@@ -1781,6 +2012,7 @@ function M.match_leave(context, dispatcher, tick, state, presences)
     if state.close_votes then state.close_votes[presence.user_id] = nil end
   end
   if count_presences(state) == 0 then state.empty_since = now_s() end
+  if EQ then EQ.reequilibrar(state) end
   -- Si se va el host, el siguiente pasa a serlo y se le comunica a todos.
   for _, presence in ipairs(presences) do
     local sid = presence.session_id
@@ -1853,6 +2085,9 @@ end
 function M.match_loop(context, dispatcher, tick, state, messages)
   state.tick = tick
   local t = now_s()
+  -- Cierre por victoria o fin de duelo: ocurre dentro de un manejador cuyo retorno se descarta,
+  -- asi que aqui, ya con los resultados enviados, se termina la sala de verdad.
+  if state.phase == "closed" then return nil end
   if count_presences(state) == 0 then
     if state.empty_since == nil then
       state.empty_since = t
@@ -1872,7 +2107,7 @@ function M.match_loop(context, dispatcher, tick, state, messages)
       spawn_wave_enemies(state, dispatcher)
     end
   end
-  if es_duelo(state) then DUELO.tick(state, dispatcher) end
+  if es_duelo(state) then DUELO.tick(state, dispatcher); EQ.tick(state, dispatcher) end
   calle_tick(state, dispatcher, t)
   -- Un solo dueno por bot y tick: en el Matadero los entrenados los lleva freestyle_tick (persecucion
   -- real por celdas). Antes move_bots los empujaba a la vez hacia un objetivo viejo y el tira y afloja
@@ -2036,6 +2271,9 @@ end
 -- Vive en memoria del modulo: vale para una sola instancia de Nakama, que es la que tenemos.
 local RESERVA_TTL_S = 20
 local reservas = {}   -- match_id -> lista de instantes de caducidad
+-- codigo -> match_id de las salas creadas por RPC. nk.match_list tarda un instante en indexar una
+-- sala nueva: sin esto el amigo que se une al segundo de crearla recibia "code_not_found".
+local codigos_recientes = {}
 
 local function reservas_vivas(match_id)
   local lista = reservas[match_id]
@@ -2178,6 +2416,17 @@ local function salas_vivas()
 end
 
 local function buscar_por_codigo(codigo)
+  local id = codigos_recientes[codigo]
+  if id and nk.match_get then
+    local ok, got = pcall(nk.match_get, id)
+    if ok and got then
+      local okl, label = pcall(nk.json_decode, got.label or "{}")
+      if okl and type(label) == "table" and normalizar_codigo(label.code) == codigo then
+        return { match_id = id, size = got.size, label = got.label }, label
+      end
+    end
+    codigos_recientes[codigo] = nil   -- la sala ya no existe
+  end
   for _, e in ipairs(salas_vivas()) do
     if normalizar_codigo(e.label.code) == codigo then return e.m, e.label end
   end
@@ -2227,6 +2476,7 @@ local function rpc_create_room(context, payload)
     map = map, room_name = nombre, bots = bots, monsters = req.monsters ~= false,
   })
   reservar(match_id)
+  codigos_recientes[codigo] = match_id
   return nk.json_encode({
     match_id = match_id, code = codigo, private = privada, mode = mode, map = map, name = nombre,
     max_players = aforo, monsters = req.monsters ~= false, bots = bots,
@@ -2307,19 +2557,29 @@ local function rpc_list_rooms(context, payload)
       puede = (now_s() - (tonumber(leido[1].value.t) or 0)) > 40
     end
     if puede then
-      local mapas = { "recycling_plant", "storm_village", "space_arena" }
+      local mapas = { "recycling_plant", "storm_village", "space_arena", "snow_fields" }
       local mapa = mapas[(math.floor(now_s() / 40) % #mapas) + 1]
+      -- La sala de guardia es TRANQUILA: sin bots (no saturan a nadie que solo mira la lista) y
+      -- con codigo, para que se pueda entrar desde la lista como a cualquier otra sala.
+      local vivos_g = {}
+      for _, e in ipairs(salas_vivas()) do vivos_g[normalizar_codigo(e.label.code)] = true end
+      local codigo_g = generar_codigo()
+      for _ = 1, 30 do
+        if not vivos_g[codigo_g] then break end
+        codigo_g = generar_codigo()
+      end
       local okc, nueva = pcall(nk.match_create, "coopwave", {
         mode = "freestylers", max_players = MAX_PLAYERS, map = mapa,
-        room_name = "Casa Boomer Shooter", bots = BOTS_MAX,
+        room_name = "Casa Boomer Shooter", bots = 0, code = codigo_g,
       })
       if okc and nueva then
+        codigos_recientes[codigo_g] = nueva
         pcall(nk.storage_write, { { collection = "system", key = "keeper",
           value = { t = now_s() }, permission_read = 0, permission_write = 0 } })
         table.insert(rooms, {
           match_id = nueva, mode = "freestylers", mode_label = (MODES.freestylers or {}).label or "Matadero",
           map = mapa, map_label = (MAPS[mapa] or {}).label or mapa, name = "Casa Boomer Shooter",
-          players = 0, bots = BOTS_MAX, max = MAX_PLAYERS, wave = 0, joinable = true,
+          code = codigo_g, players = 0, bots = 0, max = MAX_PLAYERS, wave = 0, joinable = true,
         })
       end
     end

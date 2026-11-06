@@ -81,11 +81,13 @@ theme_override_constants/separation = 14
 unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 45)
 layout_mode = 2
-item_count = 3
+item_count = 4
 selected = 0
 popup/item_0/text = "Planta de Reciclaje"
 popup/item_1/text = "Distrito de Tormenta"
 popup/item_2/text = "Puesto Lunar"
+popup/item_3/text = "Campos de Nieve"
+popup/item_3/id = 3
 
 [node name="Preview" type="TextureRect" parent="Center/Panel/Box"]
 unique_name_in_owner = true

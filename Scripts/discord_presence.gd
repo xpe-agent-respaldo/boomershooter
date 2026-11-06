@@ -61,9 +61,9 @@ func menu() -> void:
 
 
 const NOMBRES_MODO := {"coop_waves": "Oleadas", "survival": "Supervivencia", "horde": "Horda",
-	"boss_rush": "Jefes", "freestylers": "Matadero", "duelo": "Duelo"}
+	"boss_rush": "Jefes", "freestylers": "Matadero", "duelo": "Duelo", "tdm": "Duelo por equipos", "dominio": "Dominar el punto", "caliente": "Punto caliente"}
 const NOMBRES_MAPA := {"recycling_plant": "Planta de Reciclaje", "storm_village": "Distrito de Tormenta",
-	"space_arena": "Puesto Lunar"}
+	"space_arena": "Puesto Lunar", "snow_fields": "Campos de Nieve"}
 
 
 ## Traduce los ids del servidor a texto para el jugador.

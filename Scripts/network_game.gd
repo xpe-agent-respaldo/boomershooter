@@ -26,6 +26,7 @@ func _ready() -> void:
 	OnlineManager.bot_positions_received.connect(_on_posiciones_bots)
 	OnlineManager.bot_dijo.connect(_on_bot_dijo)
 	OnlineManager.entrenado_disparo.connect(_on_entrenado_disparo)
+	OnlineManager.match_result_received.connect(_on_final_de_partida)
 
 
 ## Un bot del servidor dispara: se oye desde su posicion y se ve la traza hacia quien apunta.
@@ -124,7 +125,15 @@ func _prune_stale(delta: float) -> void:
 func _dar_cuerpo_de_duelo(remote: Node3D, user_id: String) -> void:
 	if remote == null or user_id.is_empty() or not DuelClient.es_duelo():
 		return
-	if remote.get_node_or_null("CuerpoDuelo") != null:
+	# Se reconcilia en cada llamada: el equipo puede llegar DESPUES de que aparezca el avatar. En
+	# equipos los companeros no se apuntan ni danan (el servidor tampoco lo permite).
+	var existente := remote.get_node_or_null("CuerpoDuelo")
+	if not DuelClient.es_rival(user_id):
+		if existente != null:
+			remote.remove_child(existente)
+			existente.queue_free()
+		return
+	if existente != null:
 		return
 	var cuerpo := StaticBody3D.new()
 	cuerpo.name = "CuerpoDuelo"
@@ -278,3 +287,24 @@ func _on_posiciones_bots(lista: Array) -> void:
 		remote.visible = int(e.get("a", 1)) == 1
 		remote.push_transform(Vector3(float(e.get("x", 0)), float(e.get("y", 0)), float(e.get("z", 0))), float(e.get("yaw", 0)))
 		_last_seen[clave] = 0.0
+
+
+## El servidor termino la partida (victoria, derrota o fin de duelo): se cuenta que paso y se
+## deja volver al lobby. Antes este resultado llegaba y nadie lo mostraba.
+var _final_mostrado := false
+
+func _on_final_de_partida(resultado: Dictionary) -> void:
+	if _final_mostrado:
+		return
+	_final_mostrado = true
+	var pantalla := EndScreen.new()
+	add_child(pantalla)
+	pantalla.mostrar(resultado, OnlineManager.get_local_user_id())
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	pantalla.salir_pulsado.connect(_volver_al_lobby)
+
+
+func _volver_al_lobby() -> void:
+	get_tree().paused = false
+	OnlineManager.leave_online()
+	LobbyAudio.change_scene(get_tree(), "res://Levels/Lobby.tscn")

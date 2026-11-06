@@ -1,6 +1,10 @@
 extends Node
 ## Reproduce lo que hace el usuario: abre el lobby (lista salas) y pulsa una fila.
 func _ready() -> void:
+	if not FileAccess.file_exists("res://online_defaults.cfg"):
+		print("OMITIDA: falta res://online_defaults.cfg (clave del servidor); esta prueba solo corre en CI o con la clave.")
+		get_tree().quit(0)
+		return
 	OnlineManager.status_changed.connect(func(m: String) -> void: print("ESTADO: ", m))
 	OnlineManager.match_ready.connect(func(id: String) -> void:
 		print("SALA LISTA: ", id)

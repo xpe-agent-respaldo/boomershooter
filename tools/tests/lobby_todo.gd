@@ -21,6 +21,10 @@ func _abrir_lobby(arbol: SceneTree) -> Node:
 	await _esperar(arbol, func(): return not lb._refreshing and lb._rooms_status.text != "", 25.0)
 	return lb
 func _correr() -> void:
+	if not FileAccess.file_exists("res://online_defaults.cfg"):
+		print("OMITIDA: falta res://online_defaults.cfg (clave del servidor); esta prueba solo corre en CI o con la clave.")
+		get_tree().quit(0)
+		return
 	var arbol := get_tree()
 	await arbol.process_frame
 	var combos := [[0,0],[1,1],[2,2],[3,0],[4,1],[0,2]]   # modo, mapa (cubre los 5 modos y los 3 mapas)

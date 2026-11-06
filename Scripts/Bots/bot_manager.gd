@@ -76,6 +76,10 @@ func _ensure_spawned() -> void:
 		return
 	await get_tree().physics_frame
 	await get_tree().physics_frame
+	# Durante esos dos frames el jugador pudo salir del mapa: la escena ya estaria liberada.
+	if not is_instance_valid(scene) or get_tree() == null or get_tree().current_scene != scene:
+		_spawned_scene = null
+		return
 	_spawn_all(scene)
 
 

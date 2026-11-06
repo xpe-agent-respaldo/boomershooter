@@ -3,7 +3,7 @@ extends Node
 ## lejos de los puntos de aparicion (que estan a radio 28-30), para que nadie
 ## aparezca dentro de una caja.
 
-const ARENAS := ["StormVillage", "SpaceArena", "LunarPost", "RecyclingPlant"]
+const ARENAS := ["StormVillage", "SpaceArena", "SnowFields", "RecyclingPlant"]
 
 var _hecho: String = ""
 ## Un solo material para todas las coberturas: antes cada caja creaba el suyo (22 por arena).

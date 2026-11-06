@@ -193,7 +193,7 @@ function M.decir(rol, situacion, ctx, memoria, rnd)
   memoria = memoria or {}
   ctx = ctx or {}
   local mejor
-  for _ = 1, 10 do
+  for _ = 1, 40 do   -- 40 intentos: con pocas plantillas, 10 se agotaban y salia una repetida
     local frase = llenar(elegir(lista, rnd), ctx, rnd)
     -- capa de contexto: solo si encaja con lo que pasa
     local capa

@@ -6,7 +6,7 @@ extends Node
 const PISTAS := {
 	"StormVillage": "res://Assets/Sounds/Music/Maps/aldea_tormenta.wav",
 	"SpaceArena": "res://Assets/Sounds/Music/Maps/estacion_lunar.wav",
-	"LunarPost": "res://Assets/Sounds/Music/Maps/estacion_lunar.wav",
+	"SnowFields": "res://Assets/Sounds/Music/Maps/campos_nieve.wav",
 	"RecyclingPlant": "res://Assets/Sounds/Music/Maps/planta_reciclaje.wav",
 	"TestLevel": "res://Assets/Sounds/Music/Maps/aldea_tormenta.wav",
 }
@@ -47,6 +47,12 @@ func _watch() -> void:
 
 func _poner(nombre: String, ruta: String) -> void:
 	_actual = nombre
+	# Si el propio mapa ya tiene su musica sonando por el bus Music (la Arena Espacial pone su pista),
+	# el director cede: dos pistas a la vez sonaban como una mezcla.
+	var escena := get_tree().current_scene
+	if escena != null and _mapa_trae_su_musica(escena):
+		_parar_solo_reproductor()
+		return
 	if not ResourceLoader.exists(ruta):
 		return
 	var stream := load(ruta)
@@ -69,3 +75,17 @@ func _parar() -> void:
 	if _player.playing:
 		_player.stop()
 	_actual = ""
+
+
+## true si algun reproductor del mapa (no el del director) suena ya por el bus Music.
+func _mapa_trae_su_musica(nodo: Node) -> bool:
+	for h in nodo.find_children("*", "AudioStreamPlayer", true, false):
+		var p := h as AudioStreamPlayer
+		if p != _player and p.bus == &"Music" and p.stream != null and p.playing:
+			return true
+	return false
+
+
+func _parar_solo_reproductor() -> void:
+	if _player.playing:
+		_player.stop()

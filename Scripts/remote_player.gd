@@ -140,12 +140,23 @@ func push_transform(world_position: Vector3, yaw: float) -> void:
 		_has_target = true
 
 
+## A mas de esta distancia (m) un avatar remoto no se anima: no se distingue y cuesta CPU en portatiles.
+const LEJOS_SIN_ANIMAR := 70.0
+
+
 func _process(delta: float) -> void:
 	if not _has_target:
 		return
 	var step := clampf(LERP_SPEED * delta, 0.0, 1.0)
 	global_position = global_position.lerp(_target_position, step)
 	rotation.y = lerp_angle(rotation.y, _target_yaw, step)
+	# Muy lejos de la camara (o invisible) nadie ve las piernas ni la etiqueta: se ahorra la animacion.
+	if not visible:
+		return
+	var cam: Camera3D = get_viewport().get_camera_3d()
+	if cam != null and cam.global_position.distance_squared_to(global_position) > LEJOS_SIN_ANIMAR * LEJOS_SIN_ANIMAR:
+		_prev_position = global_position
+		return
 	_animate_body(delta)
 
 
