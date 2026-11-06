@@ -8,6 +8,9 @@ extends CanvasLayer
 const BANNER_SECONDS := 4.5
 const MAX_BANNERS := 4
 const ARROW_SECONDS := 12.0
+## La peticion de ayuda dura mas: es un punto al que hay que ir. Se retira al llegar a esta distancia.
+const HELP_SECONDS := 40.0
+const HELP_LLEGADA_M := 6.0
 const SEVERITY_COLORS := [
 	Color(0.85, 0.85, 0.9),     # 0 info
 	Color(0.55, 0.9, 0.55),     # 1 bien (revivido)
@@ -61,7 +64,9 @@ func _process(_delta: float) -> void:
 	var camera := get_viewport().get_camera_3d()
 	for id in _arrows.keys():
 		var arrow: Dictionary = _arrows[id]
-		if now >= arrow.expires or not is_instance_valid(arrow.node):
+		var llego: bool = bool(arrow.get("ayuda", false)) and _player != null \
+			and _player.global_position.distance_to(arrow.pos) <= HELP_LLEGADA_M
+		if now >= arrow.expires or not is_instance_valid(arrow.node) or llego:
 			_remove_marker(arrow)
 			_arrows.erase(id)
 			continue
@@ -164,7 +169,8 @@ func _on_team_alert(alert: Dictionary) -> void:
 	if pos is Dictionary and (kind == "player_down" or kind == "help"):
 		var uid := str(alert.get("user_id", ""))
 		if uid != OnlineManager.get_local_user_id():
-			_add_arrow(uid, _to_vec3(pos), severity)
+			var quien := str(alert.get("username", "")).strip_edges()
+			_add_arrow(uid, _to_vec3(pos), severity, quien, kind == "help")
 	elif kind == "revived" or kind == "player_lost":
 		_clear_arrow(str(alert.get("user_id", "")))
 
@@ -242,12 +248,39 @@ func _show_banner(text: String, severity: int) -> void:
 	tween.tween_callback(panel.queue_free)
 
 
-func _add_arrow(user_id: String, pos: Vector3, severity: int) -> void:
+func _add_arrow(user_id: String, pos: Vector3, severity: int, quien: String = "", es_ayuda: bool = false) -> void:
 	_clear_arrow(user_id)
 	var color: Color = SEVERITY_COLORS[clampi(severity, 0, 3)]
-	var marker := _make_marker("", color)
+	var marker := _make_marker(quien, color)
 	add_child(marker)
-	_arrows[user_id] = {"node": marker, "pos": pos, "expires": Time.get_ticks_msec() / 1000.0 + ARROW_SECONDS}
+	var dura := HELP_SECONDS if es_ayuda else ARROW_SECONDS
+	var entrada := {"node": marker, "pos": pos, "expires": Time.get_ticks_msec() / 1000.0 + dura, "ayuda": es_ayuda}
+	if es_ayuda:
+		entrada["baliza"] = _poner_baliza(pos, color)
+	_arrows[user_id] = entrada
+
+
+## Haz de luz vertical en el mundo 3D sobre quien pide ayuda: se ve desde lejos aunque no se mire hacia alli.
+func _poner_baliza(pos: Vector3, color: Color) -> Node3D:
+	var escena := get_tree().current_scene
+	if escena == null:
+		return null
+	var haz := MeshInstance3D.new()
+	var cil := CylinderMesh.new()
+	cil.top_radius = 0.12
+	cil.bottom_radius = 0.12
+	cil.height = 40.0
+	haz.mesh = cil
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	mat.albedo_color = Color(color.r, color.g, color.b, 0.45)
+	mat.no_depth_test = false
+	haz.material_override = mat
+	haz.add_to_group("baliza_ayuda")
+	escena.add_child(haz)
+	haz.global_position = pos + Vector3(0, 20.0, 0)
+	return haz
 
 
 func _clear_arrow(user_id: String) -> void:
@@ -307,6 +340,8 @@ func _place_marker(marker: Dictionary, camera: Camera3D) -> void:
 func _remove_marker(marker: Dictionary) -> void:
 	if marker.has("node") and is_instance_valid(marker.node):
 		marker.node.queue_free()
+	if marker.has("baliza") and is_instance_valid(marker["baliza"]):
+		marker["baliza"].queue_free()
 
 
 func _to_vec3(d: Dictionary) -> Vector3:

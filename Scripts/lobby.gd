@@ -9,6 +9,7 @@ const MODES := [
 	{"id": "horde", "name": "HORDA", "desc": "Enjambres masivos de enemigos. Dispara sin parar."},
 	{"id": "boss_rush", "name": "JEFES", "desc": "Un jefe tras otro. Sin enemigos menores."},
 	{"id": "freestylers", "name": "FREESTYLERS", "desc": "Sala de los Freestylers: puro enfrentamiento contra jugadores entrenados. Sin monstruos."},
+	{"id": "duelo", "name": "DUELO", "desc": "Tu contra tus amigos. Sin monstruos ni bots: el que mas bajas haga gana. Tab muestra el marcador."},
 ]
 const MAPS := [
 	{"id": "recycling_plant", "name": "PLANTA DE RECICLAJE", "level": "res://Levels/RecyclingPlant.tscn", "preview": "res://Assets/Maps/References/village_scenery_idea.png"},
@@ -260,6 +261,8 @@ func _select_mode(i: int) -> void:
 	for k in _mode_buttons.size():
 		_mode_buttons[k].button_pressed = (k == i)
 	mode_desc.text = MODES[i].desc
+	if _opt_monstruos != null:
+		_refrescar_opciones()
 
 
 func _select_map(i: int) -> void:
@@ -332,14 +335,24 @@ func _select_vis(privada: bool) -> void:
 	vis_desc.text = "Solo entra quien tenga el codigo. No sale en la lista." if privada else "Sale en la lista de salas: cualquiera puede unirse."
 
 
+func _es_duelo() -> bool:
+	return str(MODES[_mode_index].id) == "duelo"
+
+
 func _refrescar_opciones() -> void:
-	_opt_monstruos.text = "MONSTRUOS: " + ("SI" if _monstruos else "NO")
-	_opt_bots.text = "BOTS: %d" % BOTS_OPC[_bots_i]
+	# En el duelo no hay monstruos ni bots: se muestra tal cual y no se puede cambiar.
+	var duelo := _es_duelo()
+	_opt_monstruos.text = "MONSTRUOS: " + ("NO" if duelo else ("SI" if _monstruos else "NO"))
+	_opt_bots.text = "BOTS: " + ("0" if duelo else str(BOTS_OPC[_bots_i]))
+	_opt_monstruos.disabled = duelo
+	_opt_bots.disabled = duelo
 	_opt_jug.text = "MAX: %d" % JUGADORES_OPC[_jug_i]
 
 
 ## Las opciones elegidas, tal cual viajan al servidor.
 func opciones_sala() -> Dictionary:
+	if _es_duelo():
+		return {"monsters": false, "bots": 0, "max_players": JUGADORES_OPC[_jug_i]}
 	return {"monsters": _monstruos, "bots": BOTS_OPC[_bots_i], "max_players": JUGADORES_OPC[_jug_i]}
 
 

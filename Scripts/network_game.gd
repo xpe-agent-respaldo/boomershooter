@@ -106,6 +106,7 @@ func _on_player_state(session_id: String, world_position: Vector3, yaw: float, d
 		_remote[session_id] = remote
 	elif not display_name.is_empty() and remote.display_name != display_name:
 		remote.setup(display_name, RemotePlayer.color_for(session_id), OnlineManager.skin_de(session_id))
+	_dar_cuerpo_de_duelo(remote, session_id)
 	remote.push_transform(world_position, yaw)
 	_last_seen[session_id] = 0.0
 
@@ -116,6 +117,29 @@ func _prune_stale(delta: float) -> void:
 		if float(_last_seen[session_id]) < STALE_SECONDS:
 			continue
 		_remove_remote(session_id)
+
+
+## En un duelo los demas jugadores se pueden disparar: se les da un cuerpo de colision en la capa 4
+## (la que mira el AimCast), con su user_id. Fuera del duelo no se anade: nadie puede danar a nadie.
+func _dar_cuerpo_de_duelo(remote: Node3D, user_id: String) -> void:
+	if remote == null or user_id.is_empty() or not DuelClient.es_duelo():
+		return
+	if remote.get_node_or_null("CuerpoDuelo") != null:
+		return
+	var cuerpo := StaticBody3D.new()
+	cuerpo.name = "CuerpoDuelo"
+	cuerpo.collision_layer = 8
+	cuerpo.collision_mask = 0
+	cuerpo.add_to_group("rival_duelo")
+	cuerpo.set_meta("rival_id", user_id)
+	var forma := CollisionShape3D.new()
+	var capsula := CapsuleShape3D.new()
+	capsula.radius = 0.45
+	capsula.height = 1.8
+	forma.shape = capsula
+	forma.position = Vector3(0, 0.9, 0)
+	cuerpo.add_child(forma)
+	remote.add_child(cuerpo)
 
 
 func _remove_remote(session_id: String) -> void:
@@ -153,7 +177,8 @@ func _sincronizar_humanos(lista: Array) -> void:
 			_remote[uid] = remote
 		elif str(entrada.get("skin", "")) != "" and remote._skin_id != str(entrada.get("skin", "")):
 			remote.set_skin(str(entrada.get("skin", "")), RemotePlayer.color_for(uid))
-		remote.visible = bool(entrada.get("alive", true))
+		remote.visible = bool(entrada.get("alive", true)) and not bool(entrada.get("dead", false))
+		_dar_cuerpo_de_duelo(remote, uid)
 		remote.push_transform(destino, float(entrada.get("yaw", remote.rotation.y)))
 		_last_seen[uid] = 0.0
 	# quien ya no esta en la lista (se fue de la sala) se retira

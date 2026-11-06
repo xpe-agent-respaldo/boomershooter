@@ -45,6 +45,10 @@ var _neko: BotLook
 var _skin_id: String = ""
 
 
+func _enter_tree() -> void:
+	add_to_group("remote_player")
+
+
 func setup(player_name: String, tint: Color, skin_id: String = "") -> void:
 	display_name = player_name if not player_name.is_empty() else "Jugador"
 	if is_instance_valid(name_tag):

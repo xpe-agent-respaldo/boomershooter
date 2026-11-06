@@ -28,6 +28,8 @@ signal match_result_received(result: Dictionary)
 signal revive_result(ok: bool, info: Dictionary)
 signal player_down_changed(user_id: String, is_down: bool, info: Dictionary)
 signal entrenado_hit_received(damage: int, from: Vector3, nombre: String)
+## Duelo: golpe, baja o reaparicion que decide el servidor (kind: hit | kill | respawn).
+signal duel_event_received(evento: Dictionary)
 signal entrenado_cayo(nombre: String)
 ## Un bot del servidor disparo: posicion de su arma, a quien apuntaba y si dio. Sirve para oirlo y verlo.
 signal entrenado_disparo(desde: Vector3, objetivo_id: String, acerto: bool, nombre: String)
@@ -68,6 +70,8 @@ const OP_PING := 82
 const OP_MATCH_RESULT := 91
 const OP_VOICE := 92
 const OP_BOT_POS := 94
+const OP_HIT_PLAYER := 95
+const OP_DUEL_EVENT := 96
 const PLAYER_STATE_HZ := 12.0
 
 var host := "boomershooter.onrender.com"
@@ -525,6 +529,8 @@ func handle_server_message(op_code: int, raw_payload: String) -> void:
 			var desde = payload.get("from", {})
 			var punto := Vector3(float(desde.get("x", 0)), float(desde.get("y", 0)), float(desde.get("z", 0)))
 			entrenado_hit_received.emit(int(payload.get("damage", 0)), punto, str(payload.get("name", "")))
+		OP_DUEL_EVENT:
+			duel_event_received.emit(payload)
 		OP_PLAYER_DEATH:
 			# El aviso para el jugador llega por OP_TEAM_ALERT (kind "player_down");
 			# este mensaje solo sirve para actualizar quien esta caido.
@@ -614,6 +620,13 @@ func report_entrenado_hit(entrenado_id: String, damage: int) -> void:
 	if entrenado_id.is_empty():
 		return
 	await _send_op(OP_HIT_BOT, {"user_id": entrenado_id, "damage": damage})
+
+
+## Duelo: le diste a otro jugador. El servidor valida distancia, pared y ritmo y decide el dano real.
+func report_player_hit(target_user_id: String, damage: int) -> void:
+	if target_user_id.is_empty():
+		return
+	await _send_op(OP_HIT_PLAYER, {"target_id": target_user_id, "damage": damage})
 
 
 ## Hacerse amigo de uno de los buenos (hay que estar cerca).

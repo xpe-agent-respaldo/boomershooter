@@ -37,6 +37,8 @@ local OP_MATCH_RESULT = 91
 local OP_VOICE = 92          -- paquete de voz (mu-law 8 kHz) para el chat
 local OP_BOT_SAY = 93        -- un bot dice una frase (texto ya armado por el servidor)
 local OP_BOT_POS = 94        -- posiciones de los bots (compacto, 10 Hz) para que se vean andar de forma fluida
+local OP_HIT_PLAYER = 95     -- duelo: le di a otro jugador (cliente -> servidor)
+local OP_DUEL_EVENT = 96     -- duelo: golpe, baja o reaparicion (servidor -> todos)
 local OP_ERROR = 99
 local OP_META = 9001           -- canal interno de NakamaMultiplayerBridge (0 = soy host, 1 = toma este peer id)
 
@@ -134,6 +136,9 @@ local MODES = {
   -- Puro enfrentamiento contra jugadores entrenados: no aparecen monstruos.
   freestylers = { label = "Matadero", revive = true, lives = 0, wave_cap = 0,
                   hp_scale = 1.0, count_scale = 0.0, pvp = true },
+  -- Duelo entre jugadores (amigos contra amigos): sin monstruos ni bots, el servidor lleva la vida.
+  duelo = { label = "Duelo", revive = false, lives = 0, wave_cap = 0,
+            hp_scale = 1.0, count_scale = 0.0, duelo = true },
 }
 
 -- atan2 portatil: Lua 5.1 lo trae en math.atan2, Lua 5.4 solo math.atan(y,x).
@@ -179,6 +184,7 @@ local PLAN = {
   horde       = { companions = 3, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 3
   boss_rush   = { companions = 2, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 2
   freestylers = { companions = 4, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 4
+  duelo       = { companions = 0, calle = false, gang = 0, solo = 0, amigo = 0 },   -- 0: solo humanos
 }
 local function plan_de(state)
   return PLAN[state.mode or "coop_waves"] or PLAN.coop_waves
@@ -904,6 +910,104 @@ local function handle_hit_bot(state, dispatcher, presence, payload, t)
     })
   end
   return state
+end
+
+-- ============================ DUELO (jugador contra jugador) ============================
+-- El servidor es la autoridad: lleva la vida de cada jugador, valida el disparo (distancia, pared,
+-- ritmo, daño acotado) y cuenta bajas. El cliente solo dice "le di a X con esta arma".
+-- (todo en UNA tabla local: Lua limita a 200 variables locales por modulo y ya estabamos al borde)
+local DUELO = {
+  HP = 100,
+  RESPAWN_TICKS = 50,          -- 5 s hasta reaparecer
+  ALCANCE_M = 120.0,           -- ningun arma llega mas lejos
+  DANO_MAX = 60,               -- tope por impacto (la escopeta es lo mas fuerte)
+  DANO_MIN = 1,
+  RITMO_S = 1.0,
+  RITMO_MAX = 20,              -- impactos por segundo y jugador (subfusil ~15/s)
+  INVULNERABLE_TICKS = 20,     -- 2 s de proteccion al reaparecer
+  PUNTOS_BAJA = 1,
+}
+
+local function es_duelo(state)
+  local cfg = MODES[state.mode or ""] or {}
+  return cfg.duelo == true
+end
+
+function DUELO.marcador(state)
+  local lista = {}
+  for _, pr in pairs(state.presences) do
+    local p = state.players[pr.user_id]
+    if p ~= nil and p.bot ~= true then
+      lista[#lista + 1] = { user_id = p.user_id, name = p.username, kills = p.duel_kills or 0,
+                            deaths = p.duel_deaths or 0, hp = p.duel_hp or DUELO.HP, dead = p.dead == true }
+    end
+  end
+  table.sort(lista, function(a, b)
+    if a.kills ~= b.kills then return a.kills > b.kills end
+    return a.deaths < b.deaths
+  end)
+  return lista
+end
+
+function DUELO.golpe(state, dispatcher, presence, payload, t)
+  if not es_duelo(state) then return state end
+  local tirador = state.players[presence.user_id]
+  local objetivo = state.players[tostring(payload.target_id or payload.user_id or "")]
+  if tirador == nil or objetivo == nil or objetivo.bot == true then return state end
+  if tirador.user_id == objetivo.user_id then return state end          -- nada de autodaño
+  if tirador.dead or objetivo.dead then return state end
+  if (state.tick or 0) < (objetivo.duel_safe_until or 0) then return state end   -- recien reaparecido
+  state.rate_duelo = state.rate_duelo or {}
+  if not rate_allow(state.rate_duelo, presence.session_id, DUELO.RITMO_S, DUELO.RITMO_MAX, t) then return state end
+  -- el equipo (si lo hay) no se dispara entre si
+  if tirador.team ~= nil and tirador.team == objetivo.team then return state end
+  -- distancia y pared: con las posiciones que el propio servidor conoce
+  if tirador.pos == nil or objetivo.pos == nil then return state end
+  local d = vec_dist(tirador.pos, objetivo.pos)
+  if d > DUELO.ALCANCE_M then return state end
+  if not hay_vision(state, tirador.pos, objetivo.pos) then return state end
+  local dano = math.max(DUELO.DANO_MIN, math.min(DUELO.DANO_MAX, math.floor(tonumber(payload.damage) or 0)))
+  objetivo.duel_hp = (objetivo.duel_hp or DUELO.HP) - dano
+  tirador.damage_dealt = (tirador.damage_dealt or 0) + dano
+  local destino = state.presences[objetivo.user_id]
+  if objetivo.duel_hp > 0 then
+    broadcast(dispatcher, OP_DUEL_EVENT, { kind = "hit", from = tirador.user_id, to = objetivo.user_id,
+      damage = dano, hp = objetivo.duel_hp })
+    return state
+  end
+  objetivo.duel_hp = 0
+  objetivo.dead = true
+  objetivo.duel_deaths = (objetivo.duel_deaths or 0) + 1
+  objetivo.respawn_at = (state.tick or 0) + DUELO.RESPAWN_TICKS
+  tirador.duel_kills = (tirador.duel_kills or 0) + DUELO.PUNTOS_BAJA
+  tirador.kills = (tirador.kills or 0) + 1
+  tirador.rewards = (tirador.rewards or 0) + REWARD_PER_KILL
+  broadcast(dispatcher, OP_DUEL_EVENT, { kind = "kill", from = tirador.user_id, to = objetivo.user_id,
+    killer = tirador.username, victim = objetivo.username, board = DUELO.marcador(state) })
+  return state
+end
+
+function DUELO.golpe_seguro(state, dispatcher, presence, payload, t)
+  local ok, err = pcall(DUELO.golpe, state, dispatcher, presence, payload, t)
+  if not ok then nk.logger_error("hit_player_fallo: " .. tostring(err)) end
+  return state
+end
+
+-- Reaparicion: vuelven con la vida llena, en un punto lejos de los demas, con 2 s de proteccion.
+function DUELO.tick(state, dispatcher)
+  for _, pr in pairs(state.presences) do
+    local p = state.players[pr.user_id]
+    if p ~= nil and p.bot ~= true then
+      if p.duel_hp == nil then p.duel_hp = DUELO.HP end
+      if p.dead and (state.tick or 0) >= (p.respawn_at or 0) then
+        p.dead = false
+        p.duel_hp = DUELO.HP
+        p.duel_safe_until = (state.tick or 0) + DUELO.INVULNERABLE_TICKS
+        broadcast(dispatcher, OP_DUEL_EVENT, { kind = "respawn", to = p.user_id, hp = DUELO.HP,
+          board = DUELO.marcador(state) })
+      end
+    end
+  end
 end
 
 -- Envoltorio defensivo: si algo falla aqui, se registra y la sala sigue viva en vez
@@ -1755,7 +1859,7 @@ function M.match_loop(context, dispatcher, tick, state, messages)
     end
   end
   if state.phase == "lobby" or state.phase == "break" then
-    if state.monsters == false and not es_pvp(state) then
+    if (state.monsters == false and not es_pvp(state)) or es_duelo(state) then
       -- Sala sin monstruos: no hay oleadas que contar ni esperar. Queda en fase "free" (libre).
       state.phase = "free"
       state.wave_active = false
@@ -1766,6 +1870,7 @@ function M.match_loop(context, dispatcher, tick, state, messages)
       spawn_wave_enemies(state, dispatcher)
     end
   end
+  if es_duelo(state) then DUELO.tick(state, dispatcher) end
   calle_tick(state, dispatcher, t)
   -- Un solo dueno por bot y tick: en el Matadero los entrenados los lleva freestyle_tick (persecucion
   -- real por celdas). Antes move_bots los empujaba a la vez hacia un objetivo viejo y el tira y afloja
@@ -1794,6 +1899,8 @@ function M.match_loop(context, dispatcher, tick, state, messages)
       state = handle_damage(state, dispatcher, presence, payload, t)
     elseif op == OP_HIT_BOT then
       state = handle_hit_bot_seguro(state, dispatcher, presence, payload, t)
+    elseif op == OP_HIT_PLAYER then
+      state = DUELO.golpe_seguro(state, dispatcher, presence, payload, t)
     elseif op == OP_VOICE then
       state = handle_voice(state, dispatcher, presence, payload, t)
     elseif op == OP_BEFRIEND then

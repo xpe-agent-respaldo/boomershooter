@@ -164,10 +164,78 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
+  apk:
+    name: APK de Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 17 y SDK de Android
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Instalar el SDK de Android
+        run: |
+          set -e
+          export ANDROID_SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$ANDROID_SDK_ROOT/cmdline-tools"
+          curl -fL -o cmdline.zip "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip"
+          unzip -q cmdline.zip -d "$ANDROID_SDK_ROOT/cmdline-tools"
+          mv "$ANDROID_SDK_ROOT/cmdline-tools/cmdline-tools" "$ANDROID_SDK_ROOT/cmdline-tools/latest"
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" "platform-tools" "build-tools;34.0.0" "platforms;android-34" "cmake;3.10.2.4988404" "ndk;28.1.13356709"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+
+      - name: Instalar Godot y plantillas
+        run: |
+          set -e
+          curl -fL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_linux.x86_64.zip"
+          unzip -q godot.zip
+          sudo mv Godot_v${GODOT_VERSION}_linux.x86_64 /usr/local/bin/godot
+          curl -fL -o plantillas.tpz "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}/Godot_v${GODOT_VERSION}_export_templates.tpz"
+          PLANTILLAS="$HOME/.local/share/godot/export_templates/4.7.stable"
+          mkdir -p "$PLANTILLAS"
+          unzip -q -j plantillas.tpz 'templates/*' -d "$PLANTILLAS"
+          # Godot necesita saber donde esta el SDK y el JDK
+          mkdir -p "$HOME/.config/godot"
+          printf '[gd_resource type="EditorSettings" format=3]\n\n[resource]\nexport/android/android_sdk_path = "%s"\nexport/android/java_sdk_path = "%s"\n' "$ANDROID_SDK_ROOT" "$JAVA_HOME" > "$HOME/.config/godot/editor_settings-4.7.tres"
+          godot --version
+
+      - name: Inyectar servidor online
+        env:
+          NAKAMA_HOST: ${{ secrets.NAKAMA_HOST }}
+          NAKAMA_SERVER_KEY: ${{ secrets.NAKAMA_SERVER_KEY }}
+        run: sh tools/write_online_defaults.sh online_defaults.cfg
+
+      - name: Importar el proyecto
+        run: godot --headless --path "$GITHUB_WORKSPACE" --editor --quit || true
+
+      - name: Compilar y firmar el APK
+        env:
+          GODOT: godot
+          ANDROID_KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: sh tools/build_android.sh
+
+      - name: Validar el APK (permisos, microfono, arm64, online, firma)
+        run: python3 tools/validar_apk.py Build/Android/BoomerShooter.apk
+
+      - name: Guardar el APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BoomerShooter-apk
+          path: Build/Android/BoomerShooter.apk
+          if-no-files-found: error
+          retention-days: 90
+
   publicar:
     name: Publicar descargas, manifiesto y release
-    needs: [escritorio_y_web, ipa]
-    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [escritorio_y_web, ipa, apk]
+    # El APK es nuevo: si su compilacion falla, Windows, Linux, Web e IPA se publican igual.
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/v') && needs.escritorio_y_web.result == 'success' && needs.ipa.result == 'success' }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -203,6 +271,12 @@ jobs:
         with:
           name: BoomerShooter-ipa-sin-firmar
           path: repo/Build/IPA
+
+      - uses: actions/download-artifact@v4
+        if: ${{ needs.apk.result == 'success' }}
+        with:
+          name: BoomerShooter-apk
+          path: repo/Build/APK
 
       - name: Subir binarios, generar manifiesto y crear la release
         working-directory: repo
@@ -245,15 +319,17 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           IPA="$(find repo/Build/IPA -name '*.ipa' | head -1)"
           test -f "$IPA"
+          APK="$(find repo/Build/APK -name '*.apk' 2>/dev/null | head -1)"
+          if [ -n "$APK" ]; then cp "$APK" "repo/Build/APK/BoomerShooter-${GITHUB_REF_NAME#v}.apk"; APK="repo/Build/APK/BoomerShooter-${GITHUB_REF_NAME#v}.apk"; fi
           SHA_TAG="$(curl -fsS -H "Authorization: Bearer ${GH_TOKEN}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/ref/tags/${GITHUB_REF_NAME}" | python3 -c "import json,sys; print(json.load(sys.stdin)['object']['sha'])")"
           NOTAS="$(curl -fsS -H "Authorization: Bearer ${GH_TOKEN}" "https://api.github.com/repos/${GITHUB_REPOSITORY}/git/tags/${SHA_TAG}" | python3 -c "import json,sys; print(json.load(sys.stdin)['message'].strip())")"
           CUERPO="$(printf '%s' "$NOTAS" | tr ';' '\n' | sed 's/^ *//; /^$/d; s/^/- /')"
-          printf '**Boomer Shooter %s**\n\n%s\n\nIPA sin firmar: se instala con Gbox, Sideloadly o AltStore. Windows y Linux: https://boomershooter.vercel.app\n' "$VERSION" "$CUERPO" > notas.md
+          printf '**Boomer Shooter %s**\n\n%s\n\nAndroid: instala el APK (activa "instalar apps desconocidas" para tu navegador). iPhone: IPA sin firmar, se instala con Gbox, Sideloadly o AltStore. Windows y Linux: https://boomershooter.vercel.app\n' "$VERSION" "$CUERPO" > notas.md
           if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$GITHUB_REF_NAME" "$IPA" --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$GITHUB_REF_NAME" "$IPA" $APK --clobber --repo "$GITHUB_REPOSITORY"
             gh release edit "$GITHUB_REF_NAME" --notes-file notas.md --draft=false --latest --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$GITHUB_REF_NAME" "$IPA" --title "v${VERSION}" --notes-file notas.md --draft=false --latest --repo "$GITHUB_REPOSITORY"
+            gh release create "$GITHUB_REF_NAME" "$IPA" $APK --title "v${VERSION}" --notes-file notas.md --draft=false --latest --repo "$GITHUB_REPOSITORY"
           fi
 
       - name: Empujar manifiesto y version web a GitLab (Vercel los publica)

@@ -1606,3 +1606,82 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -26)
 [node name="SpawnPoint6" type="Marker3D" parent="SpawnPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 26)
 
+; --- ESCONDITE_INICIO
+[node name="EsconditeNorte" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.00, 1.70, -35.75)
+size = Vector3(8.00, 3.40, 0.50)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeOeste" type="CSGBox3D" parent="Map"]
+position = Vector3(-21.75, 1.70, -32.00)
+size = Vector3(0.50, 3.40, 8.00)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeEsteBajo" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.25, 0.75, -32.00)
+size = Vector3(0.50, 1.50, 8.00)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeEsteAlto" type="CSGBox3D" parent="Map"]
+position = Vector3(-14.25, 2.70, -32.00)
+size = Vector3(0.50, 1.40, 8.00)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeSurA" type="CSGBox3D" parent="Map"]
+position = Vector3(-20.50, 1.70, -28.25)
+size = Vector3(3.00, 3.40, 0.50)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeSurB" type="CSGBox3D" parent="Map"]
+position = Vector3(-15.50, 1.70, -28.25)
+size = Vector3(3.00, 3.40, 0.50)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeDintel" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.00, 3.00, -28.25)
+size = Vector3(2.00, 0.80, 0.50)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_4")
+
+[node name="EsconditeTecho" type="CSGBox3D" parent="Map"]
+position = Vector3(-18.00, 3.55, -32.00)
+size = Vector3(8.00, 0.30, 8.00)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="EsconditeCaja" type="CSGBox3D" parent="Map"]
+position = Vector3(-20.40, 0.45, -34.60)
+size = Vector3(1.40, 0.90, 1.00)
+use_collision = true
+collision_layer = 1
+collision_mask = 0
+material = SubResource("Mat_3")
+
+[node name="EsconditeLuz" type="OmniLight3D" parent="Map"]
+position = Vector3(-18.00, 2.6, -32.00)
+light_color = Color(0.45, 0.62, 1, 1)
+light_energy = 1.4
+omni_range = 7.0
+; --- ESCONDITE_FIN

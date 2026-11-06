@@ -365,6 +365,61 @@ func take_damage(damage: int, hit_position: Vector3) -> void:
 			player_hurt.emit(hit_position)
 
 
+# --- Duelo (jugador contra jugador). La vida la lleva el servidor; aqui solo se refleja. -------------
+var en_duelo_caido := false
+
+
+## El servidor dice cuanta vida te queda tras un impacto de otro jugador.
+func recibir_dano_duelo(_dano: int, vida_servidor: int, desde: Vector3) -> void:
+	health = clampi(vida_servidor, 0, MAX_HEALTH)
+	health_changed.emit()
+	if has_node("%OuchSound") and not %OuchSound.playing:
+		%OuchSound.play()
+	if health > 0:
+		player_hurt.emit(desde)
+
+
+## Te eliminaron: caes unos segundos (sin pantalla de Game Over: en el duelo se reaparece).
+func caer_en_duelo() -> void:
+	en_duelo_caido = true
+	health = 0
+	health_changed.emit()
+	velocity = Vector3.ZERO
+	set_physics_process(false)
+	visible = false
+
+
+## El servidor te hace reaparecer con la vida llena, lejos de donde caiste.
+func reaparecer_en_duelo(vida: int) -> void:
+	en_duelo_caido = false
+	health = clampi(vida, 1, MAX_HEALTH)
+	health_changed.emit()
+	been_hurt = false
+	visible = true
+	set_physics_process(true)
+	var puntos := get_tree().get_nodes_in_group("spawn_point")
+	if puntos.is_empty():
+		var raiz := get_tree().current_scene
+		var sp := raiz.get_node_or_null("SpawnPoints") if raiz != null else null
+		if sp != null:
+			puntos = sp.get_children()
+	if not puntos.is_empty():
+		var lejos: Node3D = puntos[0]
+		var mejor := -1.0
+		for punto in puntos:
+			if not punto is Node3D:
+				continue
+			var d := 9999.0
+			for otro in get_tree().get_nodes_in_group("remote_player"):
+				if otro is Node3D:
+					d = minf(d, (punto as Node3D).global_position.distance_to(otro.global_position))
+			if d > mejor:
+				mejor = d
+				lejos = punto
+		global_position = lejos.global_position + Vector3(0, 0.3, 0)
+	velocity = Vector3.ZERO
+
+
 ## Devuelve el nodo enemigo que corresponde a un cuerpo detectado, ya sea el
 ## propio CharacterBody3D del enemigo o uno de sus huesos.
 func _enemy_from_body(body: Node3D) -> Node3D:

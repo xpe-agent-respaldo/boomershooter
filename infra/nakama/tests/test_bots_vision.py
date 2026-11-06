@@ -59,6 +59,42 @@ def escenario(mapa, bot_celda, jug_celda, modo="freestylers", ticks=60, semilla=
     return len(h.ops(OP_BOT_SHOT)), len(h.ops(OP_BOT_HIT)), h
 
 
+def escondite():
+    """El escondite del mapa espacial (-18,-32): la pared tapa la vista, la puerta no."""
+    print("\n[space_arena: escondite]")
+    mapa = "space_arena"
+    # jugador dentro, al fondo. Bot A al norte, fuera, con el MURO en medio. Bot B al sur, frente a la puerta.
+    dentro = (-18, -32)
+    tras_muro = (-18, -42)       # 10 m al norte; el muro norte (z=-35.75) esta en medio
+    frente_puerta = (-18, -22)   # 10 m al sur, en linea con la puerta (z=-28)
+    lado = (-26, -32)            # 8 m al oeste; muro oeste (x=-21.75) en medio
+    for nombre, celda in (("tras el muro norte", tras_muro), ("tras el muro oeste", lado)):
+        r = escenario(mapa, celda, dentro)
+        check(f"bot {nombre}: NO dispara a quien se esconde", r is not None and r[0] == 0, str(r and r[:2]))
+        check(f"bot {nombre}: NO hace dano", r is not None and r[1] == 0, str(r and r[:2]))
+    r = escenario(mapa, frente_puerta, dentro)
+    check("bot frente a la puerta: SI ve y dispara (la puerta no es pared)", r is not None and r[0] > 0, str(r and r[:2]))
+    # el suelo del plano: la pared no es caminable, el interior y la puerta si
+    src = open(os.path.join(MODS, "map_floor.lua"), encoding="utf-8").read()
+    bloque = src.split("M.space_arena = {")[1].split("\n}")[0]
+    celdas = {(int(x), int(z)) for x, z, _ in re.findall(r"\{(-?\d+),(-?\d+),(-?[\d.]+)\}", bloque)}
+    check("las celdas bajo los muros ya no son suelo", all(c not in celdas for c in [(-18, -36), (-22, -32), (-14, -32), (-20, -28)]))
+    check("el interior sigue siendo suelo", all(c in celdas for c in [(-18, -32), (-16, -32), (-20, -30)]))
+    check("la puerta sigue siendo suelo", (-18, -28) in celdas)
+    # un bot dentro del plano puede ir de la puerta al centro (el interior no quedo aislado)
+    from collections import deque
+    cola, vistos = deque([(-18, -28)]), {(-18, -28)}
+    while cola:
+        x, z = cola.popleft()
+        for dx in (-2, 0, 2):
+            for dz in (-2, 0, 2):
+                v = (x + dx, z + dz)
+                if v in celdas and v not in vistos:
+                    vistos.add(v); cola.append(v)
+    check("desde la puerta se llega al centro del escondite", (-18, -32) in vistos)
+    check("y desde ahi se alcanza TODO el mapa (ninguna celda queda aislada)", vistos == celdas, f"{len(vistos)}/{len(celdas)}")
+
+
 def main():
     global fallos
     for mapa, (bot, limpio, bot2, hueco) in CASOS.items():
@@ -108,6 +144,7 @@ def main():
             n = sum(1 for p in h.py(h.state)["players"].values() if p.get("bot"))
             check(f"{mapa}/{modo}: {n} bots (max 5)", n <= 5, str(n))
 
+    escondite()
     print(f"\n{'TODO BIEN' if fallos == 0 else str(fallos) + ' FALLOS'}")
     sys.exit(1 if fallos else 0)
 

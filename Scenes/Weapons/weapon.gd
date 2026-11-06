@@ -10,6 +10,9 @@ extends Node3D
 @export var timbre_disparo: String = ""
 
 var bullet_hole: Resource = preload("res://Scenes/raycast_test.tscn")
+## Dano por impacto a otro jugador en el duelo (el servidor lo acota a 60).
+const DUELO_SHOT_DAMAGE := 25
+
 ## Dano por impacto a un jugador entrenado (aguanta 100: cae en 4 tiros).
 const ENTRENADO_SHOT_DAMAGE := 25
 
@@ -68,6 +71,11 @@ func _on_weapon_used() -> void:
 		var entrenado := _entrenado_from(target)
 		if not entrenado.is_empty():
 			OnlineManager.report_entrenado_hit(entrenado, ENTRENADO_SHOT_DAMAGE)
+
+		# Duelo: si el rayo toca a otro jugador, el servidor decide si fue impacto y cuanto dano hace.
+		var rival := _rival_duelo_from(target)
+		if not rival.is_empty():
+			OnlineManager.report_player_hit(rival, DUELO_SHOT_DAMAGE)
 
 		var hit_bot: Bot = _bot_from(target)
 		if hit_bot != null:
@@ -220,6 +228,16 @@ func _prune_holes() -> void:
 		var oldest: Decal = _holes.pop_front()
 		if is_instance_valid(oldest):
 			oldest.queue_free()
+
+
+## Devuelve el id del jugador (duelo) al que le pegaste, o "" si no era uno.
+func _rival_duelo_from(body: Object) -> String:
+	var nodo := body as Node
+	while nodo != null:
+		if nodo.is_in_group("rival_duelo"):
+			return str(nodo.get_meta("rival_id", ""))
+		nodo = nodo.get_parent()
+	return ""
 
 
 ## Devuelve el id del jugador entrenado al que le pegaste, o "" si no era uno.

@@ -61,7 +61,7 @@ func menu() -> void:
 
 
 const NOMBRES_MODO := {"coop_waves": "Oleadas", "survival": "Supervivencia", "horde": "Horda",
-	"boss_rush": "Jefes", "freestylers": "Matadero"}
+	"boss_rush": "Jefes", "freestylers": "Matadero", "duelo": "Duelo"}
 const NOMBRES_MAPA := {"recycling_plant": "Planta de Reciclaje", "storm_village": "Distrito de Tormenta",
 	"space_arena": "Puesto Lunar"}
 
