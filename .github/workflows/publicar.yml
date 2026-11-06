@@ -171,6 +171,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
+      - name: Codigo de esta version (para copiar la web y las rutas de descarga)
+        uses: actions/checkout@v4
+        with:
+          path: fuente
+
       - name: Clonar el repositorio de GitLab (es el que sirve Vercel)
         env:
           GITLAB_TOKEN: ${{ secrets.GITLAB_TOKEN }}
@@ -179,6 +184,10 @@ jobs:
           git clone --depth 50 "https://oauth2:${GITLAB_TOKEN}@gitlab.com/rewardnexus000/boomershooter.git" repo
           git -C repo config user.name "Boomer Shooter CI"
           git -C repo config user.email "ci@xpe.nettt"
+          # La web y las rutas /api/download viven en GitHub: se copian al clon de GitLab (menos
+          # site/play y update.json, que se regeneran mas abajo). Asi Vercel recibe, por ejemplo,
+          # /api/download/ios-patch y el boton de iPhone.
+          rsync -a --exclude 'play' --exclude 'update.json' fuente/site/ repo/site/
 
       - uses: actions/download-artifact@v4
         with:
@@ -231,7 +240,7 @@ jobs:
           set -e
           VERSION="${GITHUB_REF_NAME#v}"
           if [ -d Build/Web ]; then rm -rf site/play && mkdir -p site/play && cp -r Build/Web/. site/play/; fi
-          git add site/update.json site/api/download/windows.js site/api/download/linux.js
+          git add site
           [ -d site/play ] && git add -f site/play
           git diff --cached --quiet || git commit -m "Publicada la ${VERSION} (manifiesto y descargas)"
           git pull --rebase -q origin main
