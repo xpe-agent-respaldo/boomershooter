@@ -1,7 +1,7 @@
 // Descarga directa del ejecutable de Linux. Mismo criterio que Windows: asset
 // publico del Release oficial, con override por variable de entorno.
 const RELEASE_FALLBACK =
-  'https://gitlab.com/api/v4/projects/88475071/packages/generic/boomershooter/1.2.9/boomershooter.x86_64';
+  'https://gitlab.com/api/v4/projects/88475071/packages/generic/boomershooter/1.3.0/boomershooter.x86_64';
 
 module.exports = function handler(_request, response) {
   const url = process.env.LINUX_DOWNLOAD_URL || RELEASE_FALLBACK;

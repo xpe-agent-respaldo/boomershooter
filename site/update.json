@@ -1,13 +1,13 @@
 {
-  "version": "1.2.9",
+  "version": "1.3.0",
   "minimum_version": "1.3.0",
-  "notes": "Controles tactiles nuevos para iPhone con aim assist y zona segura;microfono con permiso en iPhone;orientacion horizontal fija;IPA validada antes de entregarse;sin cambios de jugabilidad en PC",
+  "notes": "CI en GitHub Actions: compila Windows, Linux, Web e iOS y publica (GitLab se quedo sin minutos)",
   "windows_url": "https://boomershooter.vercel.app/api/download/windows",
   "linux_url": "https://boomershooter.vercel.app/api/download/linux",
-  "windows_size": 151784600,
-  "windows_sha256": "265745f21d3c97e81294818898a244ffc059b837c74b7066c186e056f7b83cb7",
-  "linux_size": 116018104,
-  "linux_sha256": "aa56f8c0b9644b94b4b44d15e9359deff57b915d6ab897694d110f598b1643d7",
+  "windows_size": 149235968,
+  "windows_sha256": "453f843aeca79d0732efaf66a37960998e5f304848fc87537491e73ada601c57",
+  "linux_size": 113469488,
+  "linux_sha256": "727ed64dbf41e24ead69f8f88b7824f050b9510085d8dc1da5049a32b02cf48f",
   "history": [
     {
       "version": "1.2.7",
@@ -32,6 +32,14 @@
       "windows_sha256": "265745f21d3c97e81294818898a244ffc059b837c74b7066c186e056f7b83cb7",
       "linux_size": 116018104,
       "linux_sha256": "aa56f8c0b9644b94b4b44d15e9359deff57b915d6ab897694d110f598b1643d7"
+    },
+    {
+      "version": "1.3.0",
+      "released_at": "2026-11-06",
+      "windows_size": 149235968,
+      "windows_sha256": "453f843aeca79d0732efaf66a37960998e5f304848fc87537491e73ada601c57",
+      "linux_size": 113469488,
+      "linux_sha256": "727ed64dbf41e24ead69f8f88b7824f050b9510085d8dc1da5049a32b02cf48f"
     }
   ],
   "released_at": "2026-11-06",
