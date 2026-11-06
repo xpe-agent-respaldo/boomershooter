@@ -33,6 +33,12 @@ jobs:
           cp templates/version.txt "$PLANTILLAS/" 2>/dev/null || true
           ls -la "$PLANTILLAS"
 
+      - name: Inyectar servidor online (clave desde los secretos del repositorio)
+        env:
+          NAKAMA_HOST: ${{ secrets.NAKAMA_HOST }}
+          NAKAMA_SERVER_KEY: ${{ secrets.NAKAMA_SERVER_KEY }}
+        run: sh tools/write_online_defaults.sh online_defaults.cfg
+
       - name: Exportar y empaquetar la IPA sin firmar
         env:
           GODOT: /Applications/Godot.app/Contents/MacOS/Godot

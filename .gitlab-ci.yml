@@ -85,6 +85,7 @@ build_web:
         unzip -q -j /tmp/godot-export-templates.tpz 'templates/*' -d "$GODOT_TEMPLATES"
       fi
   script:
+    - sh tools/write_online_defaults.sh "$CI_PROJECT_DIR/online_defaults.cfg"
     - godot --headless --path "$CI_PROJECT_DIR" --editor --quit
     - mkdir -p Build/Web
     - godot --headless --path "$CI_PROJECT_DIR" --export-release "Web" "Build/Web/index.html"
@@ -207,6 +208,7 @@ build_ios:
       cp templates/version.txt "$PLANTILLAS/" 2>/dev/null || true
   script:
     - export GODOT="$HOME/Applications/Godot.app/Contents/MacOS/Godot"
+    - sh tools/write_online_defaults.sh "$CI_PROJECT_DIR/online_defaults.cfg"
     - sh tools/build_ios_unsigned.sh
     - python3 tools/validar_ipa.py Build/iOS/*.ipa
   artifacts:

@@ -71,13 +71,14 @@ const PLAYER_STATE_HZ := 12.0
 var host := "boomershooter.onrender.com"
 var port := 443
 var scheme := "https"
-## Clave publica del cliente. Va aqui escrita a proposito: si la compilacion no trae
-## res://online_defaults.cfg, el juego debe seguir entrando al servidor bueno en vez de
-## mandar "defaultkey" (que el servidor rechaza con 401) y dejar el online muerto.
+## Clave del cliente. NO se escribe aqui: la inyecta la compilacion en
+## res://online_defaults.cfg (tools/write_online_defaults.sh, variable CI enmascarada).
+## Sin ese archivo queda vacia y el juego no intenta conectar (en vez de mandar una clave
+## inventada). Un repo publico no puede llevar la clave del servidor.
 ## Codigo de 5 caracteres de la sala actual y si es privada.
 var room_code: String = ""
 var room_private: bool = false
-var server_key := "BoomerShooterSecretKey2026"
+var server_key := ""
 const DEFAULT_USERNAME := "xpe.nettt"
 
 var username := ""

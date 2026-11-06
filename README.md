@@ -67,3 +67,10 @@ El enlace de la página `/api/download/windows` funcionará al existir un Releas
 ## Créditos de recursos
 
 Los recursos de terceros conservan sus atribuciones y términos originales. Antes de una publicación comercial, verifica que cada recurso tenga licencia compatible con ese uso.
+
+
+## Licencia
+
+El codigo es MIT (ver [LICENSE](LICENSE)). Los recursos de `Assets/` conservan la licencia
+de su autor: ver [CREDITS.md](CREDITS.md). Los secretos (clave del servidor online,
+Supabase, certificados) nunca van en el repositorio: ver [SECURITY.md](SECURITY.md).
